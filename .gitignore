@@ -1,0 +1,3 @@
+.slingshot/
+node_modules
+.angular/cache/

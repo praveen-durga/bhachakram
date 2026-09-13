@@ -1,0 +1,26 @@
+/* Import Bootstrap CSS using @use instead of deprecated @import */
+@use 'bootstrap/scss/bootstrap';
+
+/* Global styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: #f8f9fa;
+}
+
+/* Custom utility classes */
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

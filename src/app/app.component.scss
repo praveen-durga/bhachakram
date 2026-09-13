@@ -1,0 +1,24 @@
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+.navbar-brand {
+  font-weight: 600;
+  font-size: 1.5rem;
+}
+
+.card {
+  border: none;
+  border-radius: 0.5rem;
+}
+
+.list-group-item {
+  border: none;
+  padding-left: 0;
+}
