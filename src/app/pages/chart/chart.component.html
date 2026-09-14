@@ -1,0 +1,7 @@
+@if (birthChart.chart(); as chart) {
+  <div class="chart-container">
+    <app-rasi-chart-north-indian [chart]="chart" />
+  </div>
+} @else {
+  <p class="empty-state">Click "Generate Chart" in the header to see your D1 chart.</p>
+}

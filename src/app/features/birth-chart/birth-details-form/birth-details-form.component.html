@@ -1,0 +1,19 @@
+<form [formGroup]="form" id="birth-details-form" class="birth-details-form" (ngSubmit)="onSubmit()">
+  <app-input label="Name" placeholder="Full name" formControlName="name" [error]="nameError()" />
+  <div class="flex gap-2">
+    <app-input label="Date of Birth" type="date" formControlName="dob" [error]="dobError()" />
+    <app-input label="Time of Birth" type="time" formControlName="tob" [error]="tobError()" />
+  </div>
+  <app-input
+    label="Place of Birth"
+    placeholder="Start typing a city"
+    formControlName="cityLabel"
+    list="city-options"
+    [error]="cityLabelError()"
+  />
+  <datalist id="city-options">
+    @for (city of cityOptions; track city) {
+      <option [value]="city"></option>
+    }
+  </datalist>
+</form>

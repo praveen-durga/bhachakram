@@ -51,13 +51,8 @@
       }
 
       .modal-close {
-        @apply text-xl leading-none;
-        color: var(--color-neutral-content);
-
-        &:hover {
-          @apply cursor-pointer;
-          color: var(--color-base-content);
-        }
+        @apply text-xl leading-none cursor-pointer;
+        color: var(--color-base-content);
       }
     }
 

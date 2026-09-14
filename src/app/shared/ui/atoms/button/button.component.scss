@@ -72,6 +72,22 @@
     }
   }
 
+  /* for use on a primary-colored surface (e.g. the header) where primaryOutline would be invisible */
+  &.primaryInvertedOutline {
+    @apply bg-transparent;
+    color: var(--color-primary-content);
+    border-color: var(--color-primary-content);
+
+    &:hover {
+      background: color-mix(in oklch, var(--color-primary-content) 15%, transparent);
+    }
+
+    &:focus,
+    &:focus-visible {
+      --tw-ring-color: var(--color-primary-content);
+    }
+  }
+
   /* color: blue -> Dracula primary, red -> Dracula error (applies to primary/primaryOutline/ghost) */
   &.blue {
     &.primary {

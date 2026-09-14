@@ -7,3 +7,4 @@
 - [x] Card atom + Table molecule (daisyUI-styled) — [.claude/todo-plans/05-card-atom-table-molecule.md](.claude/todo-plans/05-card-atom-table-molecule.md)
 - [x] Input atom with reactive forms support (ControlValueAccessor) — [.claude/todo-plans/06-input-atom-reactive-forms.md](.claude/todo-plans/06-input-atom-reactive-forms.md)
 - [x] Select atom — [.claude/todo-plans/07-select-atom.md](.claude/todo-plans/07-select-atom.md)
+- [ ] D1 (Rasi) chart generation — [.claude/todo-plans/08-d1-chart-generation.md](.claude/todo-plans/08-d1-chart-generation.md)

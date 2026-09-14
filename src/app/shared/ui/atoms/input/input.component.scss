@@ -20,6 +20,26 @@
     border-color: color-mix(in oklab, var(--color-base-content) 20%, transparent);
     color: var(--color-base-content);
 
+    &[list] {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      background-size: 16px;
+      padding-right: 2.5rem;
+
+      &::-webkit-calendar-picker-indicator {
+        -webkit-appearance: none;
+        appearance: none;
+        display: none;
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+    }
+
     &:focus {
       @apply ring-1 outline-none;
       border-color: var(--color-primary);

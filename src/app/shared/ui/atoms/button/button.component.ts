@@ -4,6 +4,7 @@ import { ButtonColor, ButtonSize, ButtonVariant } from './button.model';
 const variantClassMap: Record<ButtonVariant, string> = {
   primary: 'primary',
   'primary-outline': 'primaryOutline',
+  'primary-inverted-outline': 'primaryInvertedOutline',
   danger: 'danger',
   'danger-outline': 'dangerOutline',
   ghost: 'ghost',
@@ -21,6 +22,7 @@ export class ButtonComponent {
   color = input<ButtonColor>('blue');
   type = input<'button' | 'submit' | 'reset'>('button');
   disabled = input(false);
+  form = input<string>();
 
   protected classes = computed(() => {
     return ['button', this.size(), variantClassMap[this.variant()], this.color()].join(' ');
