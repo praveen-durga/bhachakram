@@ -106,6 +106,10 @@ A good codebase reads as if one person wrote it, even with thousands of contribu
 
 Use [TASKS.md](TASKS.md) and [MEMORY.md](MEMORY.md) to keep track of todos and to remember important stuff. The todos should have the plan references when they are planned. keep the plans in `.claude/todo-plans` folder.
 
+## 9. Steps before start coding
+
+If ask is complex, always ensure to create a plan first. always ask questions before plan generation. After the plan got generated, add a line item in tasks for tracking. After the task is completed, review the generated code to ensure it follow the project coding guidelines.
+
 ## About project
 
 check [PROJECT.md](PROJECT.md) for project details and guidelines.

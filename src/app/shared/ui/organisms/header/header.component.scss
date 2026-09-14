@@ -1,0 +1,9 @@
+@reference 'tailwindcss';
+
+.header {
+  @apply flex items-center h-14 px-6 bg-blue-600;
+}
+
+.brand {
+  @apply text-white text-lg font-semibold;
+}

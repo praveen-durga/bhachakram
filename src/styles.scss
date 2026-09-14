@@ -1,5 +1,5 @@
-/* Import Bootstrap CSS using @use instead of deprecated @import */
-@use 'bootstrap/scss/bootstrap';
+@use 'styles/variables';
+@use 'tailwindcss';
 
 /* Global styles */
 * {
@@ -20,7 +20,6 @@ body {
   background-color: #f8f9fa;
 }
 
-/* Custom utility classes */
 .app-container {
   min-height: 100vh;
   display: flex;

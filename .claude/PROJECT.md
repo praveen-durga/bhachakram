@@ -30,3 +30,4 @@ This is a astrology related software project written in latest angular tech stac
 - Ensure to use barrel files to export and import across the project
 - Ensure to use css variables for sharing values. Maintain them in `src/styles/_variables.scss`.
 - The html should follow latest html5 standards and must adopt native browser based ui controls instead of generaring the boiler code from scratch.
+- Follow official angular naming conventions

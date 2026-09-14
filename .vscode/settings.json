@@ -11,5 +11,8 @@
       "mode": "auto"
     }
   ],
+  "files.associations": {
+    "*.scss": "tailwindcss"
+  },
   "Slingshot.readFileLineLimit": 3000
 }
