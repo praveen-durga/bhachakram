@@ -1,0 +1,45 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply contents;
+}
+
+.modal {
+  @apply m-auto p-0 rounded-lg border-0 shadow-xl;
+
+  &::backdrop {
+    @apply bg-black/50;
+  }
+
+  .modal-panel {
+    @apply flex flex-col w-[32rem] max-w-[90vw] max-h-[85vh];
+
+    .modal-header {
+      @apply flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200;
+
+      .modal-title {
+        @apply text-lg font-semibold text-gray-900;
+      }
+
+      .modal-close {
+        @apply text-xl leading-none text-gray-400;
+
+        &:hover {
+          @apply cursor-pointer text-gray-700;
+        }
+      }
+    }
+
+    .modal-body {
+      @apply flex-1 overflow-y-auto px-6 py-4;
+    }
+
+    .modal-footer {
+      @apply flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-200;
+
+      &:empty {
+        @apply hidden;
+      }
+    }
+  }
+}
