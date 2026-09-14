@@ -1,10 +1,12 @@
 # Plan: Tailwind setup, Header, Button atom
 
 ## Goal
+
 Replace Bootstrap with Tailwind, add a Header organism with the brand name, and
 port the React Button component to an Angular atom per project conventions.
 
 ## Steps
+
 1. Remove Bootstrap + Popper.js (deps, angular.json script entry, styles.scss import) → verify: `npm ls bootstrap` empty, no bootstrap refs in repo
 2. Install Tailwind v4 (`tailwindcss`, `@tailwindcss/postcss`, `postcss`), add `.postcssrc.json`, import into `styles.scss` → verify: `ng build` compiles, styles.css contains Tailwind utilities
 3. Add `src/styles/_variables.scss` for shared CSS variables per PROJECT.md → verify: imported in styles.scss

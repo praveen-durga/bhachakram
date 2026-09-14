@@ -1,10 +1,12 @@
 # Plan: Switch to light theme, animate dialog, bold button text
 
 ## Goal
+
 Replace Dracula dark tokens with daisyUI's light theme, add a subtle open/close
 animation to the Modal's native <dialog>, and make button text semibold.
 
 ## Steps
+
 1. Preview daisyUI light theme values (fetched from package source) before deciding → verify: screenshot comparison shown to user
 2. User confirmed switching to light theme (not just previewing) → swap `_variables.scss` tokens + `color-scheme` to light
 3. Fix Modal's border-color: was `--color-neutral` (near-black in light theme, unlike Dracula) → changed to `--color-base-300` for a proper subtle divider
