@@ -1,0 +1,34 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply contents;
+}
+
+.card {
+  @apply relative flex flex-col rounded-lg;
+  background: var(--color-base-100);
+  box-shadow: var(--box-shadow);
+
+  .card-body {
+    @apply flex flex-auto flex-col gap-2;
+    padding: 1rem;
+    font-size: var(--font-size-sm);
+
+    .card-title {
+      font-weight: var(--font-weight-semibold);
+      font-size: var(--font-size-base);
+
+      &:empty {
+        @apply hidden;
+      }
+    }
+
+    .card-actions {
+      @apply flex flex-wrap items-center gap-2;
+
+      &:empty {
+        @apply hidden;
+      }
+    }
+  }
+}

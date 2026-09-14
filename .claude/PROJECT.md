@@ -4,6 +4,7 @@ This is a astrology related software project written in latest angular tech stac
 
 ## Coding guidelines for project
 
+- mobile-first design
 - No server-side rendering
 - All the code written / generated should be properly readable.
 - Components should follow atomic design pattern where smallest component fall under `atoms`, followed by `molecules` followed by `organisms`.

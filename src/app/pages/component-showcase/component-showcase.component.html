@@ -1,0 +1,61 @@
+<div class="showcase">
+  <section class="showcase-section">
+    <h2>Buttons</h2>
+    <div class="showcase-row">
+      <app-button>Primary Blue</app-button>
+      <app-button color="red">Primary Red</app-button>
+      <app-button variant="primary-outline">Outline Blue</app-button>
+      <app-button variant="primary-outline" color="red">Outline Red</app-button>
+      <app-button variant="danger">Danger</app-button>
+      <app-button variant="danger-outline">Danger Outline</app-button>
+      <app-button variant="ghost">Ghost</app-button>
+      <app-button [disabled]="true">Disabled</app-button>
+    </div>
+    <div class="showcase-row">
+      <app-button size="sm">Small</app-button>
+      <app-button size="reg">Regular</app-button>
+      <app-button size="md">Medium</app-button>
+      <app-button size="lg">Large</app-button>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Card</h2>
+    <div class="showcase-row">
+      <app-card>
+        <span title>Card Title</span>
+        <p>This is the card body content, projected via the default slot.</p>
+
+        <div actions>
+          <app-button size="sm" variant="primary-outline">Cancel</app-button>
+          <app-button size="sm">Confirm</app-button>
+        </div>
+      </app-card>
+
+      <app-card>
+        <p>Card with no title and no actions.</p>
+      </app-card>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Modal</h2>
+    <div class="showcase-row">
+      <app-button (click)="modalOpen.set(true)">Open Modal</app-button>
+    </div>
+
+    <app-modal title="Confirm action" [open]="modalOpen()" (closed)="modalOpen.set(false)">
+      <p>This is the projected body content.</p>
+
+      <div footer>
+        <app-button variant="primary-outline" (click)="modalOpen.set(false)">Cancel</app-button>
+        <app-button (click)="modalOpen.set(false)">Confirm</app-button>
+      </div>
+    </app-modal>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Table</h2>
+    <app-table [columns]="columns" [rows]="rows" />
+  </section>
+</div>

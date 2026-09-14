@@ -5,7 +5,7 @@
 }
 
 .button {
-  @apply inline-flex gap-2 items-center justify-center rounded-sm border border-transparent transition-colors;
+  @apply inline-flex gap-2 items-center justify-center rounded-sm border border-transparent font-semibold transition-colors;
 
   &:hover {
     @apply cursor-pointer;
@@ -37,107 +37,108 @@
     @apply h-10 px-8 text-lg;
   }
 
-  /* Variant styles */
-  &.primary {
-    @apply bg-blue-600 text-white border-blue-600;
-
-    &:hover {
-      @apply bg-blue-700 border-blue-700;
-    }
-
-    &:focus,
-    &:focus-visible {
-      @apply ring-blue-600;
-    }
-  }
-
-  &.primaryOutline {
-    @apply bg-white text-blue-600 border-blue-600;
-
-    &:hover {
-      @apply bg-blue-50 border-blue-700 text-blue-700;
-    }
-  }
-
+  /* danger/dangerOutline always render as Dracula error, regardless of color prop */
   &.danger {
-    @apply bg-red-600 text-white border-red-600;
+    background: var(--color-error);
+    color: var(--color-error-content);
+    border-color: var(--color-error);
 
     &:hover {
-      @apply bg-red-700 border-red-700;
+      filter: brightness(0.9);
     }
 
     &:focus,
     &:focus-visible {
-      @apply ring-red-600;
+      --tw-ring-color: var(--color-error);
     }
   }
 
   &.dangerOutline {
-    @apply bg-white text-red-600 border-red-600;
+    @apply bg-transparent;
+    color: var(--color-error);
+    border-color: var(--color-error);
 
     &:hover {
-      @apply bg-red-50 border-red-700 text-red-700;
+      background: color-mix(in oklch, var(--color-error) 15%, transparent);
     }
   }
 
   &.ghost {
     @apply bg-transparent border-transparent;
-    color: var(--color-gray-300);
+    color: var(--color-neutral-content);
 
     &:hover {
-      background: var(--color-gray-750);
+      background: var(--color-neutral);
     }
   }
 
-  /* Color overrides */
+  /* color: blue -> Dracula primary, red -> Dracula error (applies to primary/primaryOutline/ghost) */
   &.blue {
     &.primary {
-      @apply bg-blue-600 text-white border-blue-600;
+      background: var(--color-primary);
+      color: var(--color-primary-content);
+      border-color: var(--color-primary);
 
       &:hover {
-        @apply bg-blue-700 border-blue-700;
+        filter: brightness(0.9);
+      }
+
+      &:focus,
+      &:focus-visible {
+        --tw-ring-color: var(--color-primary);
       }
     }
 
     &.primaryOutline {
-      @apply bg-white text-blue-600 border-blue-600;
+      @apply bg-transparent;
+      color: var(--color-primary);
+      border-color: var(--color-primary);
 
       &:hover {
-        @apply bg-blue-50 border-blue-700 text-blue-700;
+        background: color-mix(in oklch, var(--color-primary) 15%, transparent);
       }
     }
 
     &.ghost {
-      @apply bg-transparent text-blue-600 border-transparent;
+      color: var(--color-primary);
 
       &:hover {
-        @apply bg-blue-50;
+        background: color-mix(in oklch, var(--color-primary) 15%, transparent);
       }
     }
   }
 
   &.red {
     &.primary {
-      @apply bg-red-600 text-white border-red-600;
+      background: var(--color-error);
+      color: var(--color-error-content);
+      border-color: var(--color-error);
 
       &:hover {
-        @apply bg-red-700 border-red-700;
+        filter: brightness(0.9);
+      }
+
+      &:focus,
+      &:focus-visible {
+        --tw-ring-color: var(--color-error);
       }
     }
 
     &.primaryOutline {
-      @apply bg-white text-red-600 border-red-600;
+      @apply bg-transparent;
+      color: var(--color-error);
+      border-color: var(--color-error);
 
       &:hover {
-        @apply bg-red-50 border-red-700 text-red-700;
+        background: color-mix(in oklch, var(--color-error) 15%, transparent);
       }
     }
 
     &.ghost {
-      @apply bg-transparent text-red-600 border-transparent;
+      color: var(--color-error);
 
       &:hover {
-        @apply bg-red-50;
+        background: color-mix(in oklch, var(--color-error) 15%, transparent);
       }
     }
   }

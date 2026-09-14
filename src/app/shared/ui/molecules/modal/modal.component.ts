@@ -18,14 +18,21 @@ export class ModalComponent {
     effect(() => {
       const dialog = this.dialog().nativeElement;
       if (this.open()) {
+        dialog.classList.remove('closing');
         dialog.showModal();
-      } else {
-        dialog.close();
+      } else if (dialog.open) {
+        dialog.classList.add('closing');
+        dialog.addEventListener('transitionend', () => dialog.close(), { once: true });
       }
     });
   }
 
   protected onClose(): void {
+    this.closed.emit();
+  }
+
+  protected onCancel(event: Event): void {
+    event.preventDefault();
     this.closed.emit();
   }
 }

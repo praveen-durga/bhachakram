@@ -6,26 +6,57 @@
 
 .modal {
   @apply m-auto p-0 rounded-lg border-0 shadow-xl;
+  background: var(--color-base-200);
+  color: var(--color-base-content);
+  opacity: 1;
+  scale: 1;
+  transition:
+    opacity 0.2s ease,
+    scale 0.2s ease,
+    overlay 0.2s ease allow-discrete,
+    display 0.2s ease allow-discrete;
 
   &::backdrop {
-    @apply bg-black/50;
+    @apply bg-black/70;
+    transition: opacity 0.2s ease;
+    opacity: 1;
+  }
+
+  &.closing,
+  &.closing::backdrop {
+    opacity: 0;
+    scale: 0.95;
+  }
+
+  @starting-style {
+    &[open] {
+      opacity: 0;
+      scale: 0.95;
+    }
+
+    &[open]::backdrop {
+      opacity: 0;
+    }
   }
 
   .modal-panel {
     @apply flex flex-col w-[32rem] max-w-[90vw] max-h-[85vh];
 
     .modal-header {
-      @apply flex items-center justify-between gap-4 px-6 py-4 border-b border-gray-200;
+      @apply flex items-center justify-between gap-4 px-6 py-4 border-b;
+      border-color: var(--color-base-300);
 
       .modal-title {
-        @apply text-lg font-semibold text-gray-900;
+        @apply text-lg font-semibold;
       }
 
       .modal-close {
-        @apply text-xl leading-none text-gray-400;
+        @apply text-xl leading-none;
+        color: var(--color-neutral-content);
 
         &:hover {
-          @apply cursor-pointer text-gray-700;
+          @apply cursor-pointer;
+          color: var(--color-base-content);
         }
       }
     }
@@ -35,7 +66,8 @@
     }
 
     .modal-footer {
-      @apply flex items-center justify-end gap-2 px-6 py-4 border-t border-gray-200;
+      @apply flex items-center justify-end gap-2 px-6 py-4 border-t;
+      border-color: var(--color-base-300);
 
       &:empty {
         @apply hidden;

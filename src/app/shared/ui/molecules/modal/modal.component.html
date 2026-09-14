@@ -1,8 +1,8 @@
-<dialog #dialog class="modal" (close)="onClose()" (click)="onClose()">
+<dialog #dialog class="modal" (cancel)="onCancel($event)" (click)="onClose()">
   <div class="modal-panel" (click)="$event.stopPropagation()">
     <header class="modal-header">
       <h2 class="modal-title">{{ title() }}</h2>
-      <button type="button" class="modal-close" aria-label="Close" (click)="dialog.close()">&times;</button>
+      <button type="button" class="modal-close" aria-label="Close" (click)="onClose()">&times;</button>
     </header>
     <div class="modal-body">
       <ng-content />

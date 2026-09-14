@@ -1,9 +1,11 @@
 @reference 'tailwindcss';
 
 .header {
-  @apply flex items-center h-14 px-6 bg-blue-600;
+  @apply flex items-center h-14 px-6;
+  background: var(--color-primary);
 
   .brand {
-    @apply text-white text-lg font-semibold;
+    @apply text-lg font-semibold;
+    color: var(--color-primary-content);
   }
 }
