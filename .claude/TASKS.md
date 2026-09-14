@@ -5,3 +5,5 @@
 - [x] Migrate to Dracula theme palette (dark mode) — [.claude/todo-plans/03-dracula-theme-migration.md](.claude/todo-plans/03-dracula-theme-migration.md)
 - [x] Switch to light theme, animate dialog, bold button text — [.claude/todo-plans/04-light-theme-and-dialog-animation.md](.claude/todo-plans/04-light-theme-and-dialog-animation.md)
 - [x] Card atom + Table molecule (daisyUI-styled) — [.claude/todo-plans/05-card-atom-table-molecule.md](.claude/todo-plans/05-card-atom-table-molecule.md)
+- [x] Input atom with reactive forms support (ControlValueAccessor) — [.claude/todo-plans/06-input-atom-reactive-forms.md](.claude/todo-plans/06-input-atom-reactive-forms.md)
+- [x] Select atom — [.claude/todo-plans/07-select-atom.md](.claude/todo-plans/07-select-atom.md)

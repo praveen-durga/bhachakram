@@ -58,4 +58,54 @@
     <h2>Table</h2>
     <app-table [columns]="columns" [rows]="rows" />
   </section>
+
+  <section class="showcase-section">
+    <h2>Input</h2>
+
+    <form [formGroup]="form" class="showcase-form">
+      <app-input
+        label="Email"
+        placeholder="you&#64;example.com"
+        formControlName="email"
+        [error]="emailError()"
+        hint="We'll never share your email."
+      />
+    </form>
+
+    <div class="showcase-form">
+      <app-input
+        label="Plain signal binding"
+        placeholder="Type something"
+        [ngModel]="plainValue()"
+        (ngModelChange)="plainValue.set($event)"
+      />
+      <p>Value: {{ plainValue() }}</p>
+    </div>
+  </section>
+
+  <section class="showcase-section">
+    <h2>Select</h2>
+
+    <form [formGroup]="form" class="showcase-form">
+      <app-select
+        label="Zodiac Sign"
+        placeholder="Choose your sign"
+        formControlName="zodiacSign"
+        [options]="zodiacOptions"
+        [error]="zodiacSignError()"
+        hint="Used to calculate your daily horoscope."
+      />
+    </form>
+
+    <div class="showcase-form">
+      <app-select
+        label="Plain signal binding"
+        placeholder="Choose your sign"
+        [options]="zodiacOptions"
+        [ngModel]="plainSign()"
+        (ngModelChange)="plainSign.set($event)"
+      />
+      <p>Value: {{ plainSign() }}</p>
+    </div>
+  </section>
 </div>
