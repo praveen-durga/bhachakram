@@ -1,0 +1,23 @@
+<header class="header">
+  <span class="brand">Bhachakram</span>
+
+  <div class="actions">
+    @if (birthChart.birthDetails(); as details) {
+      <app-button variant="primary-inverted-outline" (click)="onEdit()">
+        {{ details.name }} | DOB: {{ details.dob | appDateFormat: DATE_SHORT_MONTH }} | TOB:
+        {{ details.tob | appTimeFormat: TIME_12H }} | POB: {{ details.cityLabel }} &#9998;
+      </app-button>
+    } @else {
+      <app-button variant="primary-inverted-outline" (click)="onEdit()">Generate Chart</app-button>
+    }
+  </div>
+
+  <app-modal title="Birth Details" [open]="modalOpen()" (closed)="modalOpen.set(false)">
+    <app-birth-details-form (submitted)="onSubmitted($event)" />
+
+    <div footer>
+      <app-button variant="primary-outline" (click)="modalOpen.set(false)">Cancel</app-button>
+      <app-button type="submit" form="birth-details-form">Generate Chart</app-button>
+    </div>
+  </app-modal>
+</header>

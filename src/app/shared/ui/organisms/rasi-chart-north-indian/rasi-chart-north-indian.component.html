@@ -1,0 +1,15 @@
+<svg class="chart" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+  <rect class="border" x="1" y="1" width="398" height="398" rx="8" />
+
+  <line class="grid-line" x1="0" y1="0" x2="400" y2="400" />
+  <line class="grid-line" x1="400" y1="0" x2="0" y2="400" />
+  <polygon class="grid-line diamond" points="200,0 400,200 200,400 0,200" />
+
+  @for (region of regions(); track $index) {
+    <text class="rasi-number" [attr.x]="region.labelX" [attr.y]="region.labelY">{{ region.rasi }}</text>
+
+    @if (region.grahaLabel) {
+      <text class="graha-label" [attr.x]="region.labelX" [attr.y]="region.labelY + 20">{{ region.grahaLabel }}</text>
+    }
+  }
+</svg>

@@ -1,0 +1,15 @@
+@reference 'tailwindcss';
+
+.header {
+  @apply flex items-center justify-between gap-3 h-14 px-4 sm:px-6;
+  background: var(--color-primary);
+
+  .brand {
+    @apply text-lg font-semibold shrink-0;
+    color: var(--color-primary-content);
+  }
+
+  .actions {
+    @apply flex items-center justify-end flex-1 min-w-0;
+  }
+}

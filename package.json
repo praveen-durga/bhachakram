@@ -6,7 +6,10 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
   },
   "private": true,
   "dependencies": {
@@ -18,8 +21,7 @@
     "@angular/platform-browser": "^21.0.0",
     "@angular/platform-browser-dynamic": "^21.0.0",
     "@angular/router": "^21.0.0",
-    "@popperjs/core": "^2.11.8",
-    "bootstrap": "^5.3.3",
+    "date-fns": "^4.4.0",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -28,13 +30,23 @@
     "@angular-devkit/build-angular": "^21.0.0",
     "@angular/cli": "^21.0.0",
     "@angular/compiler-cli": "^21.0.0",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/jasmine": "~5.1.0",
+    "husky": "^9.1.7",
     "jasmine-core": "~5.1.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
     "karma-coverage": "~2.2.0",
     "karma-jasmine": "~5.1.0",
     "karma-jasmine-html-reporter": "~2.1.0",
+    "lint-staged": "^17.5.1",
+    "postcss": "^8.5.28",
+    "prettier": "^3.9.6",
+    "swisseph-wasm": "^0.1.0",
+    "tailwindcss": "^4.3.3",
     "typescript": "~5.9.0"
+  },
+  "lint-staged": {
+    "*.{ts,html,scss,json,md}": "prettier --write"
   }
 }

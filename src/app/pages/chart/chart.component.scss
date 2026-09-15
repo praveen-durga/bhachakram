@@ -1,0 +1,14 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block p-6;
+}
+
+.chart-container {
+  @apply max-w-md mx-auto;
+}
+
+.empty-state {
+  @apply text-center;
+  color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+}

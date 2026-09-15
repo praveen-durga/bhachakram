@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  padding: 1.5rem;
+}
+
+.showcase {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+
+  .showcase-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    h2 {
+      font-size: var(--font-size-base);
+      font-weight: var(--font-weight-semibold);
+    }
+
+    .showcase-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .showcase-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      max-width: 24rem;
+    }
+  }
+}
