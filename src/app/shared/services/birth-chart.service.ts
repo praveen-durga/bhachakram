@@ -1,70 +1,74 @@
-import { Injectable, computed, inject, resource, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { BirthDetails } from '../models';
 import { wallTimeToUtc } from '../utils';
+import { D1Chart } from './ephemeris.model';
 import { EphemerisService } from './ephemeris.service';
+import { STORE_KEYS } from './store.keys';
+import { StoreService } from './store.service';
 
-const STORAGE_KEY = 'bhachakram:birth-details';
-
-function loadStoredBirthDetails(): BirthDetails | null {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as BirthDetails) : null;
-  } catch {
-    return null;
-  }
-}
+type StoredCharts = {
+  d1Chart: D1Chart;
+  d9Chart: D1Chart;
+  bhavaChalitChart: D1Chart;
+};
 
 @Injectable({ providedIn: 'root' })
 export class BirthChartService {
   private ephemeris = inject(EphemerisService);
+  private storage = inject(StoreService);
 
-  #birthDetails = signal<BirthDetails | null>(loadStoredBirthDetails());
+  #birthDetails = signal<BirthDetails | null>(null);
+  #d1Chart = signal<D1Chart | null>(null);
+  #d9Chart = signal<D1Chart | null>(null);
+  #bhavaChalitChart = signal<D1Chart | null>(null);
 
   birthDetails = this.#birthDetails.asReadonly();
+  d1Chart = this.#d1Chart.asReadonly();
+  d9Chart = this.#d9Chart.asReadonly();
+  bhavaChalitChart = this.#bhavaChalitChart.asReadonly();
 
-  #d1ChartResource = resource({
-    params: () => this.#birthDetails(),
-    loader: ({ params: details }) => {
-      if (!details) {
-        return Promise.resolve(null);
-      }
-      const datetime = wallTimeToUtc(details.dob, details.tob, details.timezone);
-      return this.ephemeris.calculateD1Chart(datetime, details.lat, details.lng, details.ayanamsa);
-    },
-  });
+  constructor() {
+    // Always warm up the ephemeris CDN module so it's ready if a recalculation
+    // is ever needed, even when a cached chart lets us skip calculating now.
+    this.ephemeris.preload();
 
-  #d9ChartResource = resource({
-    params: () => this.#birthDetails(),
-    loader: ({ params: details }) => {
-      if (!details) {
-        return Promise.resolve(null);
-      }
-      const datetime = wallTimeToUtc(details.dob, details.tob, details.timezone);
-      return this.ephemeris.calculateD9Chart(datetime, details.lat, details.lng, details.ayanamsa);
-    },
-  });
+    // Birth details and charts are persisted independently: details alone are
+    // enough to recompute charts if the chart cache didn't make it to storage
+    // (e.g. unload happened before the calculation finished).
+    const storedDetails = this.storage.get<BirthDetails>(STORE_KEYS.BIRTH_DETAILS);
+    const storedCharts = this.storage.get<StoredCharts>(STORE_KEYS.CHARTS);
 
-  #bhavaChalitChartResource = resource({
-    params: () => this.#birthDetails(),
-    loader: ({ params: details }) => {
-      if (!details) {
-        return Promise.resolve(null);
-      }
-      const datetime = wallTimeToUtc(details.dob, details.tob, details.timezone);
-      return this.ephemeris.calculateBhavaChalitChart(datetime, details.lat, details.lng, details.ayanamsa);
-    },
-  });
+    if (storedDetails && storedCharts) {
+      this.#birthDetails.set(storedDetails);
+      this.#d1Chart.set(storedCharts.d1Chart);
+      this.#d9Chart.set(storedCharts.d9Chart);
+      this.#bhavaChalitChart.set(storedCharts.bhavaChalitChart);
+    } else if (storedDetails) {
+      this.setBirthDetails(storedDetails);
+    }
 
-  d1Chart = computed(() => this.#d1ChartResource.value() ?? null);
-  d9Chart = computed(() => this.#d9ChartResource.value() ?? null);
-  bhavaChalitChart = computed(() => this.#bhavaChalitChartResource.value() ?? null);
+    this.storage.persistOnUnload<BirthDetails>(STORE_KEYS.BIRTH_DETAILS, () => this.#birthDetails());
+
+    this.storage.persistOnUnload<StoredCharts>(STORE_KEYS.CHARTS, () => {
+      const d1Chart = this.#d1Chart();
+      const d9Chart = this.#d9Chart();
+      const bhavaChalitChart = this.#bhavaChalitChart();
+      return d1Chart && d9Chart && bhavaChalitChart ? { d1Chart, d9Chart, bhavaChalitChart } : null;
+    });
+  }
 
   setBirthDetails(details: BirthDetails): void {
     this.#birthDetails.set(details);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(details));
-    } catch {
-      // localStorage unavailable (e.g. private browsing) — in-memory state still works
-    }
+
+    const datetime = wallTimeToUtc(details.dob, details.tob, details.timezone);
+    Promise.all([
+      this.ephemeris.calculateD1Chart(datetime, details.lat, details.lng, details.ayanamsa),
+      this.ephemeris.calculateD9Chart(datetime, details.lat, details.lng, details.ayanamsa),
+      this.ephemeris.calculateBhavaChalitChart(datetime, details.lat, details.lng, details.ayanamsa),
+    ]).then(([d1Chart, d9Chart, bhavaChalitChart]) => {
+      this.#d1Chart.set(d1Chart);
+      this.#d9Chart.set(d9Chart);
+      this.#bhavaChalitChart.set(bhavaChalitChart);
+    });
   }
 }

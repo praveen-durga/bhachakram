@@ -138,17 +138,43 @@ works.
 calculation deferred further, this step only replaces the bare stub
 with the intended placeholder layout.
 
-## Status: Step 1 (structure) done and verified. Step 2 (porting real
+## Status: Step 1 (structure) and the computed-state persistence addendum
 
-logic/data) not started — paused to first investigate an in-house
-computed-state persistence layer (see below), then continue here.
+(below) are both done and verified. Step 2 (porting real logic/data) not
+started yet — resumes next.
 
-## Addendum: in-house computed-state persistence (under investigation)
+## Addendum: in-house computed-state persistence — DONE
 
-Separate from this plan's original scope, but discovered while discussing
-NGXS: the user wants an in-house mechanism to persist _computed_ chart
-data (not just raw `BirthDetails`) to `localStorage`, so a page refresh
-restores charts instantly instead of recomputing — primarily valuable on
-slow networks, where `swisseph-wasm`'s CDN fetch (not the calculation
-itself) becomes the bottleneck. This is being investigated as its own
-sub-task before Step 2 of this plan resumes.
+Separate from this plan's original scope, discovered while discussing
+NGXS: persist _computed_ chart data (not just raw `BirthDetails`) so a
+page refresh restores charts instantly instead of recomputing — valuable
+on slow networks, where `swisseph-wasm`'s CDN fetch (not the calculation
+itself) is the bottleneck. Explicit rule from the user: the CDN module
+must always be preloaded regardless of cache state; only the _calculation_
+is skipped on a cache hit.
+
+**Design**: `StoreService` (`shared/services/store.service.ts`)
+— a small generic typed `get`/`set`/`remove` wrapper around `localStorage`
+with try/catch guards, usable directly by any component or by a
+domain service for more complex cases. `BirthChartService` is the
+"complex case": on construction it unconditionally calls
+`EphemerisService.preload()` (new method, just calls the existing lazy
+`#getSwe()` internal init) to warm the CDN module, then checks
+`StoreService` for a previously-stored
+`{ birthDetails, d1Chart, d9Chart, bhavaChalitChart }` bundle and seeds
+its signals synchronously if present — no `resource()` involved anymore
+for this, since `resource()` has no hook to seed a value synchronously
+before its loader runs. `d1Chart`/`d9Chart`/`bhavaChalitChart` are now
+plain `signal().asReadonly()` rather than `resource()`-backed computed
+values (no consumer depended on resource-specific state like
+`.isLoading()`, confirmed by search). `setBirthDetails()` always
+recomputes via `EphemerisService` (any new submission invalidates the old
+cache) and persists the fresh result via `StoreService` afterward.
+
+**Verified**: cache-hit refresh dropped from ~895ms (measured earlier,
+cold CDN + fresh compute) to ~105-108ms (repeated across two test runs,
+before and after extracting `StoreService`); CDN requests still
+fire on a cached refresh (preload rule holds); submitting new birth
+details correctly overwrites the cached bundle and updates the UI; a
+fully cold context (no localStorage at all) still computes and renders
+correctly from scratch.
