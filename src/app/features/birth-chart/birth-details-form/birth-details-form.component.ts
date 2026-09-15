@@ -8,9 +8,18 @@ import {
   ValidationErrors,
   Validators,
 } from '@angular/forms';
-import { InputComponent } from '../../../shared/ui';
+import { BirthDetails } from '../../../shared/models';
+import { Ayanamsa } from '../../../shared/services';
+import { InputComponent, SelectComponent, SelectOption } from '../../../shared/ui';
 import { CITY_LABELS, findCityByLabel } from '../../../shared/utils';
-import { BirthDetails } from '../birth-details.model';
+
+const AYANAMSA_OPTIONS: SelectOption[] = [
+  { value: 'lahiri', label: 'Lahiri' },
+  { value: 'raman', label: 'B.V. Raman' },
+  { value: 'kp', label: 'KP (Krishnamurti)' },
+  { value: 'yukteshwar', label: 'Sri Yukteshwar' },
+  { value: 'fagan-bradley', label: 'Fagan–Bradley' },
+];
 
 function cityValidator(control: AbstractControl<string>): ValidationErrors | null {
   return findCityByLabel(control.value) ? null : { unknownCity: true };
@@ -19,7 +28,7 @@ function cityValidator(control: AbstractControl<string>): ValidationErrors | nul
 @Component({
   selector: 'app-birth-details-form',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent],
+  imports: [ReactiveFormsModule, InputComponent, SelectComponent],
   templateUrl: './birth-details-form.component.html',
   styleUrl: './birth-details-form.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,9 +41,11 @@ export class BirthDetailsFormComponent {
     dob: new FormControl('', { nonNullable: true, validators: Validators.required }),
     tob: new FormControl('', { nonNullable: true, validators: Validators.required }),
     cityLabel: new FormControl('', { nonNullable: true, validators: [Validators.required, cityValidator] }),
+    ayanamsa: new FormControl<Ayanamsa>('lahiri', { nonNullable: true }),
   });
 
   protected cityOptions = CITY_LABELS;
+  protected ayanamsaOptions = AYANAMSA_OPTIONS;
 
   private nameEvents = toSignal(this.form.controls.name.events);
   private dobEvents = toSignal(this.form.controls.dob.events);
@@ -80,9 +91,18 @@ export class BirthDetailsFormComponent {
       return;
     }
 
-    const { name, dob, tob, cityLabel } = this.form.getRawValue();
+    const { name, dob, tob, cityLabel, ayanamsa } = this.form.getRawValue();
     const city = findCityByLabel(cityLabel)!;
 
-    this.submitted.emit({ name, dob, tob, cityLabel, lat: city.lat, lng: city.lng, timezone: city.timezone });
+    this.submitted.emit({
+      name,
+      dob,
+      tob,
+      cityLabel,
+      lat: city.lat,
+      lng: city.lng,
+      timezone: city.timezone,
+      ayanamsa,
+    });
   }
 }

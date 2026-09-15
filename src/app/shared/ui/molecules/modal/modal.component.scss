@@ -43,7 +43,7 @@
     @apply flex flex-col w-[32rem] max-w-[90vw] max-h-[85vh];
 
     .modal-header {
-      @apply flex items-center justify-between gap-4 px-6 py-4 border-b;
+      @apply flex items-center justify-between gap-4 px-6 py-3 border-b;
       border-color: var(--color-base-300);
 
       .modal-title {

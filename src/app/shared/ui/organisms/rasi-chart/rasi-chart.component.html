@@ -6,10 +6,12 @@
   <polygon class="grid-line diamond" points="200,0 400,200 200,400 0,200" />
 
   @for (region of regions(); track $index) {
-    <text class="rasi-number" [attr.x]="region.labelX" [attr.y]="region.labelY">{{ region.rasi }}</text>
+    <text class="rasi-number" [attr.x]="region.rasiLabelX" [attr.y]="region.rasiLabelY">{{ region.rasi }}</text>
 
-    @if (region.grahaLabel) {
-      <text class="graha-label" [attr.x]="region.labelX" [attr.y]="region.labelY + 20">{{ region.grahaLabel }}</text>
+    @for (label of region.grahaLabels; track label.text) {
+      <text class="graha-label" [attr.x]="label.x" [attr.y]="label.y" [attr.text-anchor]="region.grahaTextAnchor">
+        {{ label.text }}
+      </text>
     }
   }
 </svg>

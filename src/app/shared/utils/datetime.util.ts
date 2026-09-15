@@ -4,11 +4,12 @@ export const DATE_FULL_MONTH = 'd MMMM yyyy'; // Single-digit day with full mont
 
 export const TIME_24H = 'HH:mm'; // 24-hour clock, zero-padded (e.g., 17:30)
 export const TIME_12H = 'h:mm a'; // 12-hour clock with AM/PM (e.g., 5:30 PM)
+export const TIME_12H_WITH_SECONDS = 'h:mm:ss a'; // 12-hour clock with seconds and AM/PM (e.g., 5:30:15 PM)
 
 export function wallTimeToUtc(dateStr: string, timeStr: string, timeZone: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
-  const [hour, minute] = timeStr.split(':').map(Number);
-  const asUtc = Date.UTC(year, month - 1, day, hour, minute);
+  const [hour, minute, second = 0] = timeStr.split(':').map(Number);
+  const asUtc = Date.UTC(year, month - 1, day, hour, minute, second);
 
   const formatter = new Intl.DateTimeFormat('en-US', {
     timeZone,

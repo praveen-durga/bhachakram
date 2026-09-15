@@ -2,7 +2,7 @@
   <app-input label="Name" placeholder="Full name" formControlName="name" [error]="nameError()" />
   <div class="flex gap-2">
     <app-input label="Date of Birth" type="date" formControlName="dob" [error]="dobError()" />
-    <app-input label="Time of Birth" type="time" formControlName="tob" [error]="tobError()" />
+    <app-input label="Time of Birth" type="time" step="1" formControlName="tob" [error]="tobError()" />
   </div>
   <app-input
     label="Place of Birth"
@@ -16,4 +16,6 @@
       <option [value]="city"></option>
     }
   </datalist>
+
+  <app-select label="Ayanamsa" formControlName="ayanamsa" [options]="ayanamsaOptions" />
 </form>

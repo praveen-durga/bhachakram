@@ -23,6 +23,7 @@ export class InputComponent implements ControlValueAccessor {
   type = input<string>('text');
   placeholder = input<string>();
   list = input<string>();
+  step = input<string>();
 
   protected inputId = `app-input-${nextId++}`;
   protected value = signal('');

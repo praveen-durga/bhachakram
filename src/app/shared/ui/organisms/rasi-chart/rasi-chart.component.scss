@@ -26,8 +26,7 @@
   }
 
   .graha-label {
-    @apply text-sm font-semibold;
+    @apply text-xs font-semibold;
     fill: var(--color-base-content);
-    text-anchor: middle;
   }
 }
