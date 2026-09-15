@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 .app-container {
   min-height: 100vh;
   display: flex;
@@ -5,5 +7,34 @@
 }
 
 main {
+  @apply p-6;
   flex: 1;
+
+  .charts {
+    @apply flex flex-col md:flex-row gap-6 items-start justify-center;
+
+    .chart-item {
+      @apply w-full md:max-w-sm;
+
+      .chart-title {
+        @apply text-center font-semibold mb-2;
+        color: var(--color-base-content);
+      }
+    }
+  }
+
+  .empty-state {
+    @apply text-center;
+    color: color-mix(in oklab, var(--color-base-content) 60%, transparent);
+  }
+
+  .chart-links {
+    @apply flex flex-wrap gap-3 justify-start mt-6 p-2 overflow-y-auto;
+
+    a {
+      @apply inline-block px-3 py-1 rounded-lg no-underline;
+      color: var(--color-primary);
+      box-shadow: var(--box-shadow);
+    }
+  }
 }
