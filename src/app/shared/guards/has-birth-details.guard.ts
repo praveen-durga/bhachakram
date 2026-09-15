@@ -11,3 +11,13 @@ export const hasBirthDetailsGuard: CanMatchFn = () => {
   const router = inject(Router);
   return new RedirectCommand(router.parseUrl('/'));
 };
+
+export const redirectIfHasBirthDetailsGuard: CanMatchFn = () => {
+  const birthChart = inject(BirthChartService);
+  if (!birthChart.birthDetails()) {
+    return true;
+  }
+
+  const router = inject(Router);
+  return new RedirectCommand(router.parseUrl('/planet-positions'));
+};

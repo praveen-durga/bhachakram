@@ -1,7 +1,13 @@
 import { Routes } from '@angular/router';
-import { hasBirthDetailsGuard } from './shared/guards';
+import { hasBirthDetailsGuard, redirectIfHasBirthDetailsGuard } from './shared/guards';
 
 export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    canMatch: [redirectIfHasBirthDetailsGuard],
+    children: [],
+  },
   {
     path: 'planet-positions',
     canMatch: [hasBirthDetailsGuard],

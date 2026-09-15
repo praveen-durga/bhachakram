@@ -37,6 +37,10 @@ export class EphemerisService {
   #swe: SwissEph | null = null;
   #initPromise: Promise<SwissEph> | null = null;
 
+  preload(): void {
+    void this.#getSwe();
+  }
+
   async calculateD1Chart(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<D1Chart> {
     const { grahaLongitudes, ascendantLongitude } = await this.#calculateRawPositions(
       datetime,
