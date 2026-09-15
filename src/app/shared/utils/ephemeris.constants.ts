@@ -6573,7 +6573,7 @@ export const CITIES: readonly [string, string, number, number, number][] = [
 ];
 
 // IANA timezone names, indexed by CITIES[i][4]
-export const TZS: readonly string[] = [
+export const TIME_ZONES: readonly string[] = [
   'Africa/Abidjan',
   'Africa/Accra',
   'Africa/Addis_Ababa',
@@ -6813,7 +6813,7 @@ export const TZS: readonly string[] = [
   'Pacific/Port_Moresby',
 ];
 
-export const CN: Readonly<Record<string, string>> = {
+export const COUNTRY_CODES: Readonly<Record<string, string>> = {
   AE: 'United Arab Emirates',
   AF: 'Afghanistan',
   AL: 'Albania',
@@ -6981,21 +6981,21 @@ function toCity(entry: (typeof CITIES)[number]): City {
   return {
     name,
     countryCode,
-    countryName: CN[countryCode] ?? countryCode,
+    countryName: COUNTRY_CODES[countryCode] ?? countryCode,
     lat,
     lng,
-    timezone: TZS[tzIndex],
+    timezone: TIME_ZONES[tzIndex],
   };
 }
 
 const baseLabelCounts = new Map<string, number>();
 for (const [name, countryCode] of CITIES) {
-  const baseLabel = `${name}, ${CN[countryCode] ?? countryCode}`;
+  const baseLabel = `${name}, ${COUNTRY_CODES[countryCode] ?? countryCode}`;
   baseLabelCounts.set(baseLabel, (baseLabelCounts.get(baseLabel) ?? 0) + 1);
 }
 
 export const CITY_LABELS: readonly string[] = CITIES.map(([name, countryCode, lat, lng]) => {
-  const baseLabel = `${name}, ${CN[countryCode] ?? countryCode}`;
+  const baseLabel = `${name}, ${COUNTRY_CODES[countryCode] ?? countryCode}`;
   return (baseLabelCounts.get(baseLabel) ?? 0) > 1 ? `${baseLabel} (${lat}, ${lng})` : baseLabel;
 });
 
