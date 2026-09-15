@@ -6,6 +6,7 @@ import { format, parse } from 'date-fns';
 })
 export class TimeFormatPipe implements PipeTransform {
   transform(value: string, timeFormat: string): string {
-    return format(parse(value, 'HH:mm', new Date()), timeFormat);
+    const parseFormat = value.split(':').length === 3 ? 'HH:mm:ss' : 'HH:mm';
+    return format(parse(value, parseFormat, new Date()), timeFormat);
   }
 }

@@ -1,3 +1,5 @@
+import type { Ayanamsa } from '../services/ephemeris.model';
+
 export type BirthDetails = {
   name: string;
   dob: string;
@@ -6,4 +8,5 @@ export type BirthDetails = {
   lat: number;
   lng: number;
   timezone: string;
+  ayanamsa: Ayanamsa;
 };

@@ -4,8 +4,17 @@
   @apply block p-6;
 }
 
-.chart-container {
-  @apply max-w-md mx-auto;
+.charts {
+  @apply flex flex-col md:flex-row gap-6 items-start justify-center;
+
+  .chart-item {
+    @apply w-full md:max-w-sm;
+
+    .chart-title {
+      @apply text-center font-semibold mb-2;
+      color: var(--color-base-content);
+    }
+  }
 }
 
 .empty-state {

@@ -1,6 +1,23 @@
-@if (birthChart.chart(); as chart) {
-  <div class="chart-container">
-    <app-rasi-chart-north-indian [chart]="chart" />
+@if (birthChart.d1Chart(); as d1Chart) {
+  <div class="charts">
+    <div class="chart-item">
+      <h2 class="chart-title">D1 - Rasi</h2>
+      <app-rasi-chart [chartData]="d1Chart" />
+    </div>
+
+    @if (birthChart.d9Chart(); as d9Chart) {
+      <div class="chart-item">
+        <h2 class="chart-title">D9 - Navamsa</h2>
+        <app-rasi-chart [chartData]="d9Chart" />
+      </div>
+    }
+
+    @if (birthChart.bhavaChalitChart(); as bhavaChalitChart) {
+      <div class="chart-item">
+        <h2 class="chart-title">D1 - Bhava Chalit</h2>
+        <app-rasi-chart [chartData]="bhavaChalitChart" />
+      </div>
+    }
   </div>
 } @else {
   <p class="empty-state">Click "Generate Chart" in the header to see your D1 chart.</p>

@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { BirthChartService } from '../../shared/services';
-import { RasiChartNorthIndianComponent } from '../../shared/ui';
+import { RasiChartComponent } from '../../shared/ui';
 
 @Component({
   selector: 'app-chart',
   standalone: true,
-  imports: [RasiChartNorthIndianComponent],
+  imports: [RasiChartComponent],
   templateUrl: './chart.component.html',
   styleUrl: './chart.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
