@@ -99,49 +99,42 @@ see route-structure decision above).
 
 ### Step 2 — Port logic into the structure
 
-2a. **Nakshatra/Pada utilities**: add `calculateNakshatra(longitude)` and
-`calculatePada(longitude)` to `shared/utils/ephemeris.util.ts`,
-alongside a `NAKSHATRA_NAMES` (27 short codes) constant.
-→ verify: unit-style checks against the two hand-verified sample.txt
-rows above, plus 2-3 more spot checks across different rasis.
+2a. DONE — **Nakshatra/Pada utilities**: `calculateNakshatra(longitude)` and
+`calculatePada(longitude)` added to `shared/utils/ephemeris.util.ts`,
+alongside `NAKSHATRA_NAMES`/`RASI_NAMES` constants.
 
-2b. **Rasi Combination utility**: port `getRasiDistances` logic as a pure
-function taking two 0-indexed rasi numbers, returning
+2b. DONE — **Rasi Combination utility**: `getRasiDistances(rasiA, rasiB)`
+ported as a pure function on 0-indexed rasi numbers, returning
 `{ forward, backward, isVargottam }`.
-→ verify: spot-check against old app's output for a few graha pairs
-from sample.txt (e.g. Sun D1=Pisces, D9=Leo).
 
-2c. **Static reference data**: port `NakshatraPadaData`,
-`KarmicNakshatras`, `KarmicDoshas`, `KarmicPlanets`, and nakshatra
-full names into `shared/utils/` or a new `shared/data/` folder (TBD
-at implementation based on size — these are large, content-heavy
-files; likely warrant their own folder rather than living in
-`utils/`).
-→ verify: data ports without transformation errors, spot-check a few
-entries render correctly.
+2c. DONE — **Static reference data**: ported into a new `shared/data/`
+folder (`nakshatra-pada.data.ts`, `karmic-dosha.data.ts`,
+`navamsa-combination.data.ts`), re-keyed from the old app's 2/4-letter
+codes to numeric rasi/nakshatra indices matching this app's `D1Chart`
+model; verified against the originals programmatically.
 
-2d. **Planet Positions real content**: component computes the 9-graha +
-Lagna table rows from `BirthChartService.d1Chart()` + `d9Chart()`
-(nakshatra/pada/rasi-combo computed client-side from longitude; no
-new ephemeris calls needed beyond what D1/D9 already provide),
-renders the full table with Characteristics/Career Path/Karmic
-Dosha/Karmic Planet columns and their dialogs (native `<dialog>`,
-matching the Modal molecule's pattern), plus the Navamsa Matrix
-sub-table with hover highlighting.
-→ verify: table values cross-checked against sample.txt for the same
-birth data if reproducible, or against independently recomputed
-values; dialogs open/close correctly; matrix hover highlighting
-works.
+2d. DONE — **Planet Positions real content**: `PlanetPositionsComponent`
+computes the 9-graha + Ascendant table from `BirthChartService.d1Chart()`
 
-2e. **Panchang real content**: replace stub with placeholder titles
-(Tithi/Vaara/Nakshatra/Yoga/Karana labels with sample values) — real
-calculation deferred further, this step only replaces the bare stub
-with the intended placeholder layout.
+- `d9Chart()`, renders Characteristics/Career Path/Rasi Combination/
+  Karmic Dosha/Karmic Planet columns with `app-modal`-based dialogs
+  (not native `<dialog>` — reused the existing Modal molecule instead),
+  plus an always-visible Navamsa Matrix sub-table with row/column hover
+  highlighting. The generic `Table` molecule was extended with an
+  optional per-column `cellTemplate` (`TemplateRef`) to support the
+  custom View-button cells.
+  → verified: full click-through with a real submitted birth chart,
+  dialogs open/close with correct data, matrix hover highlighting works,
+  values cross-checked by hand against the Navamsa combination formula.
 
-## Status: Step 1 (structure) and the computed-state persistence addendum
+2e. **Panchang real content**: still a bare stub (`<h1>Panchang</h1>`) —
+not started.
 
-(below) are both done and verified. Step 2 (porting real logic/data) not
-started yet — resumes next.
+## Status
+
+Step 1 (structure), the computed-state persistence addendum, and Step 2
+items 2a-2d (Planet Positions) are all done and verified. Only 2e
+(Panchang real content) remains.
 
 ## Addendum: in-house computed-state persistence — DONE
 

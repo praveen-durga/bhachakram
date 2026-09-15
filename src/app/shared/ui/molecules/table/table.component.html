@@ -12,7 +12,13 @@
       @for (row of rows(); track $index) {
         <tr>
           @for (column of columns(); track column.key) {
-            <td>{{ row[column.key] }}</td>
+            <td>
+              @if (column.cellTemplate; as template) {
+                <ng-container *ngTemplateOutlet="template; context: { $implicit: row }" />
+              } @else {
+                {{ row[column.key] }}
+              }
+            </td>
           }
         </tr>
       }
