@@ -32,3 +32,4 @@ This is a astrology related software project written in latest angular tech stac
 - Ensure to use css variables for sharing values. Maintain them in `src/styles/_variables.scss`.
 - The html should follow latest html5 standards and must adopt native browser based ui controls instead of generaring the boiler code from scratch.
 - Follow official angular naming conventions
+- Astrology/ephemeris calculation logic is complex and must strictly follow single-responsibility separation — never accumulate formulas, lookup tables, and orchestration in one file. For each calculation domain (e.g. Panchang, Planet Positions), split into: a `*.util.ts` with pure calculation functions, a `*.data.ts`/`*.constants.ts` with static reference tables, and a `*.model.ts` with types — the page/component itself only orchestrates (reads chart signals, calls the util functions, assembles the view-model, handles UI state).

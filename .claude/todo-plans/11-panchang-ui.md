@@ -95,5 +95,344 @@ at in this step.
 ## Status
 
 Steps 1-2 (UI/structure) done and verified: `tsc`, `prettier --check`,
-and `ng build` all clean. Step 3 (real calculations) not started —
-awaiting the user-supplied formulas.
+and `ng build` all clean. Step 3 (real calculations) starting — formulas
+below confirmed by the user for a first batch of cards.
+
+## Step 3 — Real calculations (in progress)
+
+Confirmed formulas, applied on top of the birth chart already computed
+by `BirthChartService`/`EphemerisService` (Sun/Moon longitudes from
+`d1Chart.grahas`, house lookups via the Bhava Chalit chart's cusps):
+
+### Tithi Sphuta
+
+`tithiSphuta = normalize360(moonLongitude - sunLongitude)`. This is a
+synthetic longitude (not a real graha) — derive its sign via
+`floor(longitude / 30)`, nakshatra/pada via the existing
+`calculateNakshatra`/`calculatePada`. **House uses the simple whole-sign
+system from the D1 chart**, not Bhava Chalit/Sripati: `house =
+getRasiDistances(d1Chart.ascendantRasi, tithiSphutaRasi).forward` — no
+`EphemerisService` changes needed, this is pure arithmetic on the
+already-computed `d1Chart.ascendantRasi`.
+
+Note text: static per the 3 confirmed examples only (Aries/Bharani →
+health concerns + self-focus; Gemini/Ardra → anxiety about
+destruction/loss, concerns re: children/studies/market; Virgo/Chitra →
+profit-oriented creativity) — shown only when the computed
+sign+nakshatra combination matches one of these three; no note
+otherwise until more interpretations are supplied.
+
+### Santan Tithi
+
+`raw = normalize360(5 * (moonLongitude - sunLongitude))`
+`tithiNumber = floor(raw / 12) + 1` (1-30, each tithi spans 12°).
+Interpretation table (favourable vs. difficult tithis) per the user's
+notes: Panchami/Dashami/Ekadashi/Trayodashi favourable for children;
+Ashtami/Navami/Chaturdashi difficult — render the appropriate note text
+based on which of these the computed tithi number falls on (or no note
+for tithis not called out).
+
+### Tithi Beeja
+
+Multi-step, NOT a closed-form formula — needs careful sequencing:
+
+1. Compute the _birth_ Tithi number the same way as Santan Tithi's raw
+   value but WITHOUT the ×5 (`normalize360(moonLongitude -
+sunLongitude) / 12`, floor + 1) — this is the ordinary birth Tithi
+   (1-30).
+2. Look up that Tithi's ruling "Graha Devata" via the confirmed
+   30-entry table (Krishna Paksha 1-14 repeats the Shukla 1-14 planet
+   sequence; Amavasya/Purnima are the 15th of each paksha):
+   `[Sun, Moon, Mars, Mercury, Jupiter, Venus, Saturn, Rahu, Sun, Moon,
+Mars, Mercury, Jupiter, Venus]` repeated for both halves, with
+   Purnima (tithi 15) = Saturn and Amavasya (tithi 30) = Rahu.
+3. Find that planet's RASI (sign, 0-11) from `d1Chart.grahas`.
+4. "7th from that planet" = `(planetRasi + 6) % 12` — this sign is the
+   "unresolved desire" result.
+5. Count sign-distance from that 7th-place sign to the Moon's sign
+   (using the existing `getRasiDistances`-style forward count, 1-12).
+6. Apply that same distance again, starting from the Moon's sign, to
+   get a candidate result sign.
+7. Exception: if the candidate result sign equals the Moon's own sign
+   OR the 7th-from-Moon sign, instead count 10 signs forward from the
+   candidate to get the final result sign.
+8. Render the final result's sign/nakshatra/house(s) as the
+   "Fulfillment path" line, and the step-4 sign as the "Unresolved
+   desire" line, mirroring the reference screenshot's Tithi Beeja card
+   layout ("Graha Devata: Moon (Aquarius · H12)", "Unresolved desire
+   (7th): Leo · H6 — ...", "Fulfillment path: Taurus · H3 — ...").
+   → verify with a hand-traced example once implemented, matching the
+   reference screenshot's own worked numbers if reproducible from a
+   matching birth chart, or at minimum confirming each step's
+   intermediate value with the user before trusting the final output.
+
+### Vainashika (Lagna) / Vainashika (Moon)
+
+Confirmed NOT a formula to derive from scratch — it's a fixed positional
+offset on the (nakshatra, pada) pair, verified algebraically against
+the user's 27×4 reference table (Ashwini through Revati): treating
+`combinedIndex = nakshatraIndex * 4 + (pada - 1)` (0-107), the result
+is `resultIndex = (combinedIndex + 87) % 108`, then split back into
+`resultNakshatra = floor(resultIndex / 4)`, `resultPada = (resultIndex
+% 4) + 1`. Verified against 4 independent spot-checks from the table
+(first row, second row, an interior row via Ardra, and the last row via
+Revati) — all matched exactly, so this is implemented as a formula, not
+a transcribed 108-row lookup table. Apply once using the natal Lagna's
+nakshatra/pada (from `d1Chart.ascendantLongitude`) and once using the
+Moon's nakshatra/pada (from `d1Chart.grahas` Moon longitude).
+
+### Mudakku — DONE
+
+Confirmed as two independent fixed-sum reflections of the Sun's
+position, verified against every row of both reference tables (12-sign
+rasi table, 27-nakshatra table — all matched exactly):
+`mudakkuRasi = (4 - sunRasi + 12) % 12`,
+`mudakkuNakshatra = (10 - sunNakshatra + 27) % 27`.
+
+### Mandi — NOT STARTED, blocked
+
+The user-provided content for Mandi was entirely a by-house
+remedy/interpretation guide (12 paragraphs on what ritual to perform
+depending on which house Mandi/Mudakku falls in) — it does not specify
+how to calculate Mandi's actual position. Mandi (Maandi/Gulika) is
+normally a weekday+sunrise/sunset-based Upagraha calculation, which
+needs sunrise/sunset times that `EphemerisService` does not currently
+compute. User confirmed: implement the standard Gulika/Mandi Upagraha
+formula (weekday ruling planet's portion of day/night divided into 8
+parts; Mandi = ascendant of that portion's start time) — this requires
+adding sunrise/sunset calculation to `EphemerisService` first (a
+swisseph-wasm rise/set call), then the weekday-portion logic in
+`panchang.util.ts`. Scoped as a separate follow-up since it touches
+`EphemerisService`, not just page-local Panchang code.
+
+### Implementation structure (SRP)
+
+Per explicit user instruction, Panchang calculation logic is split
+across dedicated files instead of living in the component:
+
+- `panchang.model.ts` — types for each calculated result
+  (`TithiSphuta`, `SantanTithi`, `TithiBeejaResult`, `VainashikaResult`,
+  `MudakkuResult`).
+- `panchang.data.ts` — static reference data (Graha Devata-per-tithi
+  table, Vainashika/Mudakku fixed offsets, Santan Tithi
+  favourable/difficult sets and note text, Tithi Sphuta interpretation
+  notes).
+- `panchang.util.ts` — pure calculation functions taking a `D1Chart`
+  (or raw values) and returning typed results; no Angular dependencies.
+- `panchang.component.ts` — orchestration only: reads
+  `BirthChartService.d1Chart()`, calls the util functions, assembles
+  view-models (adding display-friendly names via `RASI_NAMES`/
+  `NAKSHATRA_NAMES`) as `computed()` signals.
+  This mirrors the standing project-wide rule now documented in
+  `.claude/PROJECT.md`.
+
+### Verified
+
+All of Tithi Sphuta, Tithi Beeja (full multi-step chain, including the
+10th-house exception), Santan Tithi, Vainashika (Lagna + Moon), and
+Mudakku were checked against hand/script-traced arithmetic and, for
+Tithi Beeja specifically, reproduced the reference screenshot's own
+worked example exactly (Graha Devata Moon in Aquarius → unresolved
+desire Leo → distance 7 → exception triggered → fulfillment path
+Taurus). Rendered correctly in-browser with a real submitted birth
+chart, no console errors, `tsc`/`prettier`/`ng build` all clean.
+
+### Display fixes (post-implementation)
+
+- Tithi Beeja's Graha Devata line now shows the planet's own sign and
+  house (e.g. "Saturn (Capricorn · H4)"), not just the planet name —
+  added `grahaDevataRasi`/`grahaDevataHouse` to `TithiBeejaResult`,
+  computed the same whole-sign-house way as Tithi Sphuta.
+- Santan Tithi displays a readable `<Paksha> <TithiName>` (e.g.
+  "Krishna Chaturthi") instead of the raw 1-30 tithi number — added
+  `TITHI_NAMES` (14 names) to `panchang.data.ts` and a
+  `getPakshaTithi(tithiNumber)` util that splits the number into paksha
+  - name, handling the Purnima/Amavasya 15th-tithi special case for
+    each paksha. Verified against edge cases (1, 15, 16, 19, 22, 30).
+- Mudakku and both Vainashika cards now also show the resulting
+  nakshatra's ruling lord (e.g. "Ashlesha (pada 3) · Mercury") — added
+  `NAKSHATRA_LORD_CYCLE` (the standard 9-planet Vimshottari cycle,
+  repeating every 9 nakshatras: Ketu, Venus, Sun, Moon, Mars, Rahu,
+  Jupiter, Saturn, Mercury) and a `getNakshatraLord(nakshatra)` util.
+  Verified against all 3 of the user's reference examples (Shatabhisha
+  → Rahu, Purva Ashadha → Venus, Moola → Ketu — all matched exactly).
+- Mudakku and both Vainashika cards additionally show a "Planets:" line
+  listing any natal graha whose OWN nakshatra shares the same ruling
+  lord as the derived point's nakshatra (confirmed rule: same lord, not
+  necessarily the same nakshatra) — added
+  `getPlanetsWithSameNakshatraLord(d1Chart, lord)`. Line is omitted
+  entirely when no planet matches.
+
+### Second wave — DONE (standard Panchang elements)
+
+Wired up using standard, well-documented classical formulas (no
+custom/user-supplied logic needed, unlike the first wave):
+
+- **Thithi**: `normalize360(moonLongitude - sunLongitude)`, tithi
+  number = `floor(raw/12)+1`, displayed via the existing
+  `getPakshaTithi` (paksha + name) plus % elapsed within the current
+  tithi's 12° span.
+- **Nakshatra**: Moon's own nakshatra/pada (`calculateNakshatra`/
+  `calculatePada` on Moon's longitude) plus its lord via the existing
+  `getNakshatraLord`.
+- **Yoga**: `normalize360(sunLongitude + moonLongitude)`, divided into
+  27 equal 13°20' spans (same span as nakshatra) → one of the 27 fixed
+  Yoga names, plus % elapsed.
+- **Karnam**: half-tithi index (`floor(raw/6)+1`, 1-60) → one of 11
+  Karnam names (Kimstughna fixed at half-tithi 1; 7 movable Karnams
+  cycling through half-tithis 2-57, repeating 8 times; Shakuni/
+  Chatushpada/Naga fixed at 58/59/60) — verified against the standard
+  classical sequence by script.
+- **Vedic Day Lord**: calendar weekday of the birth date (`dob`, parsed
+  in its own local wall-clock terms, no timezone conversion) → weekday
+  name + ruling planet (Sun=Sunday...Saturn=Saturday) — verified June
+  15 1990 → Friday → Venus, matching JS's own `Date#getDay()`.
+- **Yogi / Ava Yogi**: `YogiPoint = normalize360(sunLongitude +
+moonLongitude + 93°20')`, `AvayogiPoint = YogiPoint + 93°20'` again
+  (186°40' total from Sun+Moon) — this exact formula was verified to
+  floating-point precision against the placeholder example that was
+  already in the UI (27°17' Sco Yogi → 3°57' Gem Avayogi, difference
+  ~1e-14). "Planet" shown is the standard nakshatra-lord of that
+  point's own nakshatra (reusing `getNakshatraLord`, no separate
+  lookup table). "in star" lists any natal planet occupying that exact
+  nakshatra (new `getPlanetsInNakshatra`, distinct from
+  `getPlanetsWithSameNakshatraLord` — this one checks the literal same
+  nakshatra, not just the same lord). Ava Yogi's static "Remedy /
+  Discipline" note was removed per explicit user instruction (no real
+  per-nakshatra remedy data source yet — user will revisit once that
+  data is available).
+
+### Third wave — DONE (Hora, Mandi, EphemerisService sunrise/sunset)
+
+- **All static/placeholder note text removed** across every card per
+  explicit user instruction ("remove all static data for now for all
+  cards") — Tithi Sphuta/Tithi Beeja/Santan Tithi's fixed description
+  paragraphs are gone (the computed-lookup notes were removed too,
+  per the user's final call to remove note text everywhere, not just
+  the fully-static ones). Ava Yogi's static remedy note was already
+  removed in the second wave. The `.note`/`.favourable` SCSS classes
+  were left in place (harmless, no churn) for whenever notes return.
+- **`EphemerisService.calculateSunriseSunset(datetime, lat, lng)`**:
+  new method using `swisseph-wasm`'s `rise_trans` (`SE_CALC_RISE`=1,
+  `SE_CALC_SET`=2 on `SE_SUN`), converting the returned Julian Day back
+  to a UTC `Date` via `jdut1_to_utc`. **Critical fix during
+  implementation**: `rise_trans` searches FORWARD from the given JD,
+  so passing the birth's exact instant (rather than that day's UTC
+  midnight) would skip past a same-day sunrise/sunset that already
+  occurred before the birth time, incorrectly returning the NEXT day's
+  event instead — verified this exact failure mode via a smoke test
+  (searching from 09:00 UTC returned June 16's sunrise instead of June
+  15's), then fixed by always anchoring the search to UTC midnight of
+  the target calendar day.
+- **`EphemerisService.calculateAscendant(datetime, lat, lng, ayanamsa)`**:
+  new method exposing just the Ascendant longitude for an arbitrary
+  instant (needed for Mandi, which requires the Ascendant at a
+  specific sub-day instant, not birth time).
+- **`BirthChartService.sunTimes`**: new signal `{ sunrise, sunset,
+nextSunrise }` (today's + tomorrow's sunrise, needed for night-hora/
+  night-portion boundary math), computed alongside the D1/D9/Bhava
+  Chalit charts whenever birth details are set or reloaded from
+  storage. Not persisted to `StoreService` — cheap to recompute,
+  keeps the storage schema simple.
+- **Hora**: 24-hora cycle (12 day + 12 night, sunrise/sunset/next-
+  sunrise-bounded), ruling planet = Chaldean order (Saturn, Jupiter,
+  Mars, Sun, Venus, Mercury, Moon) starting from the weekday's own
+  lord and advancing uninterrupted through all 24 horas. Verified the
+  self-consistency the research flagged (Sunday hora24=Mercury →
+  immediately followed by Moon = Monday's hora1, matching the
+  classical weekday-lord sequence) and confirmed against the live
+  chart (Friday, hora 9 → Mercury, matching a hand-computed check).
+- **Mandi/Gulika**: per BPHS ch.3 ~sloka 66-70 (confirmed Mandi and
+  Gulika are the same point) — day/night each split into 8 equal
+  portions in plain weekday-lord order (not Chaldean), Saturn's
+  portion index per weekday sourced directly from the primary text
+  (`MANDI_DAY_PORTION`/`MANDI_NIGHT_PORTION` in `panchang.data.ts`),
+  Mandi's longitude = the Ascendant computed at the START of that
+  portion (BPHS is explicit: start, not midpoint). Implemented as an
+  `effect()` in `PanchangComponent` (not a plain `computed()`, since
+  it needs an async `EphemerisService.calculateAscendant` call) writing
+  into a private signal — mirrors the async-signal pattern already
+  used for chart loading in `BirthChartService`, since `resource()`
+  can't be seeded synchronously from cache.
+- All rendered correctly in-browser with a real submitted birth chart,
+  no console errors; `tsc`/`prettier`/`ng build` all clean.
+
+### Still not started
+
+- Any per-item interpretive/remedy note content — explicitly deferred
+  until the user supplies real data points (static text was removed
+  rather than left as placeholder-quality content).
+
+### Fourth wave — post-launch bug fixes (verified against a real chart)
+
+After the wave-3 wiring shipped, the user found several cards didn't
+match a trusted reference app for their own real birth chart (Kiran,
+1990-10-29, 15:15:35, Rajamahendravaram). It turned out this app's
+original placeholder text (from the very first "structure only" commit)
+was actually real, correct expected output for that exact chart all
+along — confirmed by back-computing Sun+Moon longitude from it — so it
+served as a precise verification oracle for the fixes below.
+
+- **Ava Yogi was wrong**: formula used Yogi Point + 93°20' again
+  (Sun+Moon+2×93°20'). Correct classical formula is Sun+Moon+3×93°20'
+  (280° total), independent of the Yogi point. Fixed in
+  `calculateAvayogiPoint` (`panchang.util.ts`); confirmed exact match
+  against the reference chart ("Mrigashira pada 4, Mars, 3°57' Gemini").
+- **Mudakku/Vainashika "Planets:" field overmatched**: was using
+  `getPlanetsWithSameNakshatraLord` (any planet sharing the same
+  nakshatra LORD — too broad). Replaced with `getPlanetsInNakshatra`
+  (exact same nakshatra) at all 3 call sites in `panchang.component.ts`;
+  deleted the now-unused wrong function. Confirmed: Mudakku "Planets:"
+  now shows only Moon (was wrongly showing Sun, Moon, Mercury, Venus).
+- **Karnam spelling**: `MOVABLE_KARNAM_NAMES` had "Gara" instead of this
+  app's established transliteration "Garaja" — fixed.
+- **Mandi/Gulika position formula was fundamentally wrong** (biggest
+  fix): the original implementation used BPHS's 8-part day/night
+  division ("Gulika Kalam") with a portion-start convention — off by a
+  full rasi against the reference chart. Multi-stage fix:
+  1. Confirmed the portion→planet assignment table itself was right;
+     found "start of portion" should be "end of portion" — got the
+     right rasi/house but pada was still off by ~3.5°.
+  2. User: _"if we display wrong details then the whole idea
+     collapse."_ — a standing principle: never ship an
+     approximately-right formula as if confirmed-correct.
+  3. Per the user's direction to research how standard/popular systems
+     calculate Mandi, used a 40-iteration binary search against the
+     reference chart to pin the exact target instant to sub-second
+     precision, then re-derived the formula from that empirical anchor.
+  4. Found the entire 8-part "Gulika Kalam" system is the WRONG system
+     for Mandi's chart position — that system is for a different
+     feature entirely (auspicious/inauspicious time windows). The
+     correct system is a **15-muhurta division**:
+     `sunrise + (dayLength/15) × muhurtaCount(weekday)`, muhurta counts
+     13-11-9-7-5-3-1 for Sun–Sat. Matched the empirical target to
+     within 0.56 seconds.
+  5. Replaced `MANDI_DAY_PORTION`/`MANDI_NIGHT_PORTION` and the
+     portion-based logic with `MANDI_DAY_MUHURTA_COUNT` and the new
+     `getMandiInstant` (`panchang.data.ts` / `panchang.util.ts`).
+     Verified: rasi/nakshatra/pada/house all now correct, longitude
+     within ~10 arcminutes of the reference (normal precision
+     variance) — previously wrong on all four.
+  6. Added a **night-birth** formula using the same 15-muhurta
+     structure but counting from sunset, with a night muhurta table
+     (`MANDI_NIGHT_MUHURTA_COUNT = [5, 3, 1, 13, 11, 9, 7]`) that is
+     only logically derived/cross-checked against secondary sources —
+     **not yet verified against a real night-birth reference chart**,
+     unlike the day table. Implemented per the user's explicit
+     instruction ("implement it but create a todo for the same"); see
+     the open TODO below.
+
+#### Open TODO — verify night-birth Mandi
+
+- [ ] Verify `MANDI_NIGHT_MUHURTA_COUNT` in `panchang.data.ts` against
+      a real night-birth reference chart (birth time between sunset and
+      next sunrise) from the same trusted reference app used for the
+      day-birth fixes above. If it doesn't match, re-derive using the
+      same binary-search-against-empirical-target technique used for
+      the day formula.
+- [ ] Separately, decide/resolve the unhandled edge case noted in
+      `getMandiInstant`'s comment: a birth between midnight and that
+      day's own sunrise technically falls in the _previous_ calendar
+      day's night, whose weekday differs from the birth's own calendar
+      date — currently `weekday` is always the birth's own calendar-day
+      weekday, which may be wrong for this window.

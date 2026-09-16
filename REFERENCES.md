@@ -1,0 +1,59 @@
+# References
+
+External sources consulted while implementing this project's astrological
+calculations. Kept separate from `README.md` so the project setup docs stay
+focused on running/building the app.
+
+## Ephemeris library
+
+- [swisseph-wasm](https://github.com/prolaxu/swisseph-wasm) — WebAssembly port
+  of the Swiss Ephemeris library. This project loads it from its CDN build
+  (`https://cdn.jsdelivr.net/npm/swisseph-wasm@0.1.0/src/swisseph.js`) rather
+  than bundling it, and uses it for all planetary longitude, house-cusp,
+  and sunrise/sunset (`rise_trans`) calculations.
+
+## Panchang (Yogi/Avayogi, Hora, Mandi/Gulika)
+
+- Brihat Parashara Hora Shastra (BPHS), Chapter 3 (~sloka 66-70) — primary
+  classical source for Mandi/Gulika's 8-part day/night division and the
+  "Ascendant at start of Saturn's portion" rule; also confirms Gulika and
+  Mandi are the same point.
+- [AstroSaxena — Concept of Yogi, Avayogi and Duplicate Yogi Planet](https://www.astrosaxena.com/articles/yady) —
+  worked numeric example for the Yogi Point formula (Sun + Moon + 93°20'),
+  used to verify this app's implementation to floating-point precision.
+- [Applied Vedic Astrology — Points of Wealth: Luck of the Yogi and the Yogi Point](https://www.appliedvedicastrology.com/point-of-wealth-luck-of-the-yogi/) —
+  Sanjay Rath school framing of the Yogi Point/Nitya Yoga concept.
+- [BP Lama Jyotishavidya — Yogi Point, Avayogi, Yogi Graha](https://barbarapijan.com/bpa/Amsha/yogi_point_avayogi.htm) —
+  states the Avayogi offset (Yogi Point + 186°40') in the same classical
+  phrasing verified against this app's data.
+- [Jagannatha Hora 7.4 changelog](https://www.vedicastrologer.org/jh/update_7.4.htm) —
+  confirms JHora computes exact Yogi/Avayogi longitudes rather than a
+  lookup table, and documents a historical Avayogi sign/offset bug as a
+  caution for implementers.
+- [PyJHora](https://github.com/naturalstupid/PyJHora) — open-source
+  reimplementation of Jagannatha Hora's book-verified algorithms; referenced
+  as a ground-truth implementation to diff against if needed.
+- Hora (planetary hour) sequencing (Chaldean order, weekday-lord start,
+  24-hora cycle) cross-checked against
+  [sirauysal.com/en/planetary-hours](https://sirauysal.com/en/planetary-hours),
+  [kerykeion.net](https://kerykeion.net/), and skoolofforecasting.com.
+
+## Shadbala and Bhava Bala (researched, not yet implemented)
+
+- Brihat Parashara Hora Shastra (BPHS), Chapters 27-28 — primary source for
+  Sthana/Dig/Kaala/Chesta/Naisargika/Drig Bala and Ishta/Kashta Phala.
+- [Saravali](https://saravali.github.io/astrology/) — open calculation-engine
+  reference for Sthana Bala, Dig Bala, and Drig Bala's angular formulas.
+- VedAstro "Graha and Bhava Balas" blog series (vedastro.org) — detailed
+  modern derivations for Kaala Bala's 9 sub-components and Drig Bala.
+- Vijayalur / JYOTHISHI blog series (vijayalur.com) — Kendradi/Drekkana/
+  Ojhayugma Bala tables and Mandi's 8-part division tables.
+- `shadbala.pdf` (project root) — a real Parashara's Light 9.0 software
+  report, used as the numeric verification target for the formulas above.
+
+## Planet Positions
+
+- Reference implementation ported from an existing sibling project
+  (`astroParseTable` feature) for the 9-graha + Ascendant table,
+  Nakshatra/Pada, Rasi Combination, Karmic Dosha, and Karmic Planet logic —
+  not a public external source, kept here for completeness of provenance.

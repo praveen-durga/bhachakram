@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import type SwissEph from 'swisseph-wasm';
+import type SwissEphemeris from 'swisseph-wasm';
 import { calculateD9Rasi } from '../utils';
 import { Ayanamsa, D1Chart, Graha, GrahaPosition } from './ephemeris.model';
 
@@ -18,6 +18,8 @@ const GRAHA_PLANET_IDS: Record<Exclude<Graha, 'Ketu'>, number> = {
 
 const SEFLG_SWIEPH = 2;
 const SEFLG_SIDEREAL = 65536;
+const SE_CALC_RISE = 1;
+const SE_CALC_SET = 2;
 
 const SIDM_BY_AYANAMSA: Record<Ayanamsa, number> = {
   lahiri: 1,
@@ -34,11 +36,11 @@ type RawPositions = {
 
 @Injectable({ providedIn: 'root' })
 export class EphemerisService {
-  #swe: SwissEph | null = null;
-  #initPromise: Promise<SwissEph> | null = null;
+  #swissEphemeris: SwissEphemeris | null = null;
+  #initPromise: Promise<SwissEphemeris> | null = null;
 
   preload(): void {
-    void this.#getSwe();
+    void this.#getEphemeris();
   }
 
   async calculateD1Chart(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<D1Chart> {
@@ -71,16 +73,80 @@ export class EphemerisService {
     longitude: number,
     ayanamsa: Ayanamsa,
   ): Promise<D1Chart> {
-    const swe = await this.#getSwe();
-    swe.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
-    const jd = this.#toJulianDay(swe, datetime);
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
+    const jd = this.#toJulianDay(ephemeris, datetime);
 
-    const grahaLongitudes = this.#calculateGrahaLongitudes(swe, jd);
-    const houses = swe.houses_ex(jd, SEFLG_SIDEREAL, latitude, longitude, 'S');
+    const grahaLongitudes = this.#calculateGrahaLongitudes(ephemeris, jd);
+    const houses = ephemeris.houses_ex(jd, SEFLG_SIDEREAL, latitude, longitude, 'S');
     const toBhavaIndex = (lon: number) => this.#houseForLongitude(lon, houses.cusps) - 1;
 
     const grahas = this.#toGrahaPositions(grahaLongitudes, toBhavaIndex);
     return { ascendantRasi: toBhavaIndex(houses.ascmc[0]), ascendantLongitude: houses.ascmc[0], grahas };
+  }
+
+  async calculateAscendant(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<number> {
+    const swe = await this.#getEphemeris();
+    swe.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
+    const jd = this.#toJulianDay(swe, datetime);
+    const houses = swe.houses_ex(jd, SEFLG_SIDEREAL, latitude, longitude, 'W');
+
+    return houses.ascmc[0];
+  }
+
+  async calculateSunriseSunset(
+    datetime: Date,
+    latitude: number,
+    longitude: number,
+    timeZone: string,
+  ): Promise<{ sunrise: Date; sunset: Date }> {
+    const ephemeris = await this.#getEphemeris();
+    // Search from UTC midnight of this LOCAL calendar day (in the birth's own
+    // timezone), not the given instant's UTC calendar day — rise_trans searches
+    // forward, so searching from the birth time itself would miss that day's
+    // sunrise/sunset if the birth occurred after them, and searching from the
+    // UTC date can pick the wrong day entirely for births near local midnight
+    // in timezones far from UTC.
+    const midnightUtc = new Date(Date.UTC(...this.#localDateParts(datetime, timeZone)));
+    const julianDay = this.#toJulianDay(ephemeris, midnightUtc);
+    const geopos = [longitude, latitude, 0];
+
+    const riseJulianDay = ephemeris.rise_trans(
+      julianDay,
+      ephemeris.SE_SUN,
+      '',
+      SEFLG_SWIEPH,
+      SE_CALC_RISE,
+      geopos,
+      0,
+      0,
+    );
+    const setJulianDay = ephemeris.rise_trans(julianDay, ephemeris.SE_SUN, '', SEFLG_SWIEPH, SE_CALC_SET, geopos, 0, 0);
+
+    if (!riseJulianDay || !setJulianDay) {
+      throw new Error('Unable to calculate sunrise/sunset for the given date and location');
+    }
+
+    return {
+      sunrise: this.#julianDayToUtcDate(ephemeris, riseJulianDay[0]),
+      sunset: this.#julianDayToUtcDate(ephemeris, setJulianDay[0]),
+    };
+  }
+
+  #localDateParts(datetime: Date, timeZone: string): [number, number, number] {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const parts = Object.fromEntries(formatter.formatToParts(datetime).map((part) => [part.type, part.value]));
+    return [Number(parts['year']), Number(parts['month']) - 1, Number(parts['day'])];
+  }
+
+  #julianDayToUtcDate(ephemeris: SwissEphemeris, julianDay: number): Date {
+    const utc = ephemeris.jdut1_to_utc(julianDay, ephemeris.SE_GREG_CAL);
+    return new Date(Date.UTC(utc.year, utc.month - 1, utc.day, utc.hour, utc.minute, utc.second));
   }
 
   #houseForLongitude(longitude: number, cusps: Float64Array): number {
@@ -108,7 +174,7 @@ export class EphemerisService {
     longitude: number,
     ayanamsa: Ayanamsa,
   ): Promise<RawPositions> {
-    const swe = await this.#getSwe();
+    const swe = await this.#getEphemeris();
     swe.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
     const jd = this.#toJulianDay(swe, datetime);
 
@@ -118,7 +184,7 @@ export class EphemerisService {
     return { grahaLongitudes, ascendantLongitude: houses.ascmc[0] };
   }
 
-  #calculateGrahaLongitudes(swe: SwissEph, jd: number): Record<Graha, number> {
+  #calculateGrahaLongitudes(swe: SwissEphemeris, jd: number): Record<Graha, number> {
     const grahaLongitudes = {} as Record<Graha, number>;
     for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
       const [grahaLongitude] = swe.calc_ut(jd, planetId, SEFLG_SWIEPH | SEFLG_SIDEREAL);
@@ -128,7 +194,7 @@ export class EphemerisService {
     return grahaLongitudes;
   }
 
-  #toJulianDay(swe: SwissEph, datetime: Date): number {
+  #toJulianDay(swe: SwissEphemeris, datetime: Date): number {
     return swe.julday(
       datetime.getUTCFullYear(),
       datetime.getUTCMonth() + 1,
@@ -141,19 +207,19 @@ export class EphemerisService {
     return Math.floor(longitude / 30);
   }
 
-  async #getSwe(): Promise<SwissEph> {
-    if (this.#swe) {
-      return this.#swe;
+  async #getEphemeris(): Promise<SwissEphemeris> {
+    if (this.#swissEphemeris) {
+      return this.#swissEphemeris;
     }
     this.#initPromise ??= this.#init();
     return this.#initPromise;
   }
 
-  async #init(): Promise<SwissEph> {
+  async #init(): Promise<SwissEphemeris> {
     const { default: SwissEphCtor } = await import(/* @vite-ignore */ SWISSEPH_CDN_URL);
-    const swe: SwissEph = new SwissEphCtor();
-    await swe.initSwissEph();
-    this.#swe = swe;
-    return swe;
+    const ephemeris: SwissEphemeris = new SwissEphCtor();
+    await ephemeris.initSwissEph();
+    this.#swissEphemeris = ephemeris;
+    return ephemeris;
   }
 }
