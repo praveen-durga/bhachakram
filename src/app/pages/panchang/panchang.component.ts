@@ -1,28 +1,60 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { BirthChartService } from '../../shared/services';
+import { DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
+import { BirthChartService, EphemerisService } from '../../shared/services';
 import { CardComponent } from '../../shared/ui';
-import { calculateNakshatra, calculatePada, formatDegreeInRasi, NAKSHATRA_NAMES, RASI_NAMES } from '../../shared/utils';
 import {
+  calculateNakshatra,
+  calculatePada,
+  formatDegreeInRasi,
+  getRasiDistances,
+  NAKSHATRA_NAMES,
+  RASI_NAMES,
+  wallTimeToUtc,
+} from '../../shared/utils';
+import { WEEKDAY_LORD, WEEKDAY_NAMES, YOGA_NAMES } from './panchang.data';
+import {
+  calculateAvayogiPoint,
+  calculateHora,
+  calculateKarnam,
   calculateMudakku,
+  calculateNakshatraResult,
   calculateSantanTithi,
+  calculateThithi,
   calculateTithiBeeja,
   calculateTithiSphuta,
   calculateVainashika,
+  calculateYoga,
+  calculateYogiPoint,
+  getHoraLord,
+  getKarnamName,
+  getMandiPortionStart,
   getNakshatraLord,
   getPakshaTithi,
+  getPlanetsInNakshatra,
   getPlanetsWithSameNakshatraLord,
   isSantanTithiDifficult,
 } from './panchang.util';
+import { MandiResult } from './panchang.model';
+
+type MandiView = MandiResult & { nakshatraName: string; rasiName: string; degreeInRasi: string };
 
 @Component({
   selector: 'app-panchang',
-  imports: [CardComponent],
+  imports: [CardComponent, DecimalPipe],
   templateUrl: './panchang.component.html',
   styleUrl: './panchang.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PanchangComponent {
   private birthChart = inject(BirthChartService);
+  private ephemeris = inject(EphemerisService);
+
+  #mandi = signal<MandiView | null>(null);
+
+  private birthTime = computed(() => {
+    const details = this.birthChart.birthDetails();
+    return details ? wallTimeToUtc(details.dob, details.tob, details.timezone) : null;
+  });
 
   protected tithiSphuta = computed(() => {
     const d1Chart = this.birthChart.d1Chart();
@@ -115,4 +147,148 @@ export class PanchangComponent {
       planets: getPlanetsWithSameNakshatraLord(d1Chart, lord),
     };
   });
+
+  protected thithi = computed(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    if (!d1Chart) {
+      return null;
+    }
+
+    return calculateThithi(d1Chart);
+  });
+
+  protected nakshatraResult = computed(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    if (!d1Chart) {
+      return null;
+    }
+
+    const result = calculateNakshatraResult(d1Chart);
+    return { ...result, nakshatraName: NAKSHATRA_NAMES[result.nakshatra], lord: getNakshatraLord(result.nakshatra) };
+  });
+
+  protected yoga = computed(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    if (!d1Chart) {
+      return null;
+    }
+
+    const result = calculateYoga(d1Chart);
+    return { ...result, yogaName: YOGA_NAMES[result.yoga] };
+  });
+
+  protected karnam = computed(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    if (!d1Chart) {
+      return null;
+    }
+
+    const result = calculateKarnam(d1Chart);
+    return { ...result, karnamName: getKarnamName(result.karnam) };
+  });
+
+  protected vedicDayLord = computed(() => {
+    const dob = this.birthChart.birthDetails()?.dob;
+    if (!dob) {
+      return null;
+    }
+
+    const [year, month, day] = dob.split('-').map(Number);
+    const weekday = new Date(year, month - 1, day).getDay();
+    return { weekday, weekdayName: WEEKDAY_NAMES[weekday], lord: WEEKDAY_LORD[weekday] };
+  });
+
+  protected yogi = computed(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    if (!d1Chart) {
+      return null;
+    }
+
+    const result = calculateYogiPoint(d1Chart);
+    return {
+      ...result,
+      rasiName: RASI_NAMES[result.rasi],
+      nakshatraName: NAKSHATRA_NAMES[result.nakshatra],
+      degreeInRasi: formatDegreeInRasi(result.longitude),
+      lord: getNakshatraLord(result.nakshatra),
+      planetsInStar: getPlanetsInNakshatra(d1Chart, result.nakshatra),
+    };
+  });
+
+  protected avaYogi = computed(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    if (!d1Chart) {
+      return null;
+    }
+
+    const result = calculateAvayogiPoint(d1Chart);
+    return {
+      ...result,
+      rasiName: RASI_NAMES[result.rasi],
+      nakshatraName: NAKSHATRA_NAMES[result.nakshatra],
+      degreeInRasi: formatDegreeInRasi(result.longitude),
+      lord: getNakshatraLord(result.nakshatra),
+      planetsInStar: getPlanetsInNakshatra(d1Chart, result.nakshatra),
+    };
+  });
+
+  protected hora = computed(() => {
+    const birthTime = this.birthTime();
+    const sunTimes = this.birthChart.sunTimes();
+    const weekday = this.vedicDayLord()?.weekday;
+    if (!birthTime || !sunTimes || weekday === undefined) {
+      return null;
+    }
+
+    const timezone = this.birthChart.birthDetails()?.timezone;
+    const result = calculateHora(birthTime, sunTimes, weekday);
+    return {
+      ...result,
+      lord: getHoraLord(weekday, result.horaIndex),
+      sunriseLocal: this.formatLocalTime(sunTimes.sunrise, timezone),
+      sunsetLocal: this.formatLocalTime(sunTimes.sunset, timezone),
+    };
+  });
+
+  private formatLocalTime(date: Date, timezone: string | undefined): string {
+    return new Intl.DateTimeFormat('en-US', {
+      timeZone: timezone,
+      hourCycle: 'h23',
+      hour: '2-digit',
+      minute: '2-digit',
+    }).format(date);
+  }
+
+  protected mandi = this.#mandi.asReadonly();
+
+  constructor() {
+    effect(() => {
+      const d1Chart = this.birthChart.d1Chart();
+      const birthTime = this.birthTime();
+      const sunTimes = this.birthChart.sunTimes();
+      const details = this.birthChart.birthDetails();
+      const weekday = this.vedicDayLord()?.weekday;
+
+      if (!d1Chart || !birthTime || !sunTimes || !details || weekday === undefined) {
+        this.#mandi.set(null);
+        return;
+      }
+
+      const portionStart = getMandiPortionStart(birthTime, sunTimes, weekday);
+      this.ephemeris.calculateAscendant(portionStart, details.lat, details.lng, details.ayanamsa).then((longitude) => {
+        const rasi = Math.floor(longitude / 30);
+        const nakshatra = calculateNakshatra(longitude);
+        this.#mandi.set({
+          longitude,
+          rasi,
+          nakshatra,
+          pada: calculatePada(longitude),
+          house: getRasiDistances(d1Chart.ascendantRasi, rasi).forward,
+          nakshatraName: NAKSHATRA_NAMES[nakshatra],
+          rasiName: RASI_NAMES[rasi],
+          degreeInRasi: formatDegreeInRasi(longitude),
+        });
+      });
+    });
+  }
 }

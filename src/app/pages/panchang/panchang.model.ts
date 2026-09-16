@@ -36,3 +36,48 @@ export type MudakkuResult = {
   rasi: number;
   nakshatra: number;
 };
+
+export type Thithi = {
+  tithiNumber: number;
+  paksha: 'Shukla' | 'Krishna';
+  tithiName: string;
+  percentElapsed: number;
+};
+
+export type NakshatraResult = {
+  nakshatra: number;
+  pada: number;
+};
+
+export type Yoga = {
+  yoga: number;
+  percentElapsed: number;
+};
+
+export type Karnam = {
+  karnam: number;
+};
+
+export type VedicDayLord = {
+  weekday: number;
+};
+
+export type YogiPoint = {
+  longitude: number;
+  rasi: number;
+  nakshatra: number;
+  pada: number;
+};
+
+export type HoraResult = {
+  horaIndex: number;
+  isDayHora: boolean;
+};
+
+export type MandiResult = {
+  longitude: number;
+  rasi: number;
+  nakshatra: number;
+  pada: number;
+  house: number;
+};

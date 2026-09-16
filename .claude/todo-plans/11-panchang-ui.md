@@ -263,11 +263,102 @@ chart, no console errors, `tsc`/`prettier`/`ng build` all clean.
   `getPlanetsWithSameNakshatraLord(d1Chart, lord)`. Line is omitted
   entirely when no planet matches.
 
+### Second wave — DONE (standard Panchang elements)
+
+Wired up using standard, well-documented classical formulas (no
+custom/user-supplied logic needed, unlike the first wave):
+
+- **Thithi**: `normalize360(moonLongitude - sunLongitude)`, tithi
+  number = `floor(raw/12)+1`, displayed via the existing
+  `getPakshaTithi` (paksha + name) plus % elapsed within the current
+  tithi's 12° span.
+- **Nakshatra**: Moon's own nakshatra/pada (`calculateNakshatra`/
+  `calculatePada` on Moon's longitude) plus its lord via the existing
+  `getNakshatraLord`.
+- **Yoga**: `normalize360(sunLongitude + moonLongitude)`, divided into
+  27 equal 13°20' spans (same span as nakshatra) → one of the 27 fixed
+  Yoga names, plus % elapsed.
+- **Karnam**: half-tithi index (`floor(raw/6)+1`, 1-60) → one of 11
+  Karnam names (Kimstughna fixed at half-tithi 1; 7 movable Karnams
+  cycling through half-tithis 2-57, repeating 8 times; Shakuni/
+  Chatushpada/Naga fixed at 58/59/60) — verified against the standard
+  classical sequence by script.
+- **Vedic Day Lord**: calendar weekday of the birth date (`dob`, parsed
+  in its own local wall-clock terms, no timezone conversion) → weekday
+  name + ruling planet (Sun=Sunday...Saturn=Saturday) — verified June
+  15 1990 → Friday → Venus, matching JS's own `Date#getDay()`.
+- **Yogi / Ava Yogi**: `YogiPoint = normalize360(sunLongitude +
+moonLongitude + 93°20')`, `AvayogiPoint = YogiPoint + 93°20'` again
+  (186°40' total from Sun+Moon) — this exact formula was verified to
+  floating-point precision against the placeholder example that was
+  already in the UI (27°17' Sco Yogi → 3°57' Gem Avayogi, difference
+  ~1e-14). "Planet" shown is the standard nakshatra-lord of that
+  point's own nakshatra (reusing `getNakshatraLord`, no separate
+  lookup table). "in star" lists any natal planet occupying that exact
+  nakshatra (new `getPlanetsInNakshatra`, distinct from
+  `getPlanetsWithSameNakshatraLord` — this one checks the literal same
+  nakshatra, not just the same lord). Ava Yogi's static "Remedy /
+  Discipline" note was removed per explicit user instruction (no real
+  per-nakshatra remedy data source yet — user will revisit once that
+  data is available).
+
+### Third wave — DONE (Hora, Mandi, EphemerisService sunrise/sunset)
+
+- **All static/placeholder note text removed** across every card per
+  explicit user instruction ("remove all static data for now for all
+  cards") — Tithi Sphuta/Tithi Beeja/Santan Tithi's fixed description
+  paragraphs are gone (the computed-lookup notes were removed too,
+  per the user's final call to remove note text everywhere, not just
+  the fully-static ones). Ava Yogi's static remedy note was already
+  removed in the second wave. The `.note`/`.favourable` SCSS classes
+  were left in place (harmless, no churn) for whenever notes return.
+- **`EphemerisService.calculateSunriseSunset(datetime, lat, lng)`**:
+  new method using `swisseph-wasm`'s `rise_trans` (`SE_CALC_RISE`=1,
+  `SE_CALC_SET`=2 on `SE_SUN`), converting the returned Julian Day back
+  to a UTC `Date` via `jdut1_to_utc`. **Critical fix during
+  implementation**: `rise_trans` searches FORWARD from the given JD,
+  so passing the birth's exact instant (rather than that day's UTC
+  midnight) would skip past a same-day sunrise/sunset that already
+  occurred before the birth time, incorrectly returning the NEXT day's
+  event instead — verified this exact failure mode via a smoke test
+  (searching from 09:00 UTC returned June 16's sunrise instead of June
+  15's), then fixed by always anchoring the search to UTC midnight of
+  the target calendar day.
+- **`EphemerisService.calculateAscendant(datetime, lat, lng, ayanamsa)`**:
+  new method exposing just the Ascendant longitude for an arbitrary
+  instant (needed for Mandi, which requires the Ascendant at a
+  specific sub-day instant, not birth time).
+- **`BirthChartService.sunTimes`**: new signal `{ sunrise, sunset,
+nextSunrise }` (today's + tomorrow's sunrise, needed for night-hora/
+  night-portion boundary math), computed alongside the D1/D9/Bhava
+  Chalit charts whenever birth details are set or reloaded from
+  storage. Not persisted to `StoreService` — cheap to recompute,
+  keeps the storage schema simple.
+- **Hora**: 24-hora cycle (12 day + 12 night, sunrise/sunset/next-
+  sunrise-bounded), ruling planet = Chaldean order (Saturn, Jupiter,
+  Mars, Sun, Venus, Mercury, Moon) starting from the weekday's own
+  lord and advancing uninterrupted through all 24 horas. Verified the
+  self-consistency the research flagged (Sunday hora24=Mercury →
+  immediately followed by Moon = Monday's hora1, matching the
+  classical weekday-lord sequence) and confirmed against the live
+  chart (Friday, hora 9 → Mercury, matching a hand-computed check).
+- **Mandi/Gulika**: per BPHS ch.3 ~sloka 66-70 (confirmed Mandi and
+  Gulika are the same point) — day/night each split into 8 equal
+  portions in plain weekday-lord order (not Chaldean), Saturn's
+  portion index per weekday sourced directly from the primary text
+  (`MANDI_DAY_PORTION`/`MANDI_NIGHT_PORTION` in `panchang.data.ts`),
+  Mandi's longitude = the Ascendant computed at the START of that
+  portion (BPHS is explicit: start, not midpoint). Implemented as an
+  `effect()` in `PanchangComponent` (not a plain `computed()`, since
+  it needs an async `EphemerisService.calculateAscendant` call) writing
+  into a private signal — mirrors the async-signal pattern already
+  used for chart loading in `BirthChartService`, since `resource()`
+  can't be seeded synchronously from cache.
+- All rendered correctly in-browser with a real submitted birth chart,
+  no console errors; `tsc`/`prettier`/`ng build` all clean.
+
 ### Still not started
 
-- **Mandi** — blocked on the `EphemerisService` sunrise/sunset addition
-  above.
-- **Thithi, Nakshatra, Yoga, Karnam, Vedic Day Lord, Hora, Yogi, Ava
-  Yogi** cards — still hardcoded placeholders; no formulas supplied yet
-  for these (standard Panchang elements, likely simpler than the ones
-  just implemented, but not yet requested).
+- Any per-item interpretive/remedy note content — explicitly deferred
+  until the user supplies real data points (static text was removed
+  rather than left as placeholder-quality content).

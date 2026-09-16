@@ -4,41 +4,54 @@
 </header>
 
 <div class="panchang-grid">
-  <app-card>
-    <span class="label" title>Thithi</span>
-    <p class="value">Shukla Dashami</p>
-    <p class="detail">100% elapsed</p>
-  </app-card>
+  @if (thithi(); as t) {
+    <app-card>
+      <span class="label" title>Thithi</span>
+      <p class="value">{{ t.paksha }} {{ t.tithiName }}</p>
+      <p class="detail">{{ t.percentElapsed | number: '1.0-0' }}% elapsed</p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Nakshatra</span>
-    <p class="value">Shatabhisha (pada 2)</p>
-    <p class="detail">Lord: Rahu</p>
-  </app-card>
+  @if (nakshatraResult(); as n) {
+    <app-card>
+      <span class="label" title>Nakshatra</span>
+      <p class="value">{{ n.nakshatraName }} (pada {{ n.pada }})</p>
+      <p class="detail">Lord: {{ n.lord }}</p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Yoga</span>
-    <p class="value">Vriddhi</p>
-    <p class="detail">80% elapsed</p>
-  </app-card>
+  @if (yoga(); as y) {
+    <app-card>
+      <span class="label" title>Yoga</span>
+      <p class="value">{{ y.yogaName }}</p>
+      <p class="detail">{{ y.percentElapsed | number: '1.0-0' }}% elapsed</p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Karnam</span>
-    <p class="value">Garaja</p>
-    <p class="detail">100% elapsed</p>
-  </app-card>
+  @if (karnam(); as k) {
+    <app-card>
+      <span class="label" title>Karnam</span>
+      <p class="value">{{ k.karnamName }}</p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Vedic Day Lord</span>
-    <p class="value">Monday</p>
-    <p class="detail">Lord: Moon</p>
-  </app-card>
+  @if (vedicDayLord(); as v) {
+    <app-card>
+      <span class="label" title>Vedic Day Lord</span>
+      <p class="value">{{ v.weekdayName }}</p>
+      <p class="detail">Lord: {{ v.lord }}</p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Hora</span>
-    <p class="value">Jupiter (10/24)</p>
-    <p class="detail">Day hora · rise 05:59 / set 17:33</p>
-  </app-card>
+  @if (hora(); as h) {
+    <app-card>
+      <span class="label" title>Hora</span>
+      <p class="value">{{ h.lord }} ({{ h.horaIndex }}/24)</p>
+      <p class="detail">
+        {{ h.isDayHora ? 'Day' : 'Night' }} hora · rise {{ h.sunriseLocal }} / set {{ h.sunsetLocal }}
+      </p>
+    </app-card>
+  }
 
   @if (tithiSphuta(); as sphuta) {
     <app-card>
@@ -47,9 +60,6 @@
         {{ sphuta.rasiName }} · {{ sphuta.nakshatraName }} (pada {{ sphuta.pada }}) · H{{ sphuta.house }}
       </p>
       <p class="detail">{{ sphuta.degreeInRasi }} {{ sphuta.rasiName }} · Moon – Sun</p>
-      @if (sphuta.note) {
-        <p class="note">{{ sphuta.note }}</p>
-      }
     </app-card>
   }
 
@@ -61,10 +71,6 @@
       </p>
       <p class="detail">Unresolved desire (7th): {{ beeja.unresolvedDesireRasiName }}</p>
       <p class="detail">Fulfillment path: {{ beeja.fulfillmentPathRasiName }}</p>
-      <p class="note">
-        Tithi Beeja shows unfulfilled desires (vasanas) from past life and how the person tries to fulfill them now —
-        deep psychology and karmic motivation.
-      </p>
     </app-card>
   }
 
@@ -78,26 +84,26 @@
         }
       </p>
       <p class="detail">5 × (Moon – Sun)</p>
-      @if (santan.note) {
-        <p class="note">{{ santan.note }}</p>
-      }
     </app-card>
   }
 
-  <app-card>
-    <span class="label" title>Yogi</span>
-    <p class="value">Jyeshtha (pada 4)</p>
-    <p class="detail">Planet: Mercury · 27°17' Sco</p>
-    <p class="detail">in star: None</p>
-  </app-card>
+  @if (yogi(); as y) {
+    <app-card>
+      <span class="label" title>Yogi</span>
+      <p class="value">{{ y.nakshatraName }} (pada {{ y.pada }})</p>
+      <p class="detail">Planet: {{ y.lord }} · {{ y.degreeInRasi }} {{ y.rasiName }}</p>
+      <p class="detail">in star: {{ y.planetsInStar.length ? y.planetsInStar.join(', ') : 'None' }}</p>
+    </app-card>
+  }
 
-  <app-card class="error">
-    <span class="label" title>Ava Yogi</span>
-    <p class="value">Mrigashira (pada 4)</p>
-    <p class="detail">Planet: Mars · 3°57' Gem</p>
-    <p class="detail">in star: None</p>
-    <p class="note">Remedy / Discipline: Keep the body physically fit</p>
-  </app-card>
+  @if (avaYogi(); as a) {
+    <app-card class="error">
+      <span class="label" title>Ava Yogi</span>
+      <p class="value">{{ a.nakshatraName }} (pada {{ a.pada }})</p>
+      <p class="detail">Planet: {{ a.lord }} · {{ a.degreeInRasi }} {{ a.rasiName }}</p>
+      <p class="detail">in star: {{ a.planetsInStar.length ? a.planetsInStar.join(', ') : 'None' }}</p>
+    </app-card>
+  }
 
   @if (mudakku(); as mudakkuResult) {
     <app-card>
@@ -124,10 +130,11 @@
     </app-card>
   }
 
-  <app-card>
-    <span class="label" title>Mandi</span>
-    <p class="value">Shatabhisha (pada 3) · Aquarius (Aq) · in house 12</p>
-    <p class="detail">16°09' Aqu · Rahu</p>
-    <p class="detail">Registered unused secondary business or income structure</p>
-  </app-card>
+  @if (mandi(); as m) {
+    <app-card>
+      <span class="label" title>Mandi</span>
+      <p class="value">{{ m.nakshatraName }} (pada {{ m.pada }}) · {{ m.rasiName }} · in house {{ m.house }}</p>
+      <p class="detail">{{ m.degreeInRasi }} {{ m.rasiName }}</p>
+    </app-card>
+  }
 </div>

@@ -18,6 +18,8 @@ const GRAHA_PLANET_IDS: Record<Exclude<Graha, 'Ketu'>, number> = {
 
 const SEFLG_SWIEPH = 2;
 const SEFLG_SIDEREAL = 65536;
+const SE_CALC_RISE = 1;
+const SE_CALC_SET = 2;
 
 const SIDM_BY_AYANAMSA: Record<Ayanamsa, number> = {
   lahiri: 1,
@@ -81,6 +83,43 @@ export class EphemerisService {
 
     const grahas = this.#toGrahaPositions(grahaLongitudes, toBhavaIndex);
     return { ascendantRasi: toBhavaIndex(houses.ascmc[0]), ascendantLongitude: houses.ascmc[0], grahas };
+  }
+
+  async calculateAscendant(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<number> {
+    const swe = await this.#getSwe();
+    swe.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
+    const jd = this.#toJulianDay(swe, datetime);
+    const houses = swe.houses_ex(jd, SEFLG_SIDEREAL, latitude, longitude, 'W');
+
+    return houses.ascmc[0];
+  }
+
+  async calculateSunriseSunset(
+    datetime: Date,
+    latitude: number,
+    longitude: number,
+  ): Promise<{ sunrise: Date; sunset: Date }> {
+    const swe = await this.#getSwe();
+    // Search from UTC midnight of this calendar day, not the given instant —
+    // rise_trans searches forward, so searching from the birth time itself
+    // would miss that day's sunrise/sunset if the birth occurred after them.
+    const midnightUtc = new Date(Date.UTC(datetime.getUTCFullYear(), datetime.getUTCMonth(), datetime.getUTCDate()));
+    const jd = this.#toJulianDay(swe, midnightUtc);
+    const geopos = [longitude, latitude, 0];
+
+    const riseJd = swe.rise_trans(jd, swe.SE_SUN, '', SEFLG_SWIEPH, SE_CALC_RISE, geopos, 0, 0);
+    const setJd = swe.rise_trans(jd, swe.SE_SUN, '', SEFLG_SWIEPH, SE_CALC_SET, geopos, 0, 0);
+
+    if (!riseJd || !setJd) {
+      throw new Error('Unable to calculate sunrise/sunset for the given date and location');
+    }
+
+    return { sunrise: this.#jdToUtcDate(swe, riseJd[0]), sunset: this.#jdToUtcDate(swe, setJd[0]) };
+  }
+
+  #jdToUtcDate(swe: SwissEph, jd: number): Date {
+    const utc = swe.jdut1_to_utc(jd, swe.SE_GREG_CAL);
+    return new Date(Date.UTC(utc.year, utc.month - 1, utc.day, utc.hour, utc.minute, utc.second));
   }
 
   #houseForLongitude(longitude: number, cusps: Float64Array): number {

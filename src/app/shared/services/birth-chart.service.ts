@@ -12,6 +12,12 @@ type StoredCharts = {
   bhavaChalitChart: D1Chart;
 };
 
+export type SunTimes = {
+  sunrise: Date;
+  sunset: Date;
+  nextSunrise: Date;
+};
+
 @Injectable({ providedIn: 'root' })
 export class BirthChartService {
   private ephemeris = inject(EphemerisService);
@@ -21,11 +27,13 @@ export class BirthChartService {
   #d1Chart = signal<D1Chart | null>(null);
   #d9Chart = signal<D1Chart | null>(null);
   #bhavaChalitChart = signal<D1Chart | null>(null);
+  #sunTimes = signal<SunTimes | null>(null);
 
   birthDetails = this.#birthDetails.asReadonly();
   d1Chart = this.#d1Chart.asReadonly();
   d9Chart = this.#d9Chart.asReadonly();
   bhavaChalitChart = this.#bhavaChalitChart.asReadonly();
+  sunTimes = this.#sunTimes.asReadonly();
 
   constructor() {
     // Always warm up the ephemeris CDN module so it's ready if a recalculation
@@ -43,6 +51,7 @@ export class BirthChartService {
       this.#d1Chart.set(storedCharts.d1Chart);
       this.#d9Chart.set(storedCharts.d9Chart);
       this.#bhavaChalitChart.set(storedCharts.bhavaChalitChart);
+      this.#loadSunTimes(storedDetails);
     } else if (storedDetails) {
       this.setBirthDetails(storedDetails);
     }
@@ -69,6 +78,20 @@ export class BirthChartService {
       this.#d1Chart.set(d1Chart);
       this.#d9Chart.set(d9Chart);
       this.#bhavaChalitChart.set(bhavaChalitChart);
+    });
+
+    this.#loadSunTimes(details);
+  }
+
+  #loadSunTimes(details: BirthDetails): void {
+    const datetime = wallTimeToUtc(details.dob, details.tob, details.timezone);
+    const nextDay = new Date(datetime.getTime() + 24 * 60 * 60 * 1000);
+
+    Promise.all([
+      this.ephemeris.calculateSunriseSunset(datetime, details.lat, details.lng),
+      this.ephemeris.calculateSunriseSunset(nextDay, details.lat, details.lng),
+    ]).then(([today, tomorrow]) => {
+      this.#sunTimes.set({ sunrise: today.sunrise, sunset: today.sunset, nextSunrise: tomorrow.sunrise });
     });
   }
 }

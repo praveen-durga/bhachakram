@@ -41,6 +41,11 @@ export const VAINASHIKA_OFFSET = 87;
 export const MUDAKKU_RASI_SUM = 4;
 export const MUDAKKU_NAKSHATRA_SUM = 10;
 
+// Yogi Point = normalize360(Sun + Moon + 93°20'); Avayogi = Yogi Point + 93°20'
+// again (186°40' total). Verified to floating-point precision against a known
+// worked example (27°17' Sco Yogi → 3°57' Gem Avayogi).
+export const YOGI_OFFSET_DEG = 93 + 20 / 60;
+
 // Standard Vimshottari nakshatra-lord cycle, repeating every 9 nakshatras
 // (index 0 = Ashwini). Verified against 3 reference examples (Shatabhisha →
 // Rahu, Purva Ashadha → Venus, Moola → Ketu) — all matched exactly.
@@ -95,3 +100,57 @@ export const TITHI_SPHUTA_NOTES: Record<string, string> = {
   '2-5': 'Anxiety about destruction/loss; concerns regarding children, studies, or market.', // Gemini / Ardra
   '5-13': 'Profit-oriented creativity.', // Virgo / Chitra
 };
+
+// 27 Yogas, index 0 = Vishkambha, in the standard fixed order.
+export const YOGA_NAMES: string[] = [
+  'Vishkambha',
+  'Priti',
+  'Ayushman',
+  'Saubhagya',
+  'Shobhana',
+  'Atiganda',
+  'Sukarma',
+  'Dhriti',
+  'Shoola',
+  'Ganda',
+  'Vriddhi',
+  'Dhruva',
+  'Vyaghata',
+  'Harshana',
+  'Vajra',
+  'Siddhi',
+  'Vyatipata',
+  'Variyana',
+  'Parigha',
+  'Shiva',
+  'Siddha',
+  'Sadhya',
+  'Shubha',
+  'Shukla',
+  'Brahma',
+  'Indra',
+  'Vaidhriti',
+];
+
+// 11 Karnams: 4 "fixed" (each occurs once per lunar month, on specific tithis)
+// and 7 "movable" (repeat in a cycle across the remaining half-tithis).
+export const FIXED_KARNAM_NAMES: string[] = ['Shakuni', 'Chatushpada', 'Naga', 'Kimstughna'];
+export const MOVABLE_KARNAM_NAMES: string[] = ['Bava', 'Balava', 'Kaulava', 'Taitila', 'Gara', 'Vanija', 'Vishti'];
+
+// Weekday index 0 = Sunday, matching JS Date#getDay().
+export const WEEKDAY_NAMES: string[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+export const WEEKDAY_LORD: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+
+// Chaldean order (slowest to fastest orbit), used for Hora lords. The first
+// hora of each weekday is that day's own WEEKDAY_LORD; the cycle then
+// continues uninterrupted through all 24 day+night horas per BPHS.
+export const CHALDEAN_ORDER: Graha[] = ['Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon'];
+
+// Mandi/Gulika 8-part division: day (sunrise-sunset) and night (sunset-next
+// sunrise) each split into 8 equal portions, cycling through the plain
+// weekday-lord order (not Chaldean) starting from a per-weekday, per day/night
+// offset; the 8th portion of each half is unlorded (Rahu). Values below are
+// each weekday's Saturn-ruled portion index (1-8), per BPHS ch.3 ~sloka 66-70.
+export const MANDI_DAY_PORTION: number[] = [7, 6, 5, 4, 3, 2, 1]; // index 0 = Sunday
+export const MANDI_NIGHT_PORTION: number[] = [3, 2, 1, 7, 6, 5, 4]; // index 0 = Sunday
