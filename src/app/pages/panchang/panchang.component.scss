@@ -1,5 +1,50 @@
 @reference 'tailwindcss';
 
 :host {
-  @apply block p-6;
+  @apply block py-6;
+
+  .panchang-header {
+    @apply flex flex-col gap-1 mb-4 md:flex-row md:items-baseline md:justify-between md:gap-4;
+
+    h1 {
+      @apply text-xl font-semibold;
+      color: var(--color-base-content);
+    }
+
+    .subtitle {
+      font-size: var(--font-size-sm);
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    }
+  }
+
+  .panchang-grid {
+    @apply grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5;
+
+    app-card {
+      .label {
+        @apply block text-xs font-semibold tracking-wide uppercase mb-1;
+        color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+      }
+
+      .value {
+        @apply font-semibold;
+      }
+
+      .detail {
+        font-size: var(--font-size-sm);
+        color: color-mix(in oklch, var(--color-base-content) 70%, transparent);
+      }
+
+      .favourable {
+        font-size: var(--font-size-xs);
+        color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+      }
+
+      .note {
+        @apply font-semibold;
+        font-size: var(--font-size-sm);
+        color: var(--color-error);
+      }
+    }
+  }
 }

@@ -2,6 +2,10 @@
 
 :host {
   @apply contents;
+
+  &.error .card {
+    background: color-mix(in oklch, var(--color-error) 8%, var(--color-base-100));
+  }
 }
 
 .card {
