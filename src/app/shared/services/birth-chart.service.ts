@@ -1,7 +1,7 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { BirthDetails } from '../models';
 import { wallTimeToUtc } from '../utils';
-import { D1Chart } from './ephemeris.model';
+import { D1Chart, SunTimes } from './ephemeris.model';
 import { EphemerisService } from './ephemeris.service';
 import { STORE_KEYS } from './store.keys';
 import { StoreService } from './store.service';
@@ -10,12 +10,6 @@ type StoredCharts = {
   d1Chart: D1Chart;
   d9Chart: D1Chart;
   bhavaChalitChart: D1Chart;
-};
-
-export type SunTimes = {
-  sunrise: Date;
-  sunset: Date;
-  nextSunrise: Date;
 };
 
 @Injectable({ providedIn: 'root' })

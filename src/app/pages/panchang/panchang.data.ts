@@ -156,13 +156,6 @@ export const MOVABLE_KARNAM_NAMES: string[] = ['Bava', 'Balava', 'Kaulava', 'Tai
 // Weekday index 0 = Sunday, matching JS Date#getDay().
 export const WEEKDAY_NAMES: string[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-export const WEEKDAY_LORD: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
-
-// Chaldean order (slowest to fastest orbit), used for Hora lords. The first
-// hora of each weekday is that day's own WEEKDAY_LORD; the cycle then
-// continues uninterrupted through all 24 day+night horas per BPHS.
-export const CHALDEAN_ORDER: Graha[] = ['Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon'];
-
 // Mandi/Gulika's POSITION (not the "Gulika Kalam" muhurta timing-window
 // feature, a different simpler concept using an 8-part division) uses a
 // 15-muhurta division of the day: Mandi's instant = sunrise + (dayLength/15)

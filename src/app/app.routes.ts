@@ -20,6 +20,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/panchang/panchang.component').then((m) => m.PanchangComponent),
   },
   {
+    path: 'shadbala',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () => import('./pages/shadbala/shadbala.component').then((m) => m.ShadbalaComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),

@@ -1,4 +1,4 @@
-import { Graha } from '../services';
+import { Graha, GrahaPosition, HoraResult, SunTimes } from '../services';
 
 export const NAKSHATRA_NAMES = [
   'Ashwini',
@@ -87,4 +87,38 @@ export function calculateD9Rasi(longitude: number): number {
   const startRasi = modality === 0 ? rasi : modality === 1 ? (rasi + 8) % 12 : (rasi + 4) % 12;
 
   return (startRasi + navamsaIndex) % 12;
+}
+
+export function findGraha(grahas: GrahaPosition[], graha: Graha): GrahaPosition {
+  const found = grahas.find((g) => g.graha === graha);
+  if (!found) {
+    throw new Error(`Missing graha position for ${graha}`);
+  }
+  return found;
+}
+
+// Weekday index 0 = Sunday, matching JS Date#getDay().
+export const WEEKDAY_LORD: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+
+// Chaldean order (slowest to fastest orbit), used for Hora lords. The first
+// hora of each weekday is that day's own WEEKDAY_LORD; the cycle then
+// continues uninterrupted through all 24 day+night horas per BPHS.
+export const CHALDEAN_ORDER: Graha[] = ['Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon'];
+
+export function calculateHora(birthTime: Date, sunTimes: SunTimes, weekday: number): HoraResult {
+  const { sunrise, sunset, nextSunrise } = sunTimes;
+  const isDayHora = birthTime >= sunrise && birthTime < sunset;
+
+  const segmentStart = isDayHora ? sunrise : sunset;
+  const segmentEnd = isDayHora ? sunset : nextSunrise;
+  const horaLength = (segmentEnd.getTime() - segmentStart.getTime()) / 12;
+  const indexWithinSegment = Math.min(11, Math.floor((birthTime.getTime() - segmentStart.getTime()) / horaLength));
+  const horaIndex = (isDayHora ? 0 : 12) + indexWithinSegment + 1;
+
+  return { horaIndex, isDayHora };
+}
+
+export function getHoraLord(weekday: number, horaIndex: number): Graha {
+  const weekdayLordIndex = CHALDEAN_ORDER.indexOf(WEEKDAY_LORD[weekday]);
+  return CHALDEAN_ORDER[(weekdayLordIndex + horaIndex - 1) % 7];
 }

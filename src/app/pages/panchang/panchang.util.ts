@@ -1,8 +1,6 @@
-import { SunTimes } from '../../shared/services/birth-chart.service';
-import { D1Chart, Graha, GrahaPosition } from '../../shared/services';
-import { calculateNakshatra, calculatePada, getRasiDistances } from '../../shared/utils';
+import { D1Chart, Graha, SunTimes } from '../../shared/services';
+import { calculateNakshatra, calculatePada, findGraha, getRasiDistances, WEEKDAY_LORD } from '../../shared/utils';
 import {
-  CHALDEAN_ORDER,
   FIXED_KARNAM_NAMES,
   MANDI_DAY_MUHURTA_COUNT,
   MANDI_NIGHT_MUHURTA_COUNT,
@@ -17,11 +15,9 @@ import {
   TITHI_NAMES,
   TITHI_SPHUTA_NOTES,
   VAINASHIKA_OFFSET,
-  WEEKDAY_LORD,
   YOGI_OFFSET_DEG,
 } from './panchang.data';
 import {
-  HoraResult,
   Karnam,
   MudakkuResult,
   NakshatraResult,
@@ -37,14 +33,6 @@ import {
 
 function normalize360(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
-}
-
-function findGraha(grahas: GrahaPosition[], graha: string): GrahaPosition {
-  const found = grahas.find((g) => g.graha === graha);
-  if (!found) {
-    throw new Error(`Missing graha position for ${graha}`);
-  }
-  return found;
 }
 
 export function getNakshatraLord(nakshatra: number): Graha {
@@ -223,24 +211,6 @@ export function getPlanetsInNakshatra(d1Chart: D1Chart, nakshatra: number): Grah
   return d1Chart.grahas
     .filter((graha) => calculateNakshatra(graha.longitude) === nakshatra)
     .map((graha) => graha.graha);
-}
-
-export function calculateHora(birthTime: Date, sunTimes: SunTimes, weekday: number): HoraResult {
-  const { sunrise, sunset, nextSunrise } = sunTimes;
-  const isDayHora = birthTime >= sunrise && birthTime < sunset;
-
-  const segmentStart = isDayHora ? sunrise : sunset;
-  const segmentEnd = isDayHora ? sunset : nextSunrise;
-  const horaLength = (segmentEnd.getTime() - segmentStart.getTime()) / 12;
-  const indexWithinSegment = Math.min(11, Math.floor((birthTime.getTime() - segmentStart.getTime()) / horaLength));
-  const horaIndex = (isDayHora ? 0 : 12) + indexWithinSegment + 1;
-
-  return { horaIndex, isDayHora };
-}
-
-export function getHoraLord(weekday: number, horaIndex: number): Graha {
-  const weekdayLordIndex = CHALDEAN_ORDER.indexOf(WEEKDAY_LORD[weekday]);
-  return CHALDEAN_ORDER[(weekdayLordIndex + horaIndex - 1) % 7];
 }
 
 // Returns the instant at which the Ascendant must be computed to get Mandi's

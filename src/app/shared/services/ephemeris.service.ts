@@ -16,12 +16,15 @@ const GRAHA_PLANET_IDS: Record<Exclude<Graha, 'Ketu'>, number> = {
   Rahu: 11,
 };
 
-const SEFLG_SWIEPH = 2;
-const SEFLG_SIDEREAL = 65536;
-const SE_CALC_RISE = 1;
-const SE_CALC_SET = 2;
+const EPHEMERIS_FLAG_SWISS = 2;
+const EPHEMERIS_FLAG_SIDEREAL = 65536;
+const EPHEMERIS_FLAG_SPEED = 256;
+const EPHEMERIS_FLAG_EQUATORIAL = 2048;
+const RISE_TRANSIT_RISE = 1;
+const RISE_TRANSIT_SET = 2;
+const ECLIPTIC_OBLIQUITY_AND_NUTATION = -1;
 
-const SIDM_BY_AYANAMSA: Record<Ayanamsa, number> = {
+const SIDEREAL_MODE_BY_AYANAMSA: Record<Ayanamsa, number> = {
   lahiri: 1,
   raman: 3,
   kp: 5,
@@ -32,6 +35,13 @@ const SIDM_BY_AYANAMSA: Record<Ayanamsa, number> = {
 type RawPositions = {
   grahaLongitudes: Record<Graha, number>;
   ascendantLongitude: number;
+};
+
+export type GrahaEphemerisData = {
+  longitude: number;
+  longitudeSpeed: number;
+  declination: number;
+  eclipticLatitude: number;
 };
 
 @Injectable({ providedIn: 'root' })
@@ -74,24 +84,118 @@ export class EphemerisService {
     ayanamsa: Ayanamsa,
   ): Promise<D1Chart> {
     const ephemeris = await this.#getEphemeris();
-    ephemeris.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
-    const jd = this.#toJulianDay(ephemeris, datetime);
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+    const julianDay = this.#toJulianDay(ephemeris, datetime);
 
-    const grahaLongitudes = this.#calculateGrahaLongitudes(ephemeris, jd);
-    const houses = ephemeris.houses_ex(jd, SEFLG_SIDEREAL, latitude, longitude, 'S');
-    const toBhavaIndex = (lon: number) => this.#houseForLongitude(lon, houses.cusps) - 1;
+    const grahaLongitudes = this.#calculateGrahaLongitudes(ephemeris, julianDay);
+    const houses = ephemeris.houses_ex(julianDay, EPHEMERIS_FLAG_SIDEREAL, latitude, longitude, 'S');
+    const toBhavaIndex = (longitude: number) => this.#houseForLongitude(longitude, houses.cusps) - 1;
 
     const grahas = this.#toGrahaPositions(grahaLongitudes, toBhavaIndex);
-    return { ascendantRasi: toBhavaIndex(houses.ascmc[0]), ascendantLongitude: houses.ascmc[0], grahas };
+    return {
+      ascendantRasi: toBhavaIndex(houses.ascmc[0]),
+      ascendantLongitude: houses.ascmc[0],
+      grahas,
+      cusps: Array.from(houses.cusps).slice(1, 13),
+    };
   }
 
   async calculateAscendant(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<number> {
-    const swe = await this.#getEphemeris();
-    swe.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
-    const jd = this.#toJulianDay(swe, datetime);
-    const houses = swe.houses_ex(jd, SEFLG_SIDEREAL, latitude, longitude, 'W');
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+    const julianDay = this.#toJulianDay(ephemeris, datetime);
+    const houses = ephemeris.houses_ex(julianDay, EPHEMERIS_FLAG_SIDEREAL, latitude, longitude, 'W');
 
     return houses.ascmc[0];
+  }
+
+  // Raw per-graha data needed by Shadbala's Chesta/Ayana/Drig Bala sub-components:
+  // sidereal longitude + longitude speed (negative = retrograde), and tropical
+  // declination (ayanamsa-independent, so always computed non-sidereal).
+  async calculateGrahaEphemerisData(
+    datetime: Date,
+    ayanamsa: Ayanamsa,
+  ): Promise<{ grahas: Record<Graha, GrahaEphemerisData>; obliquity: number }> {
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+    const julianDay = this.#toJulianDay(ephemeris, datetime);
+
+    const grahas = {} as Record<Graha, GrahaEphemerisData>;
+    for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
+      const [longitude, eclipticLatitude, , longitudeSpeed] = ephemeris.calc_ut(
+        julianDay,
+        planetId,
+        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL | EPHEMERIS_FLAG_SPEED,
+      );
+      const [, declination] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_EQUATORIAL);
+      grahas[graha as Graha] = { longitude, longitudeSpeed, declination, eclipticLatitude };
+    }
+    grahas.Ketu = {
+      longitude: ephemeris.degnorm(grahas.Rahu.longitude + 180),
+      longitudeSpeed: grahas.Rahu.longitudeSpeed,
+      declination: -grahas.Rahu.declination,
+      eclipticLatitude: -grahas.Rahu.eclipticLatitude,
+    };
+
+    const [, obliquity] = ephemeris.calc_ut(julianDay, ECLIPTIC_OBLIQUITY_AND_NUTATION, 0);
+    return { grahas, obliquity };
+  }
+
+  // Finds the most recent instant before `datetime` at which the Sun's sidereal
+  // longitude crossed a multiple of `boundaryDeg` (30 for any sign/Maasa
+  // boundary, 360 for specifically Aries 0°/Varsha) — needed for Shadbala's
+  // Varsha/Maasa Bala (weekday of that crossing determines the year/month
+  // lord). No dedicated sankranti-finder API exists, so this builds an
+  // "unwrapped" cumulative longitude (never resets to 0 at 360°, since raw
+  // calc_ut longitude does) by stepping backward a day at a time — the Sun
+  // moves under 1.5°/day, so a backward step can only ever wrap once — then
+  // binary-searches the day the boundary was crossed using that unwrapped
+  // value, which a boundaryDeg of 360 (Aries-only) handles the same way as
+  // any other boundary.
+  async findMostRecentSankranti(datetime: Date, ayanamsa: Ayanamsa, boundaryDeg: number): Promise<Date> {
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+
+    const rawSunLongitude = (julianDay: number) =>
+      ephemeris.calc_ut(julianDay, 0, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL)[0];
+
+    let laterJulianDay = this.#toJulianDay(ephemeris, datetime);
+    let unwrappedLongitude = rawSunLongitude(laterJulianDay);
+    let laterCount = Math.floor(unwrappedLongitude / boundaryDeg);
+
+    let earlierJulianDay = laterJulianDay - 1;
+    let earlierRawLongitude = rawSunLongitude(earlierJulianDay);
+    // Stepping 1 day BACKWARD, longitude normally DECREASES; if it instead
+    // looks larger, the true earlier value wrapped past 360 going backward.
+    unwrappedLongitude = earlierRawLongitude > unwrappedLongitude ? earlierRawLongitude - 360 : earlierRawLongitude;
+    let earlierCount = Math.floor(unwrappedLongitude / boundaryDeg);
+
+    while (earlierCount === laterCount) {
+      laterJulianDay = earlierJulianDay;
+      laterCount = earlierCount;
+      earlierJulianDay -= 1;
+      earlierRawLongitude = rawSunLongitude(earlierJulianDay);
+      unwrappedLongitude = earlierRawLongitude > unwrappedLongitude ? unwrappedLongitude - 360 : earlierRawLongitude;
+      earlierCount = Math.floor(unwrappedLongitude / boundaryDeg);
+    }
+
+    // The boundary was crossed between earlierJulianDay and laterJulianDay.
+    // Binary-search using plain raw longitude compared against the known
+    // target — since this span is at most 1 day, no further wraparound
+    // bookkeeping is needed.
+    const targetLongitude = laterCount * boundaryDeg;
+    for (let i = 0; i < 40; i++) {
+      const midJulianDay = (earlierJulianDay + laterJulianDay) / 2;
+      const midRawLongitude = rawSunLongitude(midJulianDay);
+      const hasReachedTarget = (midRawLongitude - targetLongitude + 360) % 360 < 180;
+      if (hasReachedTarget) {
+        laterJulianDay = midJulianDay;
+      } else {
+        earlierJulianDay = midJulianDay;
+      }
+    }
+
+    return this.#julianDayToUtcDate(ephemeris, laterJulianDay);
   }
 
   async calculateSunriseSunset(
@@ -115,13 +219,22 @@ export class EphemerisService {
       julianDay,
       ephemeris.SE_SUN,
       '',
-      SEFLG_SWIEPH,
-      SE_CALC_RISE,
+      EPHEMERIS_FLAG_SWISS,
+      RISE_TRANSIT_RISE,
       geopos,
       0,
       0,
     );
-    const setJulianDay = ephemeris.rise_trans(julianDay, ephemeris.SE_SUN, '', SEFLG_SWIEPH, SE_CALC_SET, geopos, 0, 0);
+    const setJulianDay = ephemeris.rise_trans(
+      julianDay,
+      ephemeris.SE_SUN,
+      '',
+      EPHEMERIS_FLAG_SWISS,
+      RISE_TRANSIT_SET,
+      geopos,
+      0,
+      0,
+    );
 
     if (!riseJulianDay || !setJulianDay) {
       throw new Error('Unable to calculate sunrise/sunset for the given date and location');
@@ -174,28 +287,28 @@ export class EphemerisService {
     longitude: number,
     ayanamsa: Ayanamsa,
   ): Promise<RawPositions> {
-    const swe = await this.#getEphemeris();
-    swe.set_sid_mode(SIDM_BY_AYANAMSA[ayanamsa], 0, 0);
-    const jd = this.#toJulianDay(swe, datetime);
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+    const julianDay = this.#toJulianDay(ephemeris, datetime);
 
-    const grahaLongitudes = this.#calculateGrahaLongitudes(swe, jd);
-    const houses = swe.houses_ex(jd, SEFLG_SIDEREAL, latitude, longitude, 'W');
+    const grahaLongitudes = this.#calculateGrahaLongitudes(ephemeris, julianDay);
+    const houses = ephemeris.houses_ex(julianDay, EPHEMERIS_FLAG_SIDEREAL, latitude, longitude, 'W');
 
     return { grahaLongitudes, ascendantLongitude: houses.ascmc[0] };
   }
 
-  #calculateGrahaLongitudes(swe: SwissEphemeris, jd: number): Record<Graha, number> {
+  #calculateGrahaLongitudes(ephemeris: SwissEphemeris, julianDay: number): Record<Graha, number> {
     const grahaLongitudes = {} as Record<Graha, number>;
     for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
-      const [grahaLongitude] = swe.calc_ut(jd, planetId, SEFLG_SWIEPH | SEFLG_SIDEREAL);
+      const [grahaLongitude] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL);
       grahaLongitudes[graha as Graha] = grahaLongitude;
     }
-    grahaLongitudes.Ketu = swe.degnorm(grahaLongitudes.Rahu + 180);
+    grahaLongitudes.Ketu = ephemeris.degnorm(grahaLongitudes.Rahu + 180);
     return grahaLongitudes;
   }
 
-  #toJulianDay(swe: SwissEphemeris, datetime: Date): number {
-    return swe.julday(
+  #toJulianDay(ephemeris: SwissEphemeris, datetime: Date): number {
+    return ephemeris.julday(
       datetime.getUTCFullYear(),
       datetime.getUTCMonth() + 1,
       datetime.getUTCDate(),
