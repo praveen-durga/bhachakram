@@ -41,9 +41,12 @@ export const VAINASHIKA_OFFSET = 87;
 export const MUDAKKU_RASI_SUM = 4;
 export const MUDAKKU_NAKSHATRA_SUM = 10;
 
-// Yogi Point = normalize360(Sun + Moon + 93°20'); Avayogi = Yogi Point + 93°20'
-// again (186°40' total). Verified to floating-point precision against a known
-// worked example (27°17' Sco Yogi → 3°57' Gem Avayogi).
+// Yogi Point = normalize360(Sun + Moon + 93°20'); Avayogi = normalize360(Sun +
+// Moon + 3 * 93°20', i.e. 280°) — NOT Yogi Point + 93°20' again (that earlier
+// assumption was wrong; re-verified against a real reported chart where the
+// app's own placeholder values (27°17' Sco Yogi, 3°57' Gem Avayogi) turned out
+// to be that exact chart's expected output, and only the x3 multiplier
+// reproduces the Avayogi side).
 export const YOGI_OFFSET_DEG = 93 + 20 / 60;
 
 // Standard Vimshottari nakshatra-lord cycle, repeating every 9 nakshatras
@@ -135,7 +138,7 @@ export const YOGA_NAMES: string[] = [
 // 11 Karnams: 4 "fixed" (each occurs once per lunar month, on specific tithis)
 // and 7 "movable" (repeat in a cycle across the remaining half-tithis).
 export const FIXED_KARNAM_NAMES: string[] = ['Shakuni', 'Chatushpada', 'Naga', 'Kimstughna'];
-export const MOVABLE_KARNAM_NAMES: string[] = ['Bava', 'Balava', 'Kaulava', 'Taitila', 'Gara', 'Vanija', 'Vishti'];
+export const MOVABLE_KARNAM_NAMES: string[] = ['Bava', 'Balava', 'Kaulava', 'Taitila', 'Garaja', 'Vanija', 'Vishti'];
 
 // Weekday index 0 = Sunday, matching JS Date#getDay().
 export const WEEKDAY_NAMES: string[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
@@ -147,10 +150,21 @@ export const WEEKDAY_LORD: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter
 // continues uninterrupted through all 24 day+night horas per BPHS.
 export const CHALDEAN_ORDER: Graha[] = ['Saturn', 'Jupiter', 'Mars', 'Sun', 'Venus', 'Mercury', 'Moon'];
 
-// Mandi/Gulika 8-part division: day (sunrise-sunset) and night (sunset-next
-// sunrise) each split into 8 equal portions, cycling through the plain
-// weekday-lord order (not Chaldean) starting from a per-weekday, per day/night
-// offset; the 8th portion of each half is unlorded (Rahu). Values below are
-// each weekday's Saturn-ruled portion index (1-8), per BPHS ch.3 ~sloka 66-70.
-export const MANDI_DAY_PORTION: number[] = [7, 6, 5, 4, 3, 2, 1]; // index 0 = Sunday
-export const MANDI_NIGHT_PORTION: number[] = [3, 2, 1, 7, 6, 5, 4]; // index 0 = Sunday
+// Mandi/Gulika's POSITION (not the "Gulika Kalam" muhurta timing-window
+// feature, a different simpler concept using an 8-part division) uses a
+// 15-muhurta division of the day: Mandi's instant = sunrise + (dayLength/15)
+// * muhurtaCount(weekday), with the classic descending-odd-number sequence
+// 13-11-9-7-5-3-1 for Sun-Sat. Verified to sub-second precision against a
+// real reference chart's reported Mandi position (an earlier 8-part-portion
+// implementation was off by up to a full rasi — do not reintroduce it).
+export const MANDI_DAY_MUHURTA_COUNT: number[] = [13, 11, 9, 7, 5, 3, 1]; // index 0 = Sunday
+
+// Night muhurta counts: same descending-odd sequence, rotated by 4 days
+// relative to day (night's 8-part cycle for a given weekday starts 5
+// planets forward from that weekday's own lord). Cross-checked against two
+// independent secondary sources that agree with each other and with the
+// day table's part→muhurta conversion — but UNLIKE the day table, this has
+// NOT been verified against a real night-birth reference chart. Treat as a
+// reasonable default, not a confirmed-correct formula, until tested — see
+// .claude/todo-plans/11-panchang-ui.md.
+export const MANDI_NIGHT_MUHURTA_COUNT: number[] = [5, 3, 1, 13, 11, 9, 7]; // index 0 = Sunday

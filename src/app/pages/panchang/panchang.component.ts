@@ -27,11 +27,10 @@ import {
   calculateYogiPoint,
   getHoraLord,
   getKarnamName,
-  getMandiPortionStart,
+  getMandiInstant,
   getNakshatraLord,
   getPakshaTithi,
   getPlanetsInNakshatra,
-  getPlanetsWithSameNakshatraLord,
   isSantanTithiDifficult,
 } from './panchang.util';
 import { MandiResult } from './panchang.model';
@@ -110,7 +109,7 @@ export class PanchangComponent {
       ...result,
       nakshatraName: NAKSHATRA_NAMES[result.nakshatra],
       lord,
-      planets: getPlanetsWithSameNakshatraLord(d1Chart, lord),
+      planets: getPlanetsInNakshatra(d1Chart, result.nakshatra),
     };
   });
 
@@ -127,7 +126,7 @@ export class PanchangComponent {
       ...result,
       nakshatraName: NAKSHATRA_NAMES[result.nakshatra],
       lord,
-      planets: getPlanetsWithSameNakshatraLord(d1Chart, lord),
+      planets: getPlanetsInNakshatra(d1Chart, result.nakshatra),
     };
   });
 
@@ -138,13 +137,12 @@ export class PanchangComponent {
     }
 
     const result = calculateMudakku(d1Chart);
-    const lord = getNakshatraLord(result.nakshatra);
     return {
       ...result,
       rasiName: RASI_NAMES[result.rasi],
       nakshatraName: NAKSHATRA_NAMES[result.nakshatra],
-      lord,
-      planets: getPlanetsWithSameNakshatraLord(d1Chart, lord),
+      lord: getNakshatraLord(result.nakshatra),
+      planets: getPlanetsInNakshatra(d1Chart, result.nakshatra),
     };
   });
 
@@ -274,8 +272,8 @@ export class PanchangComponent {
         return;
       }
 
-      const portionStart = getMandiPortionStart(birthTime, sunTimes, weekday);
-      this.ephemeris.calculateAscendant(portionStart, details.lat, details.lng, details.ayanamsa).then((longitude) => {
+      const mandiInstant = getMandiInstant(birthTime, sunTimes, weekday);
+      this.ephemeris.calculateAscendant(mandiInstant, details.lat, details.lng, details.ayanamsa).then((longitude) => {
         const rasi = Math.floor(longitude / 30);
         const nakshatra = calculateNakshatra(longitude);
         this.#mandi.set({

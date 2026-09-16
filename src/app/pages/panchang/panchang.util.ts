@@ -4,8 +4,8 @@ import { calculateNakshatra, calculatePada, getRasiDistances } from '../../share
 import {
   CHALDEAN_ORDER,
   FIXED_KARNAM_NAMES,
-  MANDI_DAY_PORTION,
-  MANDI_NIGHT_PORTION,
+  MANDI_DAY_MUHURTA_COUNT,
+  MANDI_NIGHT_MUHURTA_COUNT,
   MOVABLE_KARNAM_NAMES,
   MUDAKKU_NAKSHATRA_SUM,
   MUDAKKU_RASI_SUM,
@@ -49,12 +49,6 @@ function findGraha(grahas: GrahaPosition[], graha: string): GrahaPosition {
 
 export function getNakshatraLord(nakshatra: number): Graha {
   return NAKSHATRA_LORD_CYCLE[nakshatra % 9];
-}
-
-export function getPlanetsWithSameNakshatraLord(d1Chart: D1Chart, lord: Graha): Graha[] {
-  return d1Chart.grahas
-    .filter((graha) => getNakshatraLord(calculateNakshatra(graha.longitude)) === lord)
-    .map((graha) => graha.graha);
 }
 
 export function calculateBirthTithiNumber(sunLongitude: number, moonLongitude: number): number {
@@ -222,7 +216,7 @@ export function calculateAvayogiPoint(d1Chart: D1Chart): YogiPoint {
   const sun = findGraha(d1Chart.grahas, 'Sun');
   const moon = findGraha(d1Chart.grahas, 'Moon');
 
-  return toYogiPoint(normalize360(sun.longitude + moon.longitude + 2 * YOGI_OFFSET_DEG));
+  return toYogiPoint(normalize360(sun.longitude + moon.longitude + 3 * YOGI_OFFSET_DEG));
 }
 
 export function getPlanetsInNakshatra(d1Chart: D1Chart, nakshatra: number): Graha[] {
@@ -249,17 +243,32 @@ export function getHoraLord(weekday: number, horaIndex: number): Graha {
   return CHALDEAN_ORDER[(weekdayLordIndex + horaIndex - 1) % 7];
 }
 
-// Returns the instant (start of Saturn/Mandi's 1-of-8 portion for the given
-// weekday and day/night half) at which the Ascendant must be computed to get
-// Mandi's longitude, per BPHS ch.3 ~sloka 66-70.
-export function getMandiPortionStart(birthTime: Date, sunTimes: SunTimes, weekday: number): Date {
+// Returns the instant at which the Ascendant must be computed to get Mandi's
+// longitude: sunrise + (dayLength / 15) * muhurtaCount for a daytime birth,
+// or sunset + (nightLength / 15) * muhurtaCount for a nighttime birth (the
+// classical 15-muhurta division). Day formula/table verified to sub-second
+// precision against a real reference chart's reported Mandi position — an
+// earlier 8-part-day-portion implementation ("Gulika Kalam" — a different,
+// unrelated concept: an auspicious/inauspicious TIME WINDOW, not Mandi's
+// chart position) was off by up to a full rasi, do not reintroduce it.
+// The NIGHT table is only logically derived/cross-checked against secondary
+// sources, NOT yet verified against a real night-birth reference chart —
+// see .claude/todo-plans/11-panchang-ui.md for the open verification task.
+// Also unresolved: for a birth between midnight and that day's own sunrise,
+// the "weekday" for the preceding night technically belongs to the previous
+// calendar day's sunset — not handled here, `weekday` is always the birth's
+// own calendar-day weekday.
+export function getMandiInstant(birthTime: Date, sunTimes: SunTimes, weekday: number): Date {
   const { sunrise, sunset, nextSunrise } = sunTimes;
   const isDay = birthTime >= sunrise && birthTime < sunset;
 
-  const segmentStart = isDay ? sunrise : sunset;
-  const segmentEnd = isDay ? sunset : nextSunrise;
-  const portionLength = (segmentEnd.getTime() - segmentStart.getTime()) / 8;
-  const portion = isDay ? MANDI_DAY_PORTION[weekday] : MANDI_NIGHT_PORTION[weekday];
+  if (isDay) {
+    const dayLength = sunset.getTime() - sunrise.getTime();
+    const muhurtaLength = dayLength / 15;
+    return new Date(sunrise.getTime() + MANDI_DAY_MUHURTA_COUNT[weekday] * muhurtaLength);
+  }
 
-  return new Date(segmentStart.getTime() + (portion - 1) * portionLength);
+  const nightLength = nextSunrise.getTime() - sunset.getTime();
+  const muhurtaLength = nightLength / 15;
+  return new Date(sunset.getTime() + MANDI_NIGHT_MUHURTA_COUNT[weekday] * muhurtaLength);
 }

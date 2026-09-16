@@ -362,3 +362,77 @@ nextSunrise }` (today's + tomorrow's sunrise, needed for night-hora/
 - Any per-item interpretive/remedy note content — explicitly deferred
   until the user supplies real data points (static text was removed
   rather than left as placeholder-quality content).
+
+### Fourth wave — post-launch bug fixes (verified against a real chart)
+
+After the wave-3 wiring shipped, the user found several cards didn't
+match a trusted reference app for their own real birth chart (Kiran,
+1990-10-29, 15:15:35, Rajamahendravaram). It turned out this app's
+original placeholder text (from the very first "structure only" commit)
+was actually real, correct expected output for that exact chart all
+along — confirmed by back-computing Sun+Moon longitude from it — so it
+served as a precise verification oracle for the fixes below.
+
+- **Ava Yogi was wrong**: formula used Yogi Point + 93°20' again
+  (Sun+Moon+2×93°20'). Correct classical formula is Sun+Moon+3×93°20'
+  (280° total), independent of the Yogi point. Fixed in
+  `calculateAvayogiPoint` (`panchang.util.ts`); confirmed exact match
+  against the reference chart ("Mrigashira pada 4, Mars, 3°57' Gemini").
+- **Mudakku/Vainashika "Planets:" field overmatched**: was using
+  `getPlanetsWithSameNakshatraLord` (any planet sharing the same
+  nakshatra LORD — too broad). Replaced with `getPlanetsInNakshatra`
+  (exact same nakshatra) at all 3 call sites in `panchang.component.ts`;
+  deleted the now-unused wrong function. Confirmed: Mudakku "Planets:"
+  now shows only Moon (was wrongly showing Sun, Moon, Mercury, Venus).
+- **Karnam spelling**: `MOVABLE_KARNAM_NAMES` had "Gara" instead of this
+  app's established transliteration "Garaja" — fixed.
+- **Mandi/Gulika position formula was fundamentally wrong** (biggest
+  fix): the original implementation used BPHS's 8-part day/night
+  division ("Gulika Kalam") with a portion-start convention — off by a
+  full rasi against the reference chart. Multi-stage fix:
+  1. Confirmed the portion→planet assignment table itself was right;
+     found "start of portion" should be "end of portion" — got the
+     right rasi/house but pada was still off by ~3.5°.
+  2. User: _"if we display wrong details then the whole idea
+     collapse."_ — a standing principle: never ship an
+     approximately-right formula as if confirmed-correct.
+  3. Per the user's direction to research how standard/popular systems
+     calculate Mandi, used a 40-iteration binary search against the
+     reference chart to pin the exact target instant to sub-second
+     precision, then re-derived the formula from that empirical anchor.
+  4. Found the entire 8-part "Gulika Kalam" system is the WRONG system
+     for Mandi's chart position — that system is for a different
+     feature entirely (auspicious/inauspicious time windows). The
+     correct system is a **15-muhurta division**:
+     `sunrise + (dayLength/15) × muhurtaCount(weekday)`, muhurta counts
+     13-11-9-7-5-3-1 for Sun–Sat. Matched the empirical target to
+     within 0.56 seconds.
+  5. Replaced `MANDI_DAY_PORTION`/`MANDI_NIGHT_PORTION` and the
+     portion-based logic with `MANDI_DAY_MUHURTA_COUNT` and the new
+     `getMandiInstant` (`panchang.data.ts` / `panchang.util.ts`).
+     Verified: rasi/nakshatra/pada/house all now correct, longitude
+     within ~10 arcminutes of the reference (normal precision
+     variance) — previously wrong on all four.
+  6. Added a **night-birth** formula using the same 15-muhurta
+     structure but counting from sunset, with a night muhurta table
+     (`MANDI_NIGHT_MUHURTA_COUNT = [5, 3, 1, 13, 11, 9, 7]`) that is
+     only logically derived/cross-checked against secondary sources —
+     **not yet verified against a real night-birth reference chart**,
+     unlike the day table. Implemented per the user's explicit
+     instruction ("implement it but create a todo for the same"); see
+     the open TODO below.
+
+#### Open TODO — verify night-birth Mandi
+
+- [ ] Verify `MANDI_NIGHT_MUHURTA_COUNT` in `panchang.data.ts` against
+      a real night-birth reference chart (birth time between sunset and
+      next sunrise) from the same trusted reference app used for the
+      day-birth fixes above. If it doesn't match, re-derive using the
+      same binary-search-against-empirical-target technique used for
+      the day formula.
+- [ ] Separately, decide/resolve the unhandled edge case noted in
+      `getMandiInstant`'s comment: a birth between midnight and that
+      day's own sunrise technically falls in the _previous_ calendar
+      day's night, whose weekday differs from the birth's own calendar
+      date — currently `weekday` is always the birth's own calendar-day
+      weekday, which may be wrong for this window.
