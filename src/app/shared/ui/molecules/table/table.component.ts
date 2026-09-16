@@ -1,8 +1,10 @@
+import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TableColumn } from './table.model';
 
 @Component({
   selector: 'app-table',
+  imports: [NgTemplateOutlet],
   templateUrl: './table.component.html',
   styleUrl: './table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

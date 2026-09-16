@@ -29,7 +29,7 @@ main {
   }
 
   .chart-links {
-    @apply flex flex-wrap gap-3 justify-start mt-6 p-2 overflow-y-auto;
+    @apply flex flex-wrap gap-3 justify-start mt-6 -mx-2 p-2 overflow-y-auto;
 
     a {
       @apply inline-block px-3 py-1 rounded-lg no-underline;

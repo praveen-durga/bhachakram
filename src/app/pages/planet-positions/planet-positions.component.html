@@ -1,1 +1,67 @@
 <h1>Planet Positions</h1>
+
+<ng-template #karmicDoshaCell let-row>
+  @if (row.hasKarmicDosha) {
+    <div class="cell-with-action">
+      <span>Yes</span>
+      <app-button size="sm" variant="primary-outline" (click)="openDosha(row)">View</app-button>
+    </div>
+  } @else {
+    <span>No</span>
+  }
+</ng-template>
+
+<ng-template #karmicPlanetCell let-row>
+  <div class="cell-with-action">
+    <span>{{ row.karmicPlanet }}</span>
+    @if (row.karmicPlanetResults) {
+      <app-button size="sm" variant="primary-outline" (click)="openKarmicResults(row.karmicPlanetResults)">
+        View
+      </app-button>
+    }
+  </div>
+</ng-template>
+
+<app-table [columns]="columns()" [rows]="rows()" />
+
+<p class="navamsa-matrix-title">Navamsa Matrix</p>
+<div class="navamsa-matrix">
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        @for (colPlanet of matrixPlanets; track colPlanet; let colIndex = $index) {
+          <th [style.background]="hoveredCol() === colIndex ? '#fff3cd' : ''">{{ colPlanet }}</th>
+        }
+      </tr>
+    </thead>
+    <tbody>
+      @for (rowPlanet of matrixPlanets; track rowPlanet; let rowIndex = $index) {
+        <tr [style.background]="hoveredRow() === rowIndex ? '#fff3cd' : ''">
+          <td>{{ rowPlanet }}</td>
+          @for (colPlanet of matrixPlanets; track colPlanet; let colIndex = $index) {
+            <td
+              [style.background]="getCellBg(rowIndex, colIndex)"
+              (mouseenter)="setHover(rowIndex, colIndex)"
+              (mouseleave)="setHover(null, null)"
+            >
+              {{ matrixCell(rowPlanet, colPlanet) }}
+            </td>
+          }
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>
+
+<app-modal title="Karmic Dosha" [open]="!!selectedDosha()" (closed)="closeDosha()">
+  @if (selectedDosha(); as dosha) {
+    <p><strong>Rasi, Nakshatra:</strong> {{ dosha.rasi }}, {{ dosha.nakshatra }}</p>
+    <p><strong>Indications:</strong> {{ dosha.indications }}</p>
+    <p><strong>Remedies:</strong> {{ dosha.remedies }}</p>
+  }
+</app-modal>
+
+<app-modal title="Karmic Planet" [open]="!!selectedKarmicPlanetResults()" (closed)="closeKarmicResults()">
+  <div [innerHTML]="selectedKarmicPlanetResults()"></div>
+</app-modal>
