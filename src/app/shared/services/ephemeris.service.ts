@@ -98,12 +98,16 @@ export class EphemerisService {
     datetime: Date,
     latitude: number,
     longitude: number,
+    timeZone: string,
   ): Promise<{ sunrise: Date; sunset: Date }> {
     const ephemeris = await this.#getEphemeris();
-    // Search from UTC midnight of this calendar day, not the given instant —
-    // rise_trans searches forward, so searching from the birth time itself
-    // would miss that day's sunrise/sunset if the birth occurred after them.
-    const midnightUtc = new Date(Date.UTC(datetime.getUTCFullYear(), datetime.getUTCMonth(), datetime.getUTCDate()));
+    // Search from UTC midnight of this LOCAL calendar day (in the birth's own
+    // timezone), not the given instant's UTC calendar day — rise_trans searches
+    // forward, so searching from the birth time itself would miss that day's
+    // sunrise/sunset if the birth occurred after them, and searching from the
+    // UTC date can pick the wrong day entirely for births near local midnight
+    // in timezones far from UTC.
+    const midnightUtc = new Date(Date.UTC(...this.#localDateParts(datetime, timeZone)));
     const julianDay = this.#toJulianDay(ephemeris, midnightUtc);
     const geopos = [longitude, latitude, 0];
 
@@ -127,6 +131,17 @@ export class EphemerisService {
       sunrise: this.#julianDayToUtcDate(ephemeris, riseJulianDay[0]),
       sunset: this.#julianDayToUtcDate(ephemeris, setJulianDay[0]),
     };
+  }
+
+  #localDateParts(datetime: Date, timeZone: string): [number, number, number] {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone,
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    });
+    const parts = Object.fromEntries(formatter.formatToParts(datetime).map((part) => [part.type, part.value]));
+    return [Number(parts['year']), Number(parts['month']) - 1, Number(parts['day'])];
   }
 
   #julianDayToUtcDate(ephemeris: SwissEphemeris, julianDay: number): Date {

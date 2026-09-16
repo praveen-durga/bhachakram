@@ -88,8 +88,8 @@ export class BirthChartService {
     const nextDay = new Date(datetime.getTime() + 24 * 60 * 60 * 1000);
 
     Promise.all([
-      this.ephemeris.calculateSunriseSunset(datetime, details.lat, details.lng),
-      this.ephemeris.calculateSunriseSunset(nextDay, details.lat, details.lng),
+      this.ephemeris.calculateSunriseSunset(datetime, details.lat, details.lng, details.timezone),
+      this.ephemeris.calculateSunriseSunset(nextDay, details.lat, details.lng, details.timezone),
     ]).then(([today, tomorrow]) => {
       this.#sunTimes.set({ sunrise: today.sunrise, sunset: today.sunset, nextSunrise: tomorrow.sunrise });
     });

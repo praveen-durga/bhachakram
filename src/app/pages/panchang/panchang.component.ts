@@ -1,6 +1,6 @@
 import { DecimalPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
-import { BirthChartService, EphemerisService } from '../../shared/services';
+import { BirthChartService, EphemerisService, Graha } from '../../shared/services';
 import { CardComponent } from '../../shared/ui';
 import {
   calculateNakshatra,
@@ -35,7 +35,7 @@ import {
 } from './panchang.util';
 import { MandiResult } from './panchang.model';
 
-type MandiView = MandiResult & { nakshatraName: string; rasiName: string; degreeInRasi: string };
+type MandiView = MandiResult & { nakshatraName: string; rasiName: string; degreeInRasi: string; lord: Graha };
 
 @Component({
   selector: 'app-panchang',
@@ -285,6 +285,7 @@ export class PanchangComponent {
           nakshatraName: NAKSHATRA_NAMES[nakshatra],
           rasiName: RASI_NAMES[rasi],
           degreeInRasi: formatDegreeInRasi(longitude),
+          lord: getNakshatraLord(nakshatra),
         });
       });
     });
