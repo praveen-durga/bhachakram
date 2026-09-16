@@ -40,40 +40,49 @@
     <p class="detail">Day hora · rise 05:59 / set 17:33</p>
   </app-card>
 
-  <app-card>
-    <span class="label" title>Tithi Sphuta</span>
-    <p class="value">Cancer · Ashlesha (pada 4) · H5</p>
-    <p class="detail">29°59' Can · Moon – Sun</p>
-    <p class="note">
-      Tithi Sphuta shows the subconscious mind, emotional blueprint, and deep mental tendencies — what constantly runs
-      in the background.
-    </p>
-  </app-card>
+  @if (tithiSphuta(); as sphuta) {
+    <app-card>
+      <span class="label" title>Tithi Sphuta</span>
+      <p class="value">
+        {{ sphuta.rasiName }} · {{ sphuta.nakshatraName }} (pada {{ sphuta.pada }}) · H{{ sphuta.house }}
+      </p>
+      <p class="detail">{{ sphuta.degreeInRasi }} {{ sphuta.rasiName }} · Moon – Sun</p>
+      @if (sphuta.note) {
+        <p class="note">{{ sphuta.note }}</p>
+      }
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Tithi Beeja</span>
-    <p class="value">Graha Devata: Moon (Aquarius · H12)</p>
-    <p class="detail">Unresolved desire (7th): Leo · H6 — Service, competition, health struggles, and debts.</p>
-    <p class="detail">
-      Fulfillment path: Taurus · H3 · count 7 from Moon · 10th exception — Courage, effort, siblings, skills, and short
-      ventures.
-    </p>
-    <p class="note">
-      Tithi Beeja shows unfulfilled desires (vasanas) from past life and how the person tries to fulfill them now — deep
-      psychology and karmic motivation.
-    </p>
-  </app-card>
+  @if (tithiBeeja(); as beeja) {
+    <app-card>
+      <span class="label" title>Tithi Beeja</span>
+      <p class="value">
+        Graha Devata: {{ beeja.grahaDevata }} ({{ beeja.grahaDevataRasiName }} · H{{ beeja.grahaDevataHouse }})
+      </p>
+      <p class="detail">Unresolved desire (7th): {{ beeja.unresolvedDesireRasiName }}</p>
+      <p class="detail">Fulfillment path: {{ beeja.fulfillmentPathRasiName }}</p>
+      <p class="note">
+        Tithi Beeja shows unfulfilled desires (vasanas) from past life and how the person tries to fulfill them now —
+        deep psychology and karmic motivation.
+      </p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Santan Tithi</span>
-    <p class="value">Krishna Panchami · <span class="favourable">FAVOURABLE FOR CHILDREN</span></p>
-    <p class="detail">21.0 · 29°57' Sco · 5 × (Moon – Sun) · 100% elapsed</p>
-    <p class="detail">Strong emotional bond with children; affectionate offspring; prosperity through children.</p>
-    <p class="note">
-      Santan Tithi (5 × Moon – Sun) shows emotional bond with children, child-related happiness, and karmic experiences
-      through offspring.
-    </p>
-  </app-card>
+  @if (santanTithi(); as santan) {
+    <app-card>
+      <span class="label" title>Santan Tithi</span>
+      <p class="value">
+        {{ santan.paksha }} {{ santan.tithiName }}
+        @if (santan.isFavourable) {
+          · <span class="favourable">FAVOURABLE FOR CHILDREN</span>
+        }
+      </p>
+      <p class="detail">5 × (Moon – Sun)</p>
+      @if (santan.note) {
+        <p class="note">{{ santan.note }}</p>
+      }
+    </app-card>
+  }
 
   <app-card>
     <span class="label" title>Yogi</span>
@@ -90,22 +99,30 @@
     <p class="note">Remedy / Discipline: Keep the body physically fit</p>
   </app-card>
 
-  <app-card>
-    <span class="label" title>Mudakku</span>
-    <p class="value">Aquarius (Aq)</p>
-    <p class="detail">Nakshatra: Shatabhisha · Rahu</p>
-    <p class="detail">Planets: Moon</p>
-  </app-card>
+  @if (mudakku(); as mudakkuResult) {
+    <app-card>
+      <span class="label" title>Mudakku</span>
+      <p class="value">{{ mudakkuResult.rasiName }}</p>
+      <p class="detail">Nakshatra: {{ mudakkuResult.nakshatraName }} · {{ mudakkuResult.lord }}</p>
+      <p class="detail">Planets: {{ mudakkuResult.planets.length ? mudakkuResult.planets.join(', ') : 'none' }}</p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Vainashika (Lagna)</span>
-    <p class="value">Purva Ashadha (pada 3) · Venus</p>
-  </app-card>
+  @if (vainashikaLagna(); as vainashika) {
+    <app-card>
+      <span class="label" title>Vainashika (Lagna)</span>
+      <p class="value">{{ vainashika.nakshatraName }} (pada {{ vainashika.pada }}) · {{ vainashika.lord }}</p>
+      <p class="detail">Planets: {{ vainashika.planets.length ? vainashika.planets.join(', ') : 'none' }}</p>
+    </app-card>
+  }
 
-  <app-card>
-    <span class="label" title>Vainashika (Moon)</span>
-    <p class="value">Mula (pada 1) · Ketu</p>
-  </app-card>
+  @if (vainashikaMoon(); as vainashika) {
+    <app-card>
+      <span class="label" title>Vainashika (Moon)</span>
+      <p class="value">{{ vainashika.nakshatraName }} (pada {{ vainashika.pada }}) · {{ vainashika.lord }}</p>
+      <p class="detail">Planets: {{ vainashika.planets.length ? vainashika.planets.join(', ') : 'none' }}</p>
+    </app-card>
+  }
 
   <app-card>
     <span class="label" title>Mandi</span>
