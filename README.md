@@ -54,9 +54,10 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
-## Ephemeris Library Details:
+## References
 
-This project use wasm version of swiss ephemeris [as per this git repo](https://github.com/prolaxu/swisseph-wasm). It makes use of cdn version to load the library.
+External sources consulted for the ephemeris library and the astrological
+calculations implemented in this project are tracked in [REFERENCES.md](REFERENCES.md).
 
 ## Additional Resources
 
