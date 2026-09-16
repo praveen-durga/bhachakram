@@ -11,7 +11,7 @@ import {
   RASI_NAMES,
   wallTimeToUtc,
 } from '../../shared/utils';
-import { WEEKDAY_LORD, WEEKDAY_NAMES, YOGA_NAMES } from './panchang.data';
+import { AVA_YOGI_REMEDIES, MANDI_HOUSE_REMEDIES, WEEKDAY_LORD, WEEKDAY_NAMES, YOGA_NAMES } from './panchang.data';
 import {
   calculateAvayogiPoint,
   calculateHora,
@@ -35,7 +35,13 @@ import {
 } from './panchang.util';
 import { MandiResult } from './panchang.model';
 
-type MandiView = MandiResult & { nakshatraName: string; rasiName: string; degreeInRasi: string; lord: Graha };
+type MandiView = MandiResult & {
+  nakshatraName: string;
+  rasiName: string;
+  degreeInRasi: string;
+  lord: Graha;
+  note: string | null;
+};
 
 @Component({
   selector: 'app-panchang',
@@ -220,13 +226,15 @@ export class PanchangComponent {
     }
 
     const result = calculateAvayogiPoint(d1Chart);
+    const lord = getNakshatraLord(result.nakshatra);
     return {
       ...result,
       rasiName: RASI_NAMES[result.rasi],
       nakshatraName: NAKSHATRA_NAMES[result.nakshatra],
       degreeInRasi: formatDegreeInRasi(result.longitude),
-      lord: getNakshatraLord(result.nakshatra),
+      lord,
       planetsInStar: getPlanetsInNakshatra(d1Chart, result.nakshatra),
+      note: AVA_YOGI_REMEDIES[lord],
     };
   });
 
@@ -276,16 +284,18 @@ export class PanchangComponent {
       this.ephemeris.calculateAscendant(mandiInstant, details.lat, details.lng, details.ayanamsa).then((longitude) => {
         const rasi = Math.floor(longitude / 30);
         const nakshatra = calculateNakshatra(longitude);
+        const house = getRasiDistances(d1Chart.ascendantRasi, rasi).forward;
         this.#mandi.set({
           longitude,
           rasi,
           nakshatra,
           pada: calculatePada(longitude),
-          house: getRasiDistances(d1Chart.ascendantRasi, rasi).forward,
+          house,
           nakshatraName: NAKSHATRA_NAMES[nakshatra],
           rasiName: RASI_NAMES[rasi],
           degreeInRasi: formatDegreeInRasi(longitude),
           lord: getNakshatraLord(nakshatra),
+          note: MANDI_HOUSE_REMEDIES[house] ?? null,
         });
       });
     });

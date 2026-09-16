@@ -102,6 +102,7 @@
       <p class="value">{{ a.nakshatraName }} (pada {{ a.pada }})</p>
       <p class="detail">Planet: {{ a.lord }} · {{ a.degreeInRasi }} {{ a.rasiName }}</p>
       <p class="detail">in star: {{ a.planetsInStar.length ? a.planetsInStar.join(', ') : 'None' }}</p>
+      <p class="note">{{ a.note }}</p>
     </app-card>
   }
 
@@ -135,6 +136,9 @@
       <span class="label" title>Mandi</span>
       <p class="value">{{ m.nakshatraName }} (pada {{ m.pada }}) · {{ m.rasiName }} · in house {{ m.house }}</p>
       <p class="detail">{{ m.degreeInRasi }} {{ m.rasiName }} · {{ m.lord }}</p>
+      @if (m.note) {
+        <p class="note">{{ m.note }}</p>
+      }
     </app-card>
   }
 </div>
