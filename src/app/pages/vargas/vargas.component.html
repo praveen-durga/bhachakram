@@ -106,3 +106,46 @@
     </div>
   </section>
 }
+
+@if (grahaArudhaRows().length > 0) {
+  <section class="graha-arudha">
+    <h2 class="section-title">Graha Arudha</h2>
+    <p class="section-subtitle">
+      Each varga column is the position (1-12) from that planet's sign in the divisional chart to its Graha Arudha sign.
+      Darker green = better, darker red = worse.
+    </p>
+
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Body</th>
+            <th>D1 sign</th>
+            <th class="text-left">Final GA</th>
+            <th class="text-left house-col">House from Lagna</th>
+            @for (vargaKey of grahaArudhaVargaKeys; track vargaKey) {
+              <th>{{ vargaKey }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of grahaArudhaRows(); track row.body) {
+            <tr>
+              <td>{{ row.body }}</td>
+              <td>{{ row.d1SignLabel }}</td>
+              <td class="text-left">{{ row.finalGaLabel }}</td>
+              <td class="text-left house-col">{{ row.houseFromLagnaLabel }}</td>
+              @for (cell of row.cells; track cell.vargaKey) {
+                <td class="graha-arudha-cell">
+                  @for (value of cell.values; track $index) {
+                    <span class="ga-value" [style.background]="value.background">{{ value.position }}</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

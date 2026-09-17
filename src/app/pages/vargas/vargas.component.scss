@@ -36,7 +36,8 @@
   }
 
   .rasi-distance,
-  .modality-grade {
+  .modality-grade,
+  .graha-arudha {
     @apply mt-8;
 
     .section-title {
@@ -68,8 +69,16 @@
       th:first-child,
       td:first-child,
       th:nth-child(2),
-      td:nth-child(2) {
+      td:nth-child(2),
+      th.text-left,
+      td.text-left {
         @apply text-left;
+      }
+
+      th.house-col,
+      td.house-col {
+        @apply whitespace-normal;
+        max-width: 4.5rem;
       }
 
       thead {
@@ -105,6 +114,21 @@
         td.grade-b {
           background: color-mix(in oklch, var(--color-error) 15%, transparent);
           color: var(--color-error-content);
+        }
+
+        td.graha-arudha-cell {
+          @apply p-1;
+
+          .ga-value {
+            @apply inline-flex items-center justify-center rounded font-semibold;
+            width: 1.75rem;
+            height: 1.75rem;
+            color: var(--color-base-content);
+
+            &:not(:last-child) {
+              @apply mr-1;
+            }
+          }
         }
       }
     }
