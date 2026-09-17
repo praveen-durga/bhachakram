@@ -1,0 +1,37 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .varga-buttons {
+    @apply flex flex-wrap gap-2 mb-6 justify-center;
+  }
+
+  .unverified-mark {
+    color: var(--color-warning);
+  }
+
+  .charts {
+    @apply flex flex-col md:flex-row gap-6 items-start justify-center;
+
+    .chart-item {
+      @apply w-full md:max-w-sm;
+
+      .chart-title {
+        @apply text-center font-semibold mb-2;
+        color: var(--color-base-content);
+      }
+
+      .unverified-note {
+        @apply block font-normal;
+        font-size: var(--font-size-xs);
+        color: color-mix(in oklch, var(--color-warning) 80%, var(--color-base-content));
+      }
+    }
+  }
+}
