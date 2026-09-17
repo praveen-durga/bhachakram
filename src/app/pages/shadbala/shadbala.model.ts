@@ -50,7 +50,5 @@ export type BhavaBalaColumn = {
   fromLordBala: number;
   digBala: number;
   drishtiBala: number;
-  planetsInBala: number;
-  dayNightBala: number;
   total: number;
 };

@@ -122,15 +122,38 @@ export const DREKKANA_FEMALE_GRAHAS: Graha[] = ['Moon', 'Venus'];
 export const NATA_UNNATA_DIURNAL_GRAHAS: Graha[] = ['Sun', 'Jupiter', 'Venus'];
 export const NATA_UNNATA_NOCTURNAL_GRAHAS: Graha[] = ['Moon', 'Mars', 'Saturn'];
 
-// Paksha Bala: benefics score elongation/3 (peak at full moon), malefics score
-// the complement; Moon itself doubles the benefic formula (capped at 60).
-export const PAKSHA_BENEFIC_GRAHAS: Graha[] = ['Jupiter', 'Venus', 'Mercury'];
+// Dynamic benefic/malefic classification (used by Paksha Bala and Drig Bala):
+// Jupiter/Venus are always-benefic seeds, Sun/Mars/Saturn are always-malefic
+// seeds; Moon (waxing/waning) and Mercury (Mars-co-location rule) are then
+// resolved on top of these — see calculateBeneficMalefic in shadbala.util.ts.
+export const NATURAL_BENEFIC_SEED_GRAHAS: Graha[] = ['Jupiter', 'Venus'];
+export const NATURAL_MALEFIC_SEED_GRAHAS: Graha[] = ['Sun', 'Mars', 'Saturn'];
 
-// Drig/Bhava Drishti Bala's benefic/malefic classification for aspecting
-// grahas. Jupiter/Venus/Mercury always benefic; Sun/Mars/Saturn/Rahu/Ketu
-// always malefic; Moon is conditional (waxing = benefic, waning = malefic —
-// see calculateIsMoonWaxing in shadbala.util.ts).
-export const DRISHTI_ALWAYS_BENEFIC_GRAHAS: Graha[] = ['Jupiter', 'Venus', 'Mercury'];
+// Bhava Drishti Bala's OWN static benefic/malefic classification (distinct
+// from Drig Bala's dynamic one above) — Moon is unconditionally benefic here.
+export const BHAVA_DRISHTI_BENEFIC_GRAHAS: Graha[] = ['Moon', 'Mercury', 'Jupiter', 'Venus'];
+
+// Graha Drishti: house offsets (from the aspecting graha's own house) every
+// graha aspects. All grahas aspect the 7th; Mars/Jupiter/Saturn additionally
+// aspect their special houses.
+export const GRAHA_DRISHTI_HOUSES: Record<Graha, number[]> = {
+  Sun: [7],
+  Moon: [7],
+  Mars: [4, 7, 8],
+  Mercury: [7],
+  Jupiter: [5, 7, 9],
+  Venus: [7],
+  Saturn: [3, 7, 10],
+  Rahu: [7],
+  Ketu: [7],
+};
+
+// Rasi Drishti (sign-based aspect): movable and fixed signs mutually aspect
+// each other except the immediately adjacent sign; dual signs aspect every
+// other dual sign. Indexed by rasi (0-11).
+export const MOVABLE_SIGNS = [0, 3, 6, 9];
+export const FIXED_SIGNS = [1, 4, 7, 10];
+export const DUAL_SIGNS = [2, 5, 8, 11];
 
 // Ayana Bala's sign convention: these groups ADD when the planet's declination
 // is northern (Sun/Mars/Jupiter/Venus) or southern (Moon/Saturn); Mercury
@@ -138,34 +161,56 @@ export const DRISHTI_ALWAYS_BENEFIC_GRAHAS: Graha[] = ['Jupiter', 'Venus', 'Merc
 export const AYANA_NORTHERN_ADD_GRAHAS: Graha[] = ['Sun', 'Mars', 'Jupiter', 'Venus'];
 export const AYANA_SOUTHERN_ADD_GRAHAS: Graha[] = ['Moon', 'Saturn'];
 
-// Bhava Dig Bala's sign-group classification, each group strongest at one
-// kendra (house, 1-indexed) and weakest at the opposite kendra.
-export const SIGN_GROUP_STRONGEST_HOUSE: Record<string, number> = {
-  Nara: 1, // human signs: Gemini, Virgo, Libra, part Sagittarius, Aquarius
-  Jalachara: 4, // watery signs: Cancer, part Capricorn, Pisces
-  Chatushpada: 10, // quadruped signs: Aries, Taurus, Leo, part Sagittarius, Capricorn
-  Keeta: 7, // insect/reptile sign: Scorpio
-};
-
-export const SIGN_GROUP: Record<number, keyof typeof SIGN_GROUP_STRONGEST_HOUSE> = {
-  0: 'Chatushpada', // Aries
-  1: 'Chatushpada', // Taurus
-  2: 'Nara', // Gemini
-  3: 'Jalachara', // Cancer
-  4: 'Chatushpada', // Leo
-  5: 'Nara', // Virgo
-  6: 'Nara', // Libra
-  7: 'Keeta', // Scorpio
-  8: 'Nara', // Sagittarius (classically half-human, treated as Nara here)
-  9: 'Chatushpada', // Capricorn (classically half-aquatic, treated as Chatushpada here)
-  10: 'Nara', // Aquarius
-  11: 'Jalachara', // Pisces
-};
+// Bhava Dig Bala: each sign-group's reference house (0-indexed from the
+// Ascendant: 0=house1, 3=house4, 9=house10, 6=house7) paired with the
+// absolute longitude ranges (degrees, 0-360, not sign-relative) that belong
+// to that group.
+export const BHAVA_DIG_BALA_GROUPS: { referenceHouse: number; longitudeRanges: [number, number][] }[] = [
+  {
+    referenceHouse: 0, // Nara (human signs)
+    longitudeRanges: [
+      [60, 90],
+      [150, 180],
+      [180, 210],
+      [240, 255],
+      [300, 330],
+    ],
+  },
+  {
+    referenceHouse: 3, // Jalachara (watery signs)
+    longitudeRanges: [
+      [90, 120],
+      [285, 300],
+      [330, 360],
+    ],
+  },
+  {
+    referenceHouse: 9, // Chatushpada (quadruped signs)
+    longitudeRanges: [
+      [0, 30],
+      [30, 60],
+      [120, 150],
+      [255, 270],
+      [270, 285],
+    ],
+  },
+  {
+    referenceHouse: 6, // Keeta (insect/reptile sign)
+    longitudeRanges: [[210, 240]],
+  },
+];
 
 // Tribhaga Bala's day/night-third-to-lord mapping: each day/night is split
 // into 3 equal parts, ruled in this fixed order.
 export const TRIBHAGA_DAY_LORDS: Graha[] = ['Mercury', 'Sun', 'Saturn'];
 export const TRIBHAGA_NIGHT_LORDS: Graha[] = ['Moon', 'Venus', 'Mars'];
+
+// Varsha/Maasa/Vaara Bala's ahargana epoch anchors (per JHora, sourced from
+// "BV Raman's Bhava and Graha Bala Table - I") and the 0-6 remap table that
+// converts an ahargana-derived index into a weekday index (0=Sunday).
+export const VARSHA_MAASA_EPOCH = { baseYear: 1951, baseDays: 174 };
+export const VAARA_EPOCH = { baseYear: 1827, baseDays: 244 };
+export const ABDAHIPATHI_WEEKDAYS = [2, 3, 4, 5, 6, 0, 1];
 
 // Graha Yuddha (planetary war) is restricted to these 5 "star planets" —
 // Rahu/Ketu/Sun/Moon never participate.
@@ -178,19 +223,6 @@ export const DISC_DIAMETER_ARCSEC: Partial<Record<Graha, number>> = {
   Jupiter: 190.4,
   Venus: 16.6,
   Saturn: 158.0,
-};
-
-// Bhava Bala occupant ("Planets in") contribution per occupying graha.
-export const BHAVA_OCCUPANT_BALA: Record<Graha, number> = {
-  Jupiter: 60,
-  Mercury: 60,
-  Saturn: -60,
-  Mars: -60,
-  Sun: -60,
-  Moon: 0,
-  Venus: 0,
-  Rahu: 0,
-  Ketu: 0,
 };
 
 // Moolatrikona sign + degree range per planet (classical BPHS ranges); Rahu/Ketu
@@ -207,7 +239,7 @@ export const MOOLATRIKONA: Partial<Record<Graha, { rasi: number; from: number; t
 
 // Natural friendship table (Great Friend / Friend / Neutral / Enemy / Great
 // Enemy), from BPHS — Rahu/Ketu excluded (not used by Shadbala).
-type Relation = 'greatFriend' | 'friend' | 'neutral' | 'enemy' | 'greatEnemy';
+export type Relation = 'greatFriend' | 'friend' | 'neutral' | 'enemy' | 'greatEnemy';
 
 export const NATURAL_RELATION: Record<Exclude<Graha, 'Rahu' | 'Ketu'>, Partial<Record<Graha, Relation>>> = {
   Sun: { Moon: 'friend', Mars: 'friend', Jupiter: 'friend', Mercury: 'neutral', Venus: 'enemy', Saturn: 'enemy' },
@@ -218,6 +250,10 @@ export const NATURAL_RELATION: Record<Exclude<Graha, 'Rahu' | 'Ketu'>, Partial<R
   Venus: { Mercury: 'friend', Saturn: 'friend', Mars: 'neutral', Jupiter: 'neutral', Sun: 'enemy', Moon: 'enemy' },
   Saturn: { Mercury: 'friend', Venus: 'friend', Jupiter: 'neutral', Sun: 'enemy', Moon: 'enemy', Mars: 'enemy' },
 };
+
+// Temporal (Tatkalika) friendship: houses 2,3,4,10,11,12 from a planet's own
+// house are temporary friends, the rest (1,5,6,7,8,9) temporary enemies.
+export const TEMPORARY_FRIEND_HOUSES = [2, 3, 4, 10, 11, 12];
 
 // Sapta-vargaja Bala's dignity-point ladder (the BPHS halving progression, not
 // the rounded 45/30/20/15/10/4/2 variant some secondary sites use).
