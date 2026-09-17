@@ -9,7 +9,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { KARMIC_DOSHAS, NAVAMSA_COMBINATION } from '../../shared/data';
-import { BirthChartService, EphemerisService } from '../../shared/services';
+import { BirthChartService, EphemerisService, Graha } from '../../shared/services';
 import { ButtonComponent, ModalComponent, TableCellContext, TableColumn, TableComponent } from '../../shared/ui';
 import {
   calculateD9Rasi,
@@ -19,17 +19,19 @@ import {
   MATRIX_PLANETS,
   wallTimeToUtc,
 } from '../../shared/utils';
-import { KarmicDoshaDetails, PlanetPositionRow } from './planet-positions.model';
+import { CharaKarakaInfo, KarmicDoshaDetails, PlanetPositionRow } from './planet-positions.model';
 import {
   buildRow,
   calculateBhriguBindu,
   calculateChapa,
+  calculateCharaKarakas,
   calculateDhuma,
   calculateInduLagna,
   calculateHoraLagna,
   calculateParivesha,
   calculateUpaketu,
   calculateVyatipata,
+  formatGrahaBodyLabel,
 } from './planet-positions.util';
 
 @Component({
@@ -43,19 +45,22 @@ export class PlanetPositionsComponent {
   private birthChart = inject(BirthChartService);
   private ephemeris = inject(EphemerisService);
 
+  protected bodyCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('bodyCell');
   protected karmicDoshaCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicDoshaCell');
   protected karmicPlanetCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicPlanetCell');
 
   #selectedDosha = signal<KarmicDoshaDetails | null>(null);
   #selectedKarmicPlanetResults = signal<string | null>(null);
   #specialPointRows = signal<PlanetPositionRow[]>([]);
+  #grahaKarakas = signal<Partial<Record<Graha, CharaKarakaInfo>>>({});
 
   protected selectedDosha = this.#selectedDosha.asReadonly();
   protected selectedKarmicPlanetResults = this.#selectedKarmicPlanetResults.asReadonly();
   protected specialPointRows = this.#specialPointRows.asReadonly();
+  protected grahaKarakas = this.#grahaKarakas.asReadonly();
 
   protected columns = computed<TableColumn<PlanetPositionRow>[]>(() => [
-    { key: 'body', label: 'Body' },
+    { key: 'body', label: 'Body', cellTemplate: this.bodyCell() },
     { key: 'longitude', label: 'Longitude' },
     { key: 'nakshatra', label: 'Nakshatra' },
     { key: 'pada', label: 'Pada' },
@@ -120,6 +125,7 @@ export class PlanetPositionsComponent {
 
       if (!d1Chart || !sunTimes || !details) {
         this.#specialPointRows.set([]);
+        this.#grahaKarakas.set({});
         return;
       }
 
@@ -142,7 +148,8 @@ export class PlanetPositionsComponent {
       Promise.all([
         this.ephemeris.calculateAscendant(mandiInstant, details.lat, details.lng, details.ayanamsa),
         this.ephemeris.calculateGrahaEphemerisData(sunTimes.sunrise, details.ayanamsa),
-      ]).then(([mandiLongitude, sunriseEphemeris]) => {
+        this.ephemeris.calculateGrahaEphemerisData(birthTime, details.ayanamsa),
+      ]).then(([mandiLongitude, sunriseEphemeris, birthEphemeris]) => {
         const horaLagnaLongitude = calculateHoraLagna(
           sunriseEphemeris.grahas.Sun.longitude,
           birthTime,
@@ -166,8 +173,14 @@ export class PlanetPositionsComponent {
             buildRow(body, longitude, Math.floor(longitude / 30), calculateD9Rasi(longitude)),
           ),
         );
+
+        this.#grahaKarakas.set(calculateCharaKarakas(d1Chart, birthEphemeris.grahas));
       });
     });
+  }
+
+  protected bodyLabel(body: string): string {
+    return formatGrahaBodyLabel(body, this.grahaKarakas()[body as Graha]);
   }
 
   protected setHover(row: number | null, col: number | null): void {

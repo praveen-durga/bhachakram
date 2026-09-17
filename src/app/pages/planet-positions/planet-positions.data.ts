@@ -22,3 +22,12 @@ export const INDU_LAGNA_KALANADI: Partial<Record<Graha, number>> = {
   Venus: 12,
   Saturn: 1,
 };
+
+// Jaimini Chara Karakas, 7-planet scheme (Sun-Saturn, no Rahu/Ketu, per the
+// user's explicit choice). Rank by degree-within-sign descending, highest
+// gets AK. Retrograde planets use their degree as-is, no adjustment - the
+// "30 minus degree" rule is specific to Rahu in the 8-planet scheme, not
+// used here (confirmed via 2 independent sources).
+export const KARAKA_GRAHAS: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
+
+export const KARAKA_ABBREVIATIONS = ['AK', 'AmK', 'BK', 'MK', 'PK', 'GK', 'DK']; // rank 1 (highest degree) -> 7 (lowest)

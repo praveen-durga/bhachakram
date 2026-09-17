@@ -22,3 +22,8 @@ export type KarmicDoshaDetails = {
   indications: string;
   remedies: string;
 };
+
+export type CharaKarakaInfo = {
+  abbreviation: string;
+  isRetrograde: boolean;
+};

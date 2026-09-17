@@ -128,10 +128,41 @@ source/method as the Deities and Vargas work):
    Planet Positions, confirm the 9 new rows appear below the grahas
    with sensible longitudes and no console errors.
 
+## Addendum: Jaimini Chara Karakas
+
+The user asked to add Chara Karakas next to each graha in the same
+table, referencing a screenshot ("Sun - PK", "Mars (R) - AmK", etc.)
+and explicitly requesting the 7-planet scheme (Sun-Saturn, no
+Rahu/Ketu).
+
+- Rank the 7 classical grahas by degree-within-sign descending:
+  highest = Atmakaraka (AK), down to Darakaraka (DK) for the lowest.
+  Verified against the screenshot's exact ranking order (Saturn=AK,
+  Mars=AmK, Jupiter=BK, Mercury=MK, Sun=PK, Moon=GK, Venus=DK) with a
+  synthetic Node test reproducing that ordering exactly.
+- Confirmed via 2 independent sources that retrograde planets (Mars in
+  the screenshot) use their degree as-is for ranking — no adjustment.
+  The "30 minus degree" rule some sources mention is specific to Rahu
+  in the 8-planet scheme, not applicable here.
+- New ephemeris call added to the existing special-points `effect()`:
+  `calculateGrahaEphemerisData(birthTime, ayanamsa)` for `longitudeSpeed`
+  (retrograde detection) - reuses the same method Shadbala already
+  uses for its own retrograde-sensitive sub-components, no service
+  changes needed.
+- **Deliberately did not bake the karaka label into `PlanetPositionRow.body`**
+  for graha rows - the Navamsa Matrix (`planetMatrix`/`matrixCell`)
+  keys off `row.body` matching plain graha names from `MATRIX_PLANETS`,
+  and decorating it (e.g. "Mars (R) - AmK") would have silently broken
+  every matrix lookup. Used a `bodyCell` table `cellTemplate` instead
+  (same mechanism already used for the Karmic Dosha/Karmic Planet
+  columns) so the underlying `row.body` stays a plain graha name
+  everywhere except this one display spot.
+
 ## Status
 
 Implemented and building cleanly. Formulas researched from BPHS directly
 where possible (Hora Lagna, 5 Sun-Upagrahas) and range-tested in Node;
 Indu Lagna and Bhrigu Bindu are from general knowledge, not fresh
-citations, per the user's explicit choice to proceed anyway. Not yet
+citations, per the user's explicit choice to proceed anyway. Chara
+Karakas verified against the user's own reference screenshot. Not yet
 verified in a live browser.

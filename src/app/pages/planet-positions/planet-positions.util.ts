@@ -1,6 +1,8 @@
+import { D1Chart, Graha } from '../../shared/services';
 import {
   calculateNakshatra,
   calculatePada,
+  findGraha,
   formatDegreeInRasi,
   getRasiDistances,
   NAKSHATRA_NAMES,
@@ -8,8 +10,14 @@ import {
   RASI_NAMES,
 } from '../../shared/utils';
 import { KARMIC_NAKSHATRAS, KARMIC_PLANETS, NAKSHATRA_PADA_DATA } from '../../shared/data';
-import { DHUMA_OFFSET_DEG, INDU_LAGNA_KALANADI, UPAKETU_OFFSET_DEG } from './planet-positions.data';
-import { PlanetPositionRow } from './planet-positions.model';
+import {
+  DHUMA_OFFSET_DEG,
+  INDU_LAGNA_KALANADI,
+  KARAKA_ABBREVIATIONS,
+  KARAKA_GRAHAS,
+  UPAKETU_OFFSET_DEG,
+} from './planet-positions.data';
+import { CharaKarakaInfo, PlanetPositionRow } from './planet-positions.model';
 
 function normalizeDegrees(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
@@ -109,4 +117,36 @@ export function calculateChapa(pariveshaLongitude: number): number {
 
 export function calculateUpaketu(chapaLongitude: number): number {
   return normalizeDegrees(chapaLongitude + UPAKETU_OFFSET_DEG);
+}
+
+// Jaimini Chara Karakas (7-planet scheme, see planet-positions.data.ts):
+// rank Sun-Saturn by degree-within-sign descending, highest gets Atmakaraka
+// (AK) down to Darakaraka (DK) for the lowest. `speedByGraha` is only used
+// to label retrograde planets in the table, not to adjust the ranking
+// itself (retrograde planets rank by their degree as-is, per BPHS/Jaimini
+// sources - the "30 minus degree" adjustment is specific to Rahu in the
+// 8-planet scheme, not applicable here).
+export function calculateCharaKarakas(
+  d1Chart: D1Chart,
+  speedByGraha: Record<Graha, { longitudeSpeed: number }>,
+): Partial<Record<Graha, CharaKarakaInfo>> {
+  const withDegree = KARAKA_GRAHAS.map((graha) => {
+    const position = findGraha(d1Chart.grahas, graha);
+    return { graha, degreeInSign: position.longitude % 30, isRetrograde: speedByGraha[graha].longitudeSpeed < 0 };
+  });
+
+  const ranked = [...withDegree].sort((a, b) => b.degreeInSign - a.degreeInSign);
+
+  const result: Partial<Record<Graha, CharaKarakaInfo>> = {};
+  ranked.forEach(({ graha, isRetrograde }, index) => {
+    result[graha] = { abbreviation: KARAKA_ABBREVIATIONS[index], isRetrograde };
+  });
+  return result;
+}
+
+export function formatGrahaBodyLabel(body: string, karaka?: CharaKarakaInfo): string {
+  if (!karaka) {
+    return body;
+  }
+  return `${body}${karaka.isRetrograde ? ' (R)' : ''} - ${karaka.abbreviation}`;
 }

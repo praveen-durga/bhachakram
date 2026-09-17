@@ -82,3 +82,13 @@ focused on running/building the app.
   unavailable during this session) — Indu Lagna in particular is flagged
   as best-effort in the UI (`*`) per the user's explicit choice to
   proceed without independent verification of its Kalanadi table.
+
+### Jaimini Chara Karakas
+
+- Ranking rule (degree-within-sign descending, Atmakaraka highest down
+  to Darakaraka lowest, 7-planet scheme per the user's explicit choice)
+  and the retrograde-handling rule (regular planets rank by their
+  degree as-is; the "30 minus degree" adjustment is specific to Rahu in
+  the 8-planet scheme) both cross-checked against 2 independent web
+  sources that agree with each other. Also verified end-to-end against
+  the user's own reference screenshot's exact ranking order.

@@ -1,5 +1,9 @@
 <h1>Planet Positions</h1>
 
+<ng-template #bodyCell let-row>
+  {{ bodyLabel(row.body) }}
+</ng-template>
+
 <ng-template #karmicDoshaCell let-row>
   @if (row.hasKarmicDosha) {
     <div class="cell-with-action">
