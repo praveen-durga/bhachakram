@@ -52,16 +52,16 @@ export const NORTH_RASI_LABEL_POSITIONS: [number, number][] = [
 const NORTH_GRAHA_LABEL_POSITIONS: [number, number, number, TextAnchor][] = [
   [200, 55, 1, 'middle'],
   [320, 20, 1, 'end'],
-  [390, 75, 1, 'end'],
-  [320, 150, -1, 'end'],
+  [395, 75, 1, 'end'],
+  [330, 260, -1, 'end'],
   [395, 330, -1, 'end'],
   [325, 345, 1, 'end'],
   [200, 345, -1, 'middle'],
   [70, 390, -1, 'start'],
   [10, 335, -1, 'start'],
-  [60, 165, -1, 'start'],
-  [10, 75, 1, 'start'],
-  [70, 20, 1, 'start'],
+  [70, 165, -1, 'start'],
+  [5, 75, 1, 'start'],
+  [75, 20, 1, 'start'],
 ];
 
 // south/east geometry is not designed yet (awaiting reference images) — they

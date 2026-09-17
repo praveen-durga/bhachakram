@@ -53,81 +53,59 @@
   }
 
   .comparison-table {
-    @apply rounded-lg overflow-x-auto;
-    box-shadow: var(--box-shadow);
+    th,
+    td {
+      @apply whitespace-nowrap text-center;
+    }
 
-    table {
-      @apply relative w-full border-separate border-spacing-0 text-left;
-      background: var(--color-base-100);
-      font-size: var(--font-size-sm);
+    th:first-child,
+    td:first-child,
+    th:nth-child(2),
+    td:nth-child(2),
+    th.text-left,
+    td.text-left {
+      @apply text-left;
+    }
 
-      th,
-      td {
-        @apply px-3 py-1.5 align-middle whitespace-nowrap text-center;
+    th.house-col,
+    td.house-col {
+      @apply whitespace-normal;
+      max-width: 4.5rem;
+    }
+
+    tbody {
+      td.vargottam {
+        @apply font-semibold;
+        background: color-mix(in oklch, var(--color-success) 15%, transparent);
+        color: var(--color-success-content);
       }
 
-      th:first-child,
-      td:first-child,
-      th:nth-child(2),
-      td:nth-child(2),
-      th.text-left,
-      td.text-left {
-        @apply text-left;
+      td.grade-e {
+        background: color-mix(in oklch, var(--color-success) 15%, transparent);
+        color: var(--color-success-content);
       }
 
-      th.house-col,
-      td.house-col {
-        @apply whitespace-normal;
-        max-width: 4.5rem;
+      td.grade-a {
+        background: color-mix(in oklch, var(--color-warning) 15%, transparent);
+        color: var(--color-warning-content);
       }
 
-      thead {
-        color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
-        font-weight: var(--font-weight-semibold);
-
-        tr th {
-          border-bottom: 1px solid var(--color-base-300);
-        }
+      td.grade-b {
+        background: color-mix(in oklch, var(--color-error) 15%, transparent);
+        color: var(--color-error-content);
       }
 
-      tbody {
-        tr:not(:last-child) td {
-          border-bottom: 1px solid var(--color-base-300);
-        }
+      td.graha-arudha-cell {
+        @apply p-1;
 
-        td.vargottam {
-          @apply font-semibold;
-          background: color-mix(in oklch, var(--color-success) 15%, transparent);
-          color: var(--color-success-content);
-        }
+        .ga-value {
+          @apply inline-flex items-center justify-center rounded font-semibold;
+          width: 1.75rem;
+          height: 1.75rem;
+          color: var(--color-base-content);
 
-        td.grade-e {
-          background: color-mix(in oklch, var(--color-success) 15%, transparent);
-          color: var(--color-success-content);
-        }
-
-        td.grade-a {
-          background: color-mix(in oklch, var(--color-warning) 15%, transparent);
-          color: var(--color-warning-content);
-        }
-
-        td.grade-b {
-          background: color-mix(in oklch, var(--color-error) 15%, transparent);
-          color: var(--color-error-content);
-        }
-
-        td.graha-arudha-cell {
-          @apply p-1;
-
-          .ga-value {
-            @apply inline-flex items-center justify-center rounded font-semibold;
-            width: 1.75rem;
-            height: 1.75rem;
-            color: var(--color-base-content);
-
-            &:not(:last-child) {
-              @apply mr-1;
-            }
+          &:not(:last-child) {
+            @apply mr-1;
           }
         }
       }

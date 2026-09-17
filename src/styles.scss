@@ -30,3 +30,44 @@ body {
   display: flex;
   flex-direction: column;
 }
+
+.table-container {
+  @apply rounded-lg overflow-x-auto;
+  box-shadow: var(--box-shadow);
+
+  table {
+    @apply relative w-full border-separate border-spacing-0 text-left;
+    background: var(--color-base-100);
+    font-size: var(--font-size-sm);
+
+    th,
+    td {
+      @apply px-4 py-3 align-middle;
+    }
+
+    thead {
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+      font-weight: var(--font-weight-semibold);
+
+      tr th {
+        border-bottom: 1px solid var(--color-base-300);
+      }
+    }
+
+    tbody {
+      tr:not(:last-child) td {
+        border-bottom: 1px solid var(--color-base-300);
+      }
+    }
+
+    &.table-sticky {
+      thead th {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: var(--color-base-100);
+      }
+    }
+  }
+}
