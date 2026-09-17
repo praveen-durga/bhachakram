@@ -3,18 +3,20 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { BirthChartService, EphemerisService, Graha } from '../../shared/services';
 import { CardComponent } from '../../shared/ui';
 import {
+  calculateHora,
   calculateNakshatra,
   calculatePada,
   formatDegreeInRasi,
+  getHoraLord,
   getRasiDistances,
   NAKSHATRA_NAMES,
   RASI_NAMES,
   wallTimeToUtc,
+  WEEKDAY_LORD,
 } from '../../shared/utils';
-import { AVA_YOGI_REMEDIES, MANDI_HOUSE_REMEDIES, WEEKDAY_LORD, WEEKDAY_NAMES, YOGA_NAMES } from './panchang.data';
+import { AVA_YOGI_REMEDIES, MANDI_HOUSE_REMEDIES, WEEKDAY_NAMES, YOGA_NAMES } from './panchang.data';
 import {
   calculateAvayogiPoint,
-  calculateHora,
   calculateKarnam,
   calculateMudakku,
   calculateNakshatraResult,
@@ -25,7 +27,6 @@ import {
   calculateVainashika,
   calculateYoga,
   calculateYogiPoint,
-  getHoraLord,
   getKarnamName,
   getMandiInstant,
   getNakshatraLord,

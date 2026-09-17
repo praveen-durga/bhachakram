@@ -1,0 +1,58 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .bhava-bala-title {
+    @apply font-semibold mb-3 mt-6;
+  }
+
+  .shadbala-table {
+    @apply rounded-lg overflow-x-auto;
+    box-shadow: var(--box-shadow);
+
+    table {
+      @apply relative w-full border-separate border-spacing-0 text-left;
+      background: var(--color-base-100);
+      font-size: var(--font-size-sm);
+
+      th,
+      td {
+        @apply px-4 py-2 align-middle whitespace-nowrap;
+      }
+
+      thead {
+        color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+        font-weight: var(--font-weight-semibold);
+
+        tr th {
+          border-bottom: 1px solid var(--color-base-300);
+        }
+      }
+
+      tbody {
+        tr:not(:last-child) td {
+          border-bottom: 1px solid var(--color-base-300);
+        }
+
+        .sub-row td {
+          color: color-mix(in oklch, var(--color-base-content) 70%, transparent);
+        }
+
+        .total-row td {
+          @apply font-semibold;
+        }
+
+        .grand-total-row td {
+          @apply font-semibold;
+          background: color-mix(in oklch, var(--color-base-content) 5%, transparent);
+        }
+      }
+    }
+  }
+}

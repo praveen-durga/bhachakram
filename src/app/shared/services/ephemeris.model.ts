@@ -12,4 +12,16 @@ export type D1Chart = {
   ascendantRasi: number;
   ascendantLongitude?: number;
   grahas: GrahaPosition[];
+  cusps?: number[];
+};
+
+export type HoraResult = {
+  horaIndex: number;
+  isDayHora: boolean;
+};
+
+export type SunTimes = {
+  sunrise: Date;
+  sunset: Date;
+  nextSunrise: Date;
 };

@@ -1,0 +1,284 @@
+<h1>Shadbala</h1>
+
+@if (rows(); as shadbalaRows) {
+  <div class="shadbala-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Shad Bala</th>
+          @for (row of shadbalaRows; track row.graha) {
+            <th>{{ row.graha }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="sub-row">
+          <td>Ochcha Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.sthanaBala.ucchaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Sapta-vargaja Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.sthanaBala.saptavargajaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Ojhayugma bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.sthanaBala.ojhayugmaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Kendradi Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.sthanaBala.kendradiBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Drekkana Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.sthanaBala.drekkanaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="total-row">
+          <td>1. Sthana Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.sthanaBala.total | number: '1.2-2' }}</td>
+          }
+        </tr>
+
+        <tr class="total-row">
+          <td>2. Dig-Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.digBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+
+        <tr class="sub-row">
+          <td>Nata-Unnata Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.nataUnnataBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Paksha Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.pakshaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Tri-Bhaga Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.tribhagaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Varsha Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.varshaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Maasa Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.maasaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Vaara Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.vaaraBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Hora Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.horaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Ayana Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.ayanaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Yuddha Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.yuddhaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="total-row">
+          <td>3. Kaala Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBala.total | number: '1.2-2' }}</td>
+          }
+        </tr>
+
+        <tr class="total-row">
+          <td>4. Chesta Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.chestaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+
+        <tr class="total-row">
+          <td>5. Naisargika Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.naisargikaBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+
+        <tr class="total-row">
+          <td>6. Drig Bala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.drigBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+
+        <tr class="grand-total-row">
+          <td>Total Shadbala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.totalShadbala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Shadbala in Rupas</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.shadbalaInRupas | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Minimum requirement</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.minimumRequirement }}</td>
+          }
+        </tr>
+        <tr>
+          <td>% of required</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.percentOfRequired | number: '1.0-0' }}%</td>
+          }
+        </tr>
+
+        <tr class="sub-row">
+          <td>Sthana Bala % req.</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.sthanaBalaPercentReq | number: '1.0-0' }}%</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Dig Bala % req.</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.digBalaPercentReq | number: '1.0-0' }}%</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Kaala Bala % req.</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kaalaBalaPercentReq | number: '1.0-0' }}%</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Chesta Bala % req.</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.chestaBalaPercentReq | number: '1.0-0' }}%</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Drig-Bala % req.</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>&mdash;</td>
+          }
+        </tr>
+
+        <tr>
+          <td>Relative Rank</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.relativeRank }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Ishta Phala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.ishtaPhala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Kashta Phala</td>
+          @for (row of shadbalaRows; track row.graha) {
+            <td>{{ row.kashtaPhala | number: '1.2-2' }}</td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (bhavaBala(); as bhavaBalaColumns) {
+  <p class="bhava-bala-title">Bhava Bala</p>
+  <div class="shadbala-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Bhava Bala</th>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <th>{{ column.house }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Rashi</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.rasi }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Degree</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.degreeInRasi }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>From Lord</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.fromLordBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Dig Bala</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.digBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Drishti</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.drishtiBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Planets in</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.planetsInBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="sub-row">
+          <td>Day-Night</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.dayNightBala | number: '1.2-2' }}</td>
+          }
+        </tr>
+        <tr class="grand-total-row">
+          <td>Bhava Bala Total</td>
+          @for (column of bhavaBalaColumns; track column.house) {
+            <td>{{ column.total | number: '1.2-2' }}</td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}

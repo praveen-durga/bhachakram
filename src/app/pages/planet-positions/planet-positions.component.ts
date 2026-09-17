@@ -6,11 +6,12 @@ import {
   NAKSHATRA_PADA_DATA,
   NAVAMSA_COMBINATION,
 } from '../../shared/data';
-import { BirthChartService, Graha, GrahaPosition } from '../../shared/services';
+import { BirthChartService } from '../../shared/services';
 import { ButtonComponent, ModalComponent, TableCellContext, TableColumn, TableComponent } from '../../shared/ui';
 import {
   calculateNakshatra,
   calculatePada,
+  findGraha,
   formatDegreeInRasi,
   getRasiDistances,
   GRAHA_ORDER,
@@ -53,14 +54,6 @@ function buildRow(body: string, longitude: number, rasiIndex: number, navamsaRas
     karmicPlanet,
     karmicPlanetResults,
   };
-}
-
-function findGraha(grahas: GrahaPosition[], graha: Graha): GrahaPosition {
-  const found = grahas.find((g) => g.graha === graha);
-  if (!found) {
-    throw new Error(`Missing graha position for ${graha}`);
-  }
-  return found;
 }
 
 @Component({

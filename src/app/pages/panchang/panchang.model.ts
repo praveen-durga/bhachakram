@@ -69,11 +69,6 @@ export type YogiPoint = {
   pada: number;
 };
 
-export type HoraResult = {
-  horaIndex: number;
-  isDayHora: boolean;
-};
-
 export type MandiResult = {
   longitude: number;
   rasi: number;
