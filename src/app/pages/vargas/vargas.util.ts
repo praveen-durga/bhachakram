@@ -1,11 +1,13 @@
 import { D1Chart, Graha } from '../../shared/services';
-import { findGraha, GRAHA_ORDER, getRasiDistances, getRasiModality, RASI_NAMES } from '../../shared/utils';
 import {
-  GRAHA_ARUDHA_GREEN_ORDER,
-  GRAHA_ARUDHA_LORDSHIP,
-  GRAHA_ARUDHA_RED_ORDER,
-  MODALITY_GRADE_MATRIX,
-} from './vargas.data';
+  findGraha,
+  GRAHA_ORDER,
+  GRAHA_OWNED_RASIS,
+  getRasiDistances,
+  getRasiModality,
+  RASI_NAMES,
+} from '../../shared/utils';
+import { GRAHA_ARUDHA_GREEN_ORDER, GRAHA_ARUDHA_RED_ORDER, MODALITY_GRADE_MATRIX } from './vargas.data';
 import { GrahaArudhaRow, ModalityGradeRow, RasiDistanceRow, VargaOption } from './vargas.model';
 
 // Reuses D1's raw graha longitudes (for the chart's degree-in-rasi labels,
@@ -129,7 +131,7 @@ function buildGrahaArudhaRow(
   ascendantRasi: number,
   allVargaOptions: VargaOption[],
 ): GrahaArudhaRow {
-  const finalGaSigns = GRAHA_ARUDHA_LORDSHIP[graha].map((lordRasi) => calculateFinalGrahaArudha(d1Rasi, lordRasi));
+  const finalGaSigns = GRAHA_OWNED_RASIS[graha].map((lordRasi) => calculateFinalGrahaArudha(d1Rasi, lordRasi));
 
   const cells = allVargaOptions.map((option) => ({
     vargaKey: option.key,

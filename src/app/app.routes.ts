@@ -40,6 +40,12 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/vargas/vargas.component').then((m) => m.VargasComponent),
   },
   {
+    path: 'planet-comfort',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () =>
+      import('./pages/planet-comfort/planet-comfort.component').then((m) => m.PlanetComfortComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),

@@ -64,6 +64,24 @@ export const RASI_LORD: Graha[] = [
   'Jupiter', // Pisces
 ];
 
+// Inverse of RASI_LORD (graha -> owned rasis), plus the modern co-rulership
+// convention for the nodes (Rahu with Saturn's Aquarius, Ketu with Mars's
+// Scorpio) that several house-lordship-based techniques in this app need.
+// Relocated here from vargas.data.ts (as GRAHA_ARUDHA_LORDSHIP) since
+// Planet Comfort's Tier 3 (Yogakaraka/Subhakaraka) needs the exact same
+// mapping.
+export const GRAHA_OWNED_RASIS: Record<Graha, number[]> = {
+  Sun: [4], // Leo
+  Moon: [3], // Cancer
+  Mars: [0, 7], // Aries, Scorpio
+  Mercury: [2, 5], // Gemini, Virgo
+  Jupiter: [8, 11], // Sagittarius, Pisces
+  Venus: [1, 6], // Taurus, Libra
+  Saturn: [9, 10], // Capricorn, Aquarius
+  Rahu: [10], // Aquarius (modern co-lord)
+  Ketu: [7], // Scorpio (modern co-lord)
+};
+
 const NAKSHATRA_SPAN = 360 / 27;
 
 export const GRAHA_ORDER: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
@@ -190,4 +208,24 @@ export function getMandiInstant(birthTime: Date, sunTimes: SunTimes, weekday: nu
   const nightLength = nextSunrise.getTime() - sunset.getTime();
   const muhurtaLength = nightLength / 15;
   return new Date(sunset.getTime() + MANDI_NIGHT_MUHURTA_COUNT[weekday] * muhurtaLength);
+}
+
+// Standard Vimshottari nakshatra-lord cycle, repeating every 9 nakshatras
+// (index 0 = Ashwini). Verified against 3 reference examples (Shatabhisha →
+// Rahu, Purva Ashadha → Venus, Moola → Ketu) — all matched exactly. Relocated
+// here from panchang.util.ts since Planet Comfort needs it too.
+export const NAKSHATRA_LORD_CYCLE: Graha[] = [
+  'Ketu',
+  'Venus',
+  'Sun',
+  'Moon',
+  'Mars',
+  'Rahu',
+  'Jupiter',
+  'Saturn',
+  'Mercury',
+];
+
+export function getNakshatraLord(nakshatra: number): Graha {
+  return NAKSHATRA_LORD_CYCLE[nakshatra % 9];
 }

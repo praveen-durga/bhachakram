@@ -1,4 +1,3 @@
-import { Graha } from '../../shared/services';
 import {
   calculateD2Rasi,
   calculateD3JagannathRasi,
@@ -19,6 +18,7 @@ import {
   calculateD30Rasi,
   calculateD45Rasi,
   calculateD60Rasi,
+  GRAHA_OWNED_RASIS,
   RasiModality,
 } from '../../shared/utils';
 import { ModalityGrade, VargaOption } from './vargas.model';
@@ -56,24 +56,6 @@ export const MODALITY_GRADE_MATRIX: Record<RasiModality, Record<RasiModality, Mo
   Movable: { Movable: 'E', Fixed: 'A', Dual: 'B' },
   Fixed: { Movable: 'A', Fixed: 'B', Dual: 'E' },
   Dual: { Movable: 'B', Fixed: 'E', Dual: 'A' },
-};
-
-// Sign(s) each graha "owns" for the Graha Arudha calculation (0-indexed
-// rasi). Sun/Moon own 1 sign; Mars/Mercury/Jupiter/Venus/Saturn own 2.
-// Rahu/Ketu aren't traditional sign lords, but the modern co-rulership
-// convention (Rahu with Saturn's Aquarius, Ketu with Mars's Scorpio) is
-// what this app's reference example's numbers require to reproduce
-// exactly - confirmed by reverse-solving the example rather than assumed.
-export const GRAHA_ARUDHA_LORDSHIP: Record<Graha, number[]> = {
-  Sun: [4], // Leo
-  Moon: [3], // Cancer
-  Mars: [0, 7], // Aries, Scorpio
-  Mercury: [2, 5], // Gemini, Virgo
-  Jupiter: [8, 11], // Sagittarius, Pisces
-  Venus: [1, 6], // Taurus, Libra
-  Saturn: [9, 10], // Capricorn, Aquarius
-  Rahu: [10], // Aquarius (modern co-lord)
-  Ketu: [7], // Scorpio (modern co-lord)
 };
 
 // Rank order (darkest/strongest to lightest/weakest shade) for the 1-12

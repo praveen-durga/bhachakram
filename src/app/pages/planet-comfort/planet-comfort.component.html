@@ -1,0 +1,27 @@
+<h1>Planet Comfort</h1>
+<p class="subtitle">
+  Star Devata Comfort — 40-point Guna compatibility, enemy penalty, and Yogakaraka/Subhakaraka uplift.
+</p>
+
+<ng-template #starDevataCell let-row>
+  <span class="star-devata-cell">
+    {{ row.starDevata }}
+    @if (row.isSpecificEnemy) {
+      <span class="enemy-badge">Enemy</span>
+    }
+  </span>
+</ng-template>
+
+<ng-template #tier3Cell let-row>
+  @if (row.tier3 > 0) {
+    <span class="tier3-uplift">+{{ row.tier3 }} {{ row.tier3Label }}</span>
+  } @else {
+    0
+  }
+</ng-template>
+
+<ng-template #bandCell let-row>
+  <span class="band-badge" [class]="'band-' + row.band.toLowerCase()">{{ row.band | uppercase }}</span>
+</ng-template>
+
+<app-table [columns]="columns()" [rows]="rows()" />

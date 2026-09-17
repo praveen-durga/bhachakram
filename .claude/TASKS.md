@@ -8,3 +8,4 @@
 - [ ] Sade Sati route (Sade Sati/Ardhashtama/Ashtama occurrence list, vehicle animal, body-part timeline) — [.claude/todo-plans/14-sade-sati-route.md](.claude/todo-plans/14-sade-sati-route.md)
 - [ ] Vargas route (D3-D60 chart selector, 16 vargas) — [.claude/todo-plans/15-vargas-route.md](.claude/todo-plans/15-vargas-route.md)
 - [ ] Planet Positions special points (Mandi, Hora Lagna, Indu Lagna, Bhrigu Bindu, Upagrahas) — [.claude/todo-plans/16-planet-positions-special-points.md](.claude/todo-plans/16-planet-positions-special-points.md)
+- [ ] Planet Comfort route (40-point Star Devata comfort scoring) — [.claude/todo-plans/17-planet-comfort-route.md](.claude/todo-plans/17-planet-comfort-route.md)

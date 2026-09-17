@@ -49,21 +49,6 @@ export const MUDAKKU_NAKSHATRA_SUM = 10;
 // reproduces the Avayogi side).
 export const YOGI_OFFSET_DEG = 93 + 20 / 60;
 
-// Standard Vimshottari nakshatra-lord cycle, repeating every 9 nakshatras
-// (index 0 = Ashwini). Verified against 3 reference examples (Shatabhisha →
-// Rahu, Purva Ashadha → Venus, Moola → Ketu) — all matched exactly.
-export const NAKSHATRA_LORD_CYCLE: Graha[] = [
-  'Ketu',
-  'Venus',
-  'Sun',
-  'Moon',
-  'Mars',
-  'Rahu',
-  'Jupiter',
-  'Saturn',
-  'Mercury',
-];
-
 // Tithi names 1-14 in each paksha, index 0 = tithi 1 (Pratipada).
 export const TITHI_NAMES: string[] = [
   'Pratipada',

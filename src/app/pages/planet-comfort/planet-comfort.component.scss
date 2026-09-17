@@ -1,0 +1,55 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-1;
+    color: var(--color-base-content);
+  }
+
+  .subtitle {
+    @apply mb-4;
+    font-size: var(--font-size-sm);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  app-table {
+    @apply block;
+  }
+
+  .star-devata-cell {
+    @apply inline-flex items-center gap-2;
+  }
+
+  .enemy-badge {
+    @apply rounded-full px-2 py-0.5 text-xs font-semibold;
+    background: color-mix(in oklch, var(--color-error) 15%, transparent);
+    color: var(--color-error-content);
+  }
+
+  .tier3-uplift {
+    @apply font-semibold;
+    color: var(--color-success);
+  }
+
+  .band-badge {
+    @apply text-xs font-semibold tracking-wide;
+
+    &.band-adhimitra {
+      color: var(--color-success);
+    }
+
+    &.band-mitra {
+      color: color-mix(in oklch, var(--color-success) 70%, var(--color-base-content));
+    }
+
+    &.band-sama {
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    }
+
+    &.band-shatru {
+      color: var(--color-error);
+    }
+  }
+}

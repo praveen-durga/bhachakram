@@ -92,3 +92,21 @@ focused on running/building the app.
   the 8-planet scheme) both cross-checked against 2 independent web
   sources that agree with each other. Also verified end-to-end against
   the user's own reference screenshot's exact ranking order.
+
+## Planet Comfort
+
+- Not a classical text — a scoring framework the user wrote out in full
+  (Guna compatibility, specific-enemy penalty, Yogakaraka/Subhakaraka
+  uplift, 0-40 scale, 4 bands). The written spec had several internal
+  contradictions (SK's point value stated as both +5 and +6; a "Group
+  Uplift" mentioned in worked examples but not formally defined). Every
+  rule was instead reverse-verified against the user's own reference
+  image (a real computed table) before implementing — see
+  `.claude/todo-plans/17-planet-comfort-route.md` for the full
+  verification trail, including 2 rounds of clarifying questions and
+  one disclosed 1-point discrepancy against a single worked example
+  that doesn't match the real reference table or the other 3 examples.
+- Reuses `getNakshatraLord`'s Vimshottari lord cycle (already verified
+  for Panchang) and the modern Rahu=Aquarius/Ketu=Scorpio co-rulership
+  convention (already verified for Vargas' Graha Arudha feature) rather
+  than re-deriving either.
