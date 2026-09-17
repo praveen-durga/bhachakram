@@ -10,3 +10,4 @@
 - [ ] Planet Positions special points (Mandi, Hora Lagna, Indu Lagna, Bhrigu Bindu, Upagrahas) — [.claude/todo-plans/16-planet-positions-special-points.md](.claude/todo-plans/16-planet-positions-special-points.md)
 - [ ] Planet Comfort route (40-point Star Devata comfort scoring) — [.claude/todo-plans/17-planet-comfort-route.md](.claude/todo-plans/17-planet-comfort-route.md)
 - [ ] Ashtaka Varga route (SAV + BAV per planet, chart display) — [.claude/todo-plans/18-ashtakavarga-route.md](.claude/todo-plans/18-ashtakavarga-route.md)
+- [ ] Dagdha Rasi fire indicator on Main D1 chart — [.claude/todo-plans/19-dagdha-rasi-main-chart.md](.claude/todo-plans/19-dagdha-rasi-main-chart.md)

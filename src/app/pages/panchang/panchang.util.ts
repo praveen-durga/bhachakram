@@ -1,5 +1,6 @@
 import { D1Chart, Graha } from '../../shared/services';
 import {
+  calculateBirthTithiNumber,
   calculateNakshatra,
   calculatePada,
   findGraha,
@@ -37,11 +38,6 @@ import {
 
 function normalize360(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
-}
-
-export function calculateBirthTithiNumber(sunLongitude: number, moonLongitude: number): number {
-  const raw = normalize360(moonLongitude - sunLongitude);
-  return Math.floor(raw / 12) + 1;
 }
 
 export function calculateTithiSphuta(d1Chart: D1Chart): TithiSphuta {

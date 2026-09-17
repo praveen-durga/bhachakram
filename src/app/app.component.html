@@ -5,7 +5,7 @@
       <div class="charts">
         <div class="chart-item">
           <h2 class="chart-title">D1 - Rasi</h2>
-          <app-rasi-chart [chartData]="d1Chart" />
+          <app-rasi-chart [chartData]="d1Chart" [dagdhaRasis]="dagdhaRasis()" />
         </div>
 
         @if (birthChart.d9Chart(); as d9Chart) {

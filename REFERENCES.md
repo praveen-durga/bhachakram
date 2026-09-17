@@ -136,3 +136,19 @@ focused on running/building the app.
   sums to 51 — informational only, not a verified classical total) and
   marked with `*` in the UI, same convention as Indu Lagna and Vargas'
   D3J/D3S.
+
+## Dagdha Rasi (Main D1 chart fire indicator)
+
+- Classical Muhurta Shastra concept: for each tithi-within-paksha (1-14;
+  Purnima/Amavasya have none), a fixed set of rashi(s) are "dagdha" (burnt).
+  Cross-checked against 4 sources:
+  [jyotishkalpadrum.blogspot.com](https://jyotishkalpadrum.blogspot.com/2020/06/Dagdha-Sign-in-tithi.html)
+  and a WebSearch aggregate agreed exactly on all 14 rows; a 3rd source
+  ([freevedicastro.com](https://www.freevedicastro.com/dagdharashis.html))
+  disagreed on 2 rows (Dashami, Trayodashi); a 4th
+  ([navagrah.blogspot.com](http://navagrah.blogspot.com/2014/08/dagdha-rashi-and-dagdha-yoga.html))
+  broke the tie in favor of the original 2 sources — see
+  `.claude/todo-plans/19-dagdha-rasi-main-chart.md` for the resolved table.
+- Uses the birth tithi (not "today"), consistent with the rest of the app —
+  there's no "current moment"/live-transit concept anywhere else in this
+  codebase, every Panchang value is derived from the birth D1 chart.

@@ -94,9 +94,11 @@ const GRAHA_LABEL_POSITIONS_BY_STYLE: Record<ChartStyle, [number, number, number
 export class RasiChartComponent {
   chartData = input.required<D1Chart>();
   chartStyle = input<ChartStyle>('north');
+  dagdhaRasis = input<number[]>([]);
 
   protected regions = computed<RasiHouseRegion[]>(() => {
     const { ascendantRasi, ascendantLongitude, grahas } = this.chartData();
+    const dagdhaRasis = this.dagdhaRasis();
     const regionPolygons = REGION_POLYGONS_BY_STYLE[this.chartStyle()];
     const rasiLabelPositions = RASI_LABEL_POSITIONS_BY_STYLE[this.chartStyle()];
     const grahaLabelPositions = GRAHA_LABEL_POSITIONS_BY_STYLE[this.chartStyle()];
@@ -109,6 +111,10 @@ export class RasiChartComponent {
       const labelTexts = grahas
         .filter((g) => g.rasi === rasi)
         .map((g) => `${GRAHA_ABBREVIATIONS[g.graha]} ${formatDegreeInRasi(g.longitude)}`);
+
+      if (dagdhaRasis.includes(rasi)) {
+        labelTexts.unshift('🔥');
+      }
 
       if (position === 0) {
         const ascText = ascendantLongitude === undefined ? 'Asc' : `Asc ${formatDegreeInRasi(ascendantLongitude)}`;
