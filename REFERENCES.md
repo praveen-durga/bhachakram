@@ -110,3 +110,29 @@ focused on running/building the app.
   for Panchang) and the modern Rahu=Aquarius/Ketu=Scorpio co-rulership
   convention (already verified for Vargas' Graha Arudha feature) rather
   than re-deriving either.
+
+## Ashtaka Varga
+
+- Classical Parashara Bhinnashtakavarga/Sarvashtakavarga (8 contributors:
+  7 planets + Lagna; Rahu/Ketu excluded, per the standard scheme). The
+  primary source (BPHS via archive.org) truncates before its Ashtakavarga
+  chapters' tables, so the 7 bindu-contribution tables (56 cells total)
+  were verified against 2 independent secondary sources
+  ([myzodiaq.in](https://www.myzodiaq.in/en/online-library/basics-of-vedic-astrology/ashtakvarga/ashtakavarga-calculation-the-complete-step-by-step-guide-to-cosmic-scoring),
+  [vedastro.org "Mastering Ashtakavarga"](https://vedastro.org/blog/Mastering-Ashtakavarga-Part-2-Building-Bhinnashtakavarga-Charts.html))
+  and cross-checked against the well-known classical per-planet totals
+  (Sun 48, Moon 49, Mars 39, Mercury 54, Jupiter 56, Venus 52, Saturn 39;
+  sum 337) — see `.claude/todo-plans/18-ashtakavarga-route.md` for the 2
+  single-cell discrepancies found and resolved this way (Moon's and
+  Venus's Lagna rows), and the Node validation (table arithmetic + a
+  2,000-trial invariant sweep confirming SAV always totals 337).
+- **Lagna's own BAV (8th mini-chart, added on request) is NOT classical.**
+  In the Parashara scheme Lagna is only ever a contributor to the 7 planets'
+  charts, never a target with its own Bhinnashtakavarga — no source found
+  presents a genuine, independently-verifiable table for it (no reference
+  total to check arithmetic against, unlike the 7 planets). Flagged this to
+  the user before implementing; per their choice, it's included as a
+  best-effort table (pieced together from secondary-source fragments, row
+  sums to 51 — informational only, not a verified classical total) and
+  marked with `*` in the UI, same convention as Indu Lagna and Vargas'
+  D3J/D3S.

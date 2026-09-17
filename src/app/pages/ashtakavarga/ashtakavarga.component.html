@@ -1,0 +1,24 @@
+<h1>Ashtaka Varga</h1>
+
+<div class="charts">
+  @if (savChart(); as chart) {
+    <div class="chart-item sav">
+      <h2 class="chart-title">
+        Sarvashtakavarga (SAV) <span class="chart-total">{{ chart.total }}</span>
+      </h2>
+      <app-ashtakavarga-chart [ascendantRasi]="ascendantRasi()" [bindusByRasi]="chart.bindusByRasi" />
+    </div>
+  }
+
+  @for (chart of bavCharts(); track chart.target) {
+    <div class="chart-item">
+      <h2 class="chart-title">
+        {{ chart.target }} BAV <span class="chart-total">{{ chart.total }}</span>
+        @if (unverifiedTargets.includes(chart.target)) {
+          <span class="unverified-mark" title="Not from a primary classical source - best-effort formula">*</span>
+        }
+      </h2>
+      <app-ashtakavarga-chart [ascendantRasi]="ascendantRasi()" [bindusByRasi]="chart.bindusByRasi" />
+    </div>
+  }
+</div>

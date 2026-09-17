@@ -46,6 +46,11 @@ export const routes: Routes = [
       import('./pages/planet-comfort/planet-comfort.component').then((m) => m.PlanetComfortComponent),
   },
   {
+    path: 'ashtakavarga',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () => import('./pages/ashtakavarga/ashtakavarga.component').then((m) => m.AshtakavargaComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),

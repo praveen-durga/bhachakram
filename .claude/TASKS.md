@@ -9,3 +9,4 @@
 - [ ] Vargas route (D3-D60 chart selector, 16 vargas) — [.claude/todo-plans/15-vargas-route.md](.claude/todo-plans/15-vargas-route.md)
 - [ ] Planet Positions special points (Mandi, Hora Lagna, Indu Lagna, Bhrigu Bindu, Upagrahas) — [.claude/todo-plans/16-planet-positions-special-points.md](.claude/todo-plans/16-planet-positions-special-points.md)
 - [ ] Planet Comfort route (40-point Star Devata comfort scoring) — [.claude/todo-plans/17-planet-comfort-route.md](.claude/todo-plans/17-planet-comfort-route.md)
+- [ ] Ashtaka Varga route (SAV + BAV per planet, chart display) — [.claude/todo-plans/18-ashtakavarga-route.md](.claude/todo-plans/18-ashtakavarga-route.md)

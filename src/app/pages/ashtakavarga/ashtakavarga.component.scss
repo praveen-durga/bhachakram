@@ -1,0 +1,46 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .charts {
+    @apply grid gap-6;
+    grid-template-columns: minmax(20rem, 1.6fr) repeat(4, minmax(12rem, 1fr));
+    grid-auto-rows: 1fr;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+
+    .chart-item {
+      &.sav {
+        grid-column: 1;
+        grid-row: 1 / span 2;
+
+        @media (max-width: 768px) {
+          grid-row: auto;
+        }
+      }
+
+      .chart-title {
+        @apply text-center font-semibold mb-2;
+        color: var(--color-base-content);
+
+        .chart-total {
+          @apply font-normal;
+          font-size: var(--font-size-sm);
+          color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+        }
+
+        .unverified-mark {
+          color: var(--color-warning);
+        }
+      }
+    }
+  }
+}
