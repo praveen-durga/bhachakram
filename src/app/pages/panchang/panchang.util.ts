@@ -1,11 +1,17 @@
 import { D1Chart, Graha } from '../../shared/services';
-import { calculateNakshatra, calculatePada, findGraha, getRasiDistances, WEEKDAY_LORD } from '../../shared/utils';
+import {
+  calculateNakshatra,
+  calculatePada,
+  findGraha,
+  getNakshatraLord,
+  getRasiDistances,
+  WEEKDAY_LORD,
+} from '../../shared/utils';
 import {
   FIXED_KARNAM_NAMES,
   MOVABLE_KARNAM_NAMES,
   MUDAKKU_NAKSHATRA_SUM,
   MUDAKKU_RASI_SUM,
-  NAKSHATRA_LORD_CYCLE,
   SANTAN_TITHI_DIFFICULT,
   SANTAN_TITHI_FAVOURABLE,
   SANTAN_TITHI_NOTES,
@@ -31,10 +37,6 @@ import {
 
 function normalize360(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
-}
-
-export function getNakshatraLord(nakshatra: number): Graha {
-  return NAKSHATRA_LORD_CYCLE[nakshatra % 9];
 }
 
 export function calculateBirthTithiNumber(sunLongitude: number, moonLongitude: number): number {
