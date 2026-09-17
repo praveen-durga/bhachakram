@@ -1,0 +1,59 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .empty-state {
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .occurrence-list {
+    @apply flex flex-col gap-4;
+  }
+
+  .period,
+  .vehicle {
+    font-size: var(--font-size-sm);
+    color: color-mix(in oklch, var(--color-base-content) 80%, transparent);
+  }
+
+  .body-part-table {
+    @apply w-full border-separate border-spacing-0 text-left mt-2;
+    font-size: var(--font-size-sm);
+
+    th,
+    td {
+      @apply px-3 py-1.5 align-middle whitespace-nowrap;
+    }
+
+    thead {
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+      font-weight: var(--font-weight-semibold);
+
+      tr th {
+        border-bottom: 1px solid var(--color-base-300);
+      }
+    }
+
+    tbody {
+      tr:not(:last-child) td {
+        border-bottom: 1px solid var(--color-base-300);
+      }
+
+      tr.sensitive td {
+        background: color-mix(in oklch, var(--color-warning) 12%, transparent);
+      }
+    }
+
+    .sensitive-tag {
+      @apply ml-2 rounded px-1.5 py-0.5 text-xs font-semibold uppercase;
+      background: color-mix(in oklch, var(--color-warning) 25%, transparent);
+      color: var(--color-warning-content);
+    }
+  }
+}
