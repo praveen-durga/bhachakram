@@ -33,6 +33,14 @@ function modality(rasi: number): number {
   return rasi % 3;
 }
 
+export type RasiModality = 'Movable' | 'Fixed' | 'Dual';
+
+const MODALITY_LABELS: RasiModality[] = ['Movable', 'Fixed', 'Dual'];
+
+export function getRasiModality(rasi: number): RasiModality {
+  return MODALITY_LABELS[modality(rasi)];
+}
+
 // D3 (Drekkana), BPHS v.7-8: each 10° third of a sign maps to that sign, the
 // 5th-from-it, or the 9th-from-it.
 export function calculateD3Rasi(longitude: number): number {

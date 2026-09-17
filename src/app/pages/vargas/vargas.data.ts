@@ -17,8 +17,9 @@ import {
   calculateD30Rasi,
   calculateD45Rasi,
   calculateD60Rasi,
+  RasiModality,
 } from '../../shared/utils';
-import { VargaOption } from './vargas.model';
+import { ModalityGrade, VargaOption } from './vargas.model';
 
 export const VARGA_OPTIONS: VargaOption[] = [
   { key: 'D3', label: 'D3 - Drekkana', calculateRasi: calculateD3Rasi },
@@ -44,3 +45,12 @@ export const VARGA_OPTIONS: VargaOption[] = [
 // Not BPHS-verified (best-effort from secondary sources - see varga.util.ts
 // for the confidence notes per formula); shown with a caution badge in the UI.
 export const UNVERIFIED_VARGA_KEYS = ['D3J', 'D3S', 'D5', 'D6', 'D8', 'D11', 'D27'];
+
+// Grade for a D1 sign's modality compared against a varga sign's modality,
+// as specified by the user: M+M=E, M+F=A, M+D=B, F+F=B, F+D=E, D+D=A
+// (symmetric - order between the two signs doesn't matter).
+export const MODALITY_GRADE_MATRIX: Record<RasiModality, Record<RasiModality, ModalityGrade>> = {
+  Movable: { Movable: 'E', Fixed: 'A', Dual: 'B' },
+  Fixed: { Movable: 'A', Fixed: 'B', Dual: 'E' },
+  Dual: { Movable: 'B', Fixed: 'E', Dual: 'A' },
+};

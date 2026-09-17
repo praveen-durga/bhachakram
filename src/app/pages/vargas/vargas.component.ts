@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { BirthChartService } from '../../shared/services';
 import { ButtonComponent, RasiChartComponent } from '../../shared/ui';
 import { UNVERIFIED_VARGA_KEYS, VARGA_OPTIONS } from './vargas.data';
-import { buildVargaChart } from './vargas.util';
+import { buildModalityGradeRows, buildRasiDistanceRows, buildVargaChart } from './vargas.util';
 
 @Component({
   selector: 'app-vargas',
@@ -28,6 +28,16 @@ export class VargasComponent {
   protected selectedVargaChart = computed(() => {
     const d1Chart = this.d1Chart();
     return d1Chart ? buildVargaChart(d1Chart, this.selectedOption().calculateRasi) : null;
+  });
+
+  protected rasiDistanceRows = computed(() => {
+    const d1Chart = this.d1Chart();
+    return d1Chart ? buildRasiDistanceRows(d1Chart, this.vargaOptions) : [];
+  });
+
+  protected modalityGradeRows = computed(() => {
+    const d1Chart = this.d1Chart();
+    return d1Chart ? buildModalityGradeRows(d1Chart, this.vargaOptions) : [];
   });
 
   protected selectVarga(key: string): void {
