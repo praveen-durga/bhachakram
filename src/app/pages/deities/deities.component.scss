@@ -1,0 +1,40 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  app-table {
+    @apply block;
+  }
+
+  .d60-cell {
+    @apply flex flex-col gap-0.5 py-1;
+  }
+
+  .d60-name {
+    @apply font-medium;
+  }
+
+  .d60-nature {
+    @apply text-xs font-semibold uppercase;
+
+    &.benefic {
+      color: green;
+    }
+
+    &.malefic {
+      color: crimson;
+    }
+  }
+
+  .d60-meaning {
+    @apply text-xs;
+    color: var(--color-base-content);
+    opacity: 0.7;
+  }
+}

@@ -1,0 +1,29 @@
+<h1>Deities</h1>
+
+<ng-template #d3Cell let-row>
+  <span [style.color]="d3Colors[row.d3]">{{ row.d3 }}</span>
+</ng-template>
+
+<ng-template #d9Cell let-row>
+  <span [style.color]="d9Colors[row.d9]">{{ row.d9 }}</span>
+</ng-template>
+
+<ng-template #d12Cell let-row>
+  <span [style.color]="d12Colors[row.d12]">{{ row.d12 }}</span>
+</ng-template>
+
+<ng-template #d60Cell let-row>
+  <div class="d60-cell">
+    <span class="d60-name">{{ row.d60 }}</span>
+    <span
+      class="d60-nature"
+      [class.benefic]="row.d60Nature === 'Benefic'"
+      [class.malefic]="row.d60Nature === 'Malefic'"
+    >
+      {{ row.d60Nature }}
+    </span>
+    <span class="d60-meaning">{{ row.d60Meaning }}</span>
+  </div>
+</ng-template>
+
+<app-table [columns]="columns()" [rows]="rows()" />
