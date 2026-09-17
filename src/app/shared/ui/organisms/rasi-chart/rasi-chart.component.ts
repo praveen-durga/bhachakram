@@ -15,7 +15,7 @@ const GRAHA_ABBREVIATIONS: Record<Graha, string> = {
   Ketu: 'Ke',
 };
 
-const NORTH_REGION_POLYGONS = [
+export const NORTH_REGION_POLYGONS = [
   '200,0 300,100 200,200 100,100',
   '400,0 200,0 300,100',
   '400,0 400,200 300,100',
@@ -31,7 +31,7 @@ const NORTH_REGION_POLYGONS = [
 ];
 
 // [x, y] — where each region's rasi number is placed.
-const NORTH_RASI_LABEL_POSITIONS: [number, number][] = [
+export const NORTH_RASI_LABEL_POSITIONS: [number, number][] = [
   [200, 18],
   [370, 18],
   [385, 35],
