@@ -1,0 +1,54 @@
+<h1>Sade Sati</h1>
+
+@if (occurrences(); as occurrenceList) {
+  @if (occurrenceList.length === 0) {
+    <p class="empty-state">No Sade Sati, Ardhashtama Shani or Ashtama Shani occurrences found in the next 80 years.</p>
+  } @else {
+    <div class="occurrence-list">
+      @for (occurrence of occurrenceList; track occurrence.type + occurrence.start.getTime()) {
+        <app-card>
+          <span title>{{ occurrence.type }} ({{ occurrence.fromMoonLabel }})</span>
+
+          <p class="period">
+            <strong>Period:</strong> {{ occurrence.start | date: 'd MMM y' : displayTimezone }} →
+            {{ occurrence.end | date: 'd MMM y' : displayTimezone }} · Saturn in {{ occurrence.signs.join(' → ') }}
+          </p>
+
+          <p class="vehicle">
+            <strong>Vehicle / animal:</strong> {{ occurrence.vehicle.animal }} ({{ occurrence.vehicle.remainder }}) —
+            {{ occurrence.vehicle.indication }} · {{ occurrence.vehicle.janmaNakshatra }} →
+            {{ occurrence.vehicle.transitNakshatra }} (count {{ occurrence.vehicle.count }})
+          </p>
+
+          <table class="body-part-table">
+            <thead>
+              <tr>
+                <th>Part</th>
+                <th>Months</th>
+                <th>From</th>
+                <th>To</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of occurrence.bodyPartTimeline; track row.part) {
+                <tr [class.sensitive]="row.sensitive">
+                  <td>
+                    {{ row.part }}
+                    @if (row.sensitive) {
+                      <span class="sensitive-tag">Sensitive</span>
+                    }
+                  </td>
+                  <td>{{ row.months | number: '1.0-3' }}</td>
+                  <td>{{ row.from | date: 'yyyy-MM-dd' : displayTimezone }}</td>
+                  <td>{{ row.to | date: 'yyyy-MM-dd' : displayTimezone }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </app-card>
+      }
+    </div>
+  }
+} @else {
+  <p class="empty-state">Calculating…</p>
+}
