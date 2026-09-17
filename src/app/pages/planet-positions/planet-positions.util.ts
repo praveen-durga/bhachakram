@@ -17,7 +17,7 @@ import {
   KARAKA_GRAHAS,
   UPAKETU_OFFSET_DEG,
 } from './planet-positions.data';
-import { CharaKarakaInfo, PlanetPositionRow } from './planet-positions.model';
+import { BhavaPositionColumn, CharaKarakaInfo, PlanetPositionRow } from './planet-positions.model';
 
 function normalizeDegrees(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
@@ -149,4 +149,44 @@ export function formatGrahaBodyLabel(body: string, karaka?: CharaKarakaInfo): st
     return body;
   }
   return `${body}${karaka.isRetrograde ? ' (R)' : ''} - ${karaka.abbreviation}`;
+}
+
+// Bhava (house) positions, houses 1-12 as whole signs from the Ascendant
+// (house N's sign = Ascendant's sign + N-1), matching how every other
+// house-counting feature in this app already works. For each house:
+// - House Lord: the lord of that house's D1 sign.
+// - NTR: the D9 sign the house lord is posited in.
+// - Dispositors: the D1 dispositor (lord of the house lord's own D1 sign)
+//   and D9 dispositor (lord of the house lord's D9 sign, i.e. lord of NTR).
+// - Dispositor combinations: the D1/D9 dispositors' OWN already-computed
+//   Rasi Combination values from the main table (grahaRows) - reused, not
+//   recalculated, per the user's explicit instruction.
+export function buildBhavaPositionColumns(
+  d1Chart: D1Chart,
+  d9Chart: D1Chart,
+  grahaRows: PlanetPositionRow[],
+): BhavaPositionColumn[] {
+  const combinationByGraha = new Map(grahaRows.map((row) => [row.body, row.rasiCombination]));
+
+  return Array.from({ length: 12 }, (_, index) => {
+    const house = index + 1;
+    const houseRasi = (d1Chart.ascendantRasi + index) % 12;
+    const houseLord = RASI_LORD[houseRasi];
+
+    const houseLordD1Rasi = findGraha(d1Chart.grahas, houseLord).rasi;
+    const houseLordD9Rasi = findGraha(d9Chart.grahas, houseLord).rasi;
+
+    const d1Dispositor = RASI_LORD[houseLordD1Rasi];
+    const d9Dispositor = RASI_LORD[houseLordD9Rasi];
+
+    return {
+      house,
+      houseLord,
+      ntr: RASI_NAMES[houseLordD9Rasi],
+      d1Dispositor,
+      d9Dispositor,
+      d1DispositorCombination: combinationByGraha.get(d1Dispositor) ?? '',
+      d9DispositorCombination: combinationByGraha.get(d9Dispositor) ?? '',
+    };
+  });
 }

@@ -19,8 +19,9 @@ import {
   MATRIX_PLANETS,
   wallTimeToUtc,
 } from '../../shared/utils';
-import { CharaKarakaInfo, KarmicDoshaDetails, PlanetPositionRow } from './planet-positions.model';
+import { BhavaPositionColumn, CharaKarakaInfo, KarmicDoshaDetails, PlanetPositionRow } from './planet-positions.model';
 import {
+  buildBhavaPositionColumns,
   buildRow,
   calculateBhriguBindu,
   calculateChapa,
@@ -97,6 +98,16 @@ export class PlanetPositionsComponent {
   });
 
   protected allRows = computed<PlanetPositionRow[]>(() => [...this.rows(), ...this.specialPointRows()]);
+
+  protected bhavaPositionColumns = computed<BhavaPositionColumn[]>(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    const d9Chart = this.birthChart.d9Chart();
+    if (!d1Chart || !d9Chart) {
+      return [];
+    }
+
+    return buildBhavaPositionColumns(d1Chart, d9Chart, this.rows());
+  });
 
   protected matrixPlanets = MATRIX_PLANETS;
 

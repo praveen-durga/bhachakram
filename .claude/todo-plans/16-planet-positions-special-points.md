@@ -158,11 +158,42 @@ Rahu/Ketu).
   columns) so the underlying `row.body` stays a plain graha name
   everywhere except this one display spot.
 
+## Addendum: Bhava Positions table
+
+A new hand-rolled table (houses 1-12 as columns, matching Shadbala's
+Bhava Bala table's shape/styling precedent, not the generic `Table`
+molecule) with 4 rows, all derived from data already computed
+elsewhere - no new ephemeris calls, no new research needed:
+
+- **House Lord**: house N's sign = Ascendant's sign + N-1 (whole-sign
+  houses, matching every other house-counting feature already in this
+  app - Sade Sati, Graha Arudha, Mandi's house remedies all use plain
+  sign-counting, not bhava-chalit cusps, so this stays consistent
+  rather than introducing a second house convention). Lord = `RASI_LORD`
+  of that sign.
+- **NTR**: the D9 sign the House Lord graha is posited in (kept the
+  user's own label verbatim rather than guessing an expansion for the
+  abbreviation).
+- **Dispositors**: D1 dispositor = lord of the House Lord's own D1
+  sign; D9 dispositor = lord of the House Lord's D9 sign (i.e. lord of
+  the NTR sign). A graha can be its own dispositor (e.g. Mars sitting
+  in Scorpio, which Mars also rules) - this falls out naturally from
+  the lookup, no special-casing needed, verified in a Node sweep.
+- **Dispositor Combinations**: reuses each dispositor's own
+  already-computed `rasiCombination` string from the main table's rows
+  (via a `body -> rasiCombination` lookup map) - no recalculation, per
+  the user's explicit instruction to just display the existing value.
+- Verified with a full 12-house Node sweep (fake chart data) that every
+  house lord/dispositor is always one of the 7 classical grahas (never
+  Rahu/Ketu, since `RASI_LORD` never returns them) and every house's
+  sign cycles correctly from the Ascendant.
+
 ## Status
 
 Implemented and building cleanly. Formulas researched from BPHS directly
 where possible (Hora Lagna, 5 Sun-Upagrahas) and range-tested in Node;
 Indu Lagna and Bhrigu Bindu are from general knowledge, not fresh
 citations, per the user's explicit choice to proceed anyway. Chara
-Karakas verified against the user's own reference screenshot. Not yet
-verified in a live browser.
+Karakas verified against the user's own reference screenshot. Bhava
+Positions is a pure reuse/derivation of already-computed data, verified
+with a Node sweep. Not yet verified in a live browser.
