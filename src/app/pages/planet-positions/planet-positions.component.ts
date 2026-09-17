@@ -1,60 +1,39 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, TemplateRef, viewChild } from '@angular/core';
 import {
-  KARMIC_DOSHAS,
-  KARMIC_NAKSHATRAS,
-  KARMIC_PLANETS,
-  NAKSHATRA_PADA_DATA,
-  NAVAMSA_COMBINATION,
-} from '../../shared/data';
-import { BirthChartService } from '../../shared/services';
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  TemplateRef,
+  viewChild,
+} from '@angular/core';
+import { KARMIC_DOSHAS, NAVAMSA_COMBINATION } from '../../shared/data';
+import { BirthChartService, EphemerisService, Graha } from '../../shared/services';
 import { ButtonComponent, ModalComponent, TableCellContext, TableColumn, TableComponent } from '../../shared/ui';
 import {
-  calculateNakshatra,
-  calculatePada,
+  calculateD9Rasi,
   findGraha,
-  formatDegreeInRasi,
-  getRasiDistances,
   GRAHA_ORDER,
+  getMandiInstant,
   MATRIX_PLANETS,
-  NAKSHATRA_NAMES,
-  RASI_NAMES,
+  wallTimeToUtc,
 } from '../../shared/utils';
-import { KarmicDoshaDetails, PlanetPositionRow } from './planet-positions.model';
-
-function buildRow(body: string, longitude: number, rasiIndex: number, navamsaRasiIndex: number): PlanetPositionRow {
-  const nakshatraIndex = calculateNakshatra(longitude);
-  const pada = calculatePada(longitude);
-  const { forward, backward, isVargottam } = getRasiDistances(rasiIndex, navamsaRasiIndex);
-  const padaInfo = NAKSHATRA_PADA_DATA[nakshatraIndex][pada as 1 | 2 | 3 | 4];
-  const hasKarmicDosha = KARMIC_NAKSHATRAS[rasiIndex].includes(nakshatraIndex);
-
-  let karmicPlanet = '';
-  let karmicPlanetResults = '';
-  for (const [planet, data] of Object.entries(KARMIC_PLANETS)) {
-    if (data.stars.includes(nakshatraIndex)) {
-      karmicPlanet = planet;
-      karmicPlanetResults = data.result;
-    }
-  }
-
-  return {
-    body,
-    longitude: `${RASI_NAMES[rasiIndex]} ${formatDegreeInRasi(longitude)}`,
-    nakshatra: NAKSHATRA_NAMES[nakshatraIndex],
-    pada,
-    rasi: RASI_NAMES[rasiIndex],
-    navamsa: RASI_NAMES[navamsaRasiIndex],
-    rasiCombination: `${forward},${backward}${isVargottam ? ' (Vargottam)' : ''}`,
-    characteristics: padaInfo.characteristics,
-    careerPath: padaInfo.careerPath,
-    hasKarmicDosha,
-    nakshatraIndex,
-    rasiIndex,
-    navamsaRasiIndex,
-    karmicPlanet,
-    karmicPlanetResults,
-  };
-}
+import { BhavaPositionColumn, CharaKarakaInfo, KarmicDoshaDetails, PlanetPositionRow } from './planet-positions.model';
+import {
+  buildBhavaPositionColumns,
+  buildRow,
+  calculateBhriguBindu,
+  calculateChapa,
+  calculateCharaKarakas,
+  calculateDhuma,
+  calculateInduLagna,
+  calculateHoraLagna,
+  calculateParivesha,
+  calculateUpaketu,
+  calculateVyatipata,
+  formatGrahaBodyLabel,
+} from './planet-positions.util';
 
 @Component({
   selector: 'app-planet-positions',
@@ -65,18 +44,24 @@ function buildRow(body: string, longitude: number, rasiIndex: number, navamsaRas
 })
 export class PlanetPositionsComponent {
   private birthChart = inject(BirthChartService);
+  private ephemeris = inject(EphemerisService);
 
+  protected bodyCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('bodyCell');
   protected karmicDoshaCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicDoshaCell');
   protected karmicPlanetCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicPlanetCell');
 
   #selectedDosha = signal<KarmicDoshaDetails | null>(null);
   #selectedKarmicPlanetResults = signal<string | null>(null);
+  #specialPointRows = signal<PlanetPositionRow[]>([]);
+  #grahaKarakas = signal<Partial<Record<Graha, CharaKarakaInfo>>>({});
 
   protected selectedDosha = this.#selectedDosha.asReadonly();
   protected selectedKarmicPlanetResults = this.#selectedKarmicPlanetResults.asReadonly();
+  protected specialPointRows = this.#specialPointRows.asReadonly();
+  protected grahaKarakas = this.#grahaKarakas.asReadonly();
 
   protected columns = computed<TableColumn<PlanetPositionRow>[]>(() => [
-    { key: 'body', label: 'Body' },
+    { key: 'body', label: 'Body', cellTemplate: this.bodyCell() },
     { key: 'longitude', label: 'Longitude' },
     { key: 'nakshatra', label: 'Nakshatra' },
     { key: 'pada', label: 'Pada' },
@@ -112,6 +97,18 @@ export class PlanetPositionsComponent {
     return [ascendantRow, ...grahaRows];
   });
 
+  protected allRows = computed<PlanetPositionRow[]>(() => [...this.rows(), ...this.specialPointRows()]);
+
+  protected bhavaPositionColumns = computed<BhavaPositionColumn[]>(() => {
+    const d1Chart = this.birthChart.d1Chart();
+    const d9Chart = this.birthChart.d9Chart();
+    if (!d1Chart || !d9Chart) {
+      return [];
+    }
+
+    return buildBhavaPositionColumns(d1Chart, d9Chart, this.rows());
+  });
+
   protected matrixPlanets = MATRIX_PLANETS;
 
   protected planetMatrix = computed<Record<string, number>>(() => {
@@ -130,6 +127,72 @@ export class PlanetPositionsComponent {
 
   protected hoveredRow = signal<number | null>(null);
   protected hoveredCol = signal<number | null>(null);
+
+  constructor() {
+    effect(() => {
+      const d1Chart = this.birthChart.d1Chart();
+      const sunTimes = this.birthChart.sunTimes();
+      const details = this.birthChart.birthDetails();
+
+      if (!d1Chart || !sunTimes || !details) {
+        this.#specialPointRows.set([]);
+        this.#grahaKarakas.set({});
+        return;
+      }
+
+      const moon = findGraha(d1Chart.grahas, 'Moon');
+      const rahu = findGraha(d1Chart.grahas, 'Rahu');
+      const sun = findGraha(d1Chart.grahas, 'Sun');
+      const weekday = new Date(details.dob).getUTCDay();
+      const birthTime = wallTimeToUtc(details.dob, details.tob, details.timezone);
+
+      const bhriguBinduLongitude = calculateBhriguBindu(moon.longitude, rahu.longitude);
+      const induLagnaRasi = calculateInduLagna(d1Chart.ascendantRasi, moon.rasi);
+      const dhumaLongitude = calculateDhuma(sun.longitude);
+      const vyatipataLongitude = calculateVyatipata(dhumaLongitude);
+      const pariveshaLongitude = calculateParivesha(vyatipataLongitude);
+      const chapaLongitude = calculateChapa(pariveshaLongitude);
+      const upaketuLongitude = calculateUpaketu(chapaLongitude);
+
+      const mandiInstant = getMandiInstant(birthTime, sunTimes, weekday);
+
+      Promise.all([
+        this.ephemeris.calculateAscendant(mandiInstant, details.lat, details.lng, details.ayanamsa),
+        this.ephemeris.calculateGrahaEphemerisData(sunTimes.sunrise, details.ayanamsa),
+        this.ephemeris.calculateGrahaEphemerisData(birthTime, details.ayanamsa),
+      ]).then(([mandiLongitude, sunriseEphemeris, birthEphemeris]) => {
+        const horaLagnaLongitude = calculateHoraLagna(
+          sunriseEphemeris.grahas.Sun.longitude,
+          birthTime,
+          sunTimes.sunrise,
+        );
+
+        const points: [string, number][] = [
+          ['Mandi', mandiLongitude],
+          ['Hora Lagna', horaLagnaLongitude],
+          ['Indu Lagna*', induLagnaRasi * 30],
+          ['Bhrigu Bindu', bhriguBinduLongitude],
+          ['Dhuma', dhumaLongitude],
+          ['Vyatipata', vyatipataLongitude],
+          ['Parivesha', pariveshaLongitude],
+          ['Chapa', chapaLongitude],
+          ['Upaketu', upaketuLongitude],
+        ];
+
+        this.#specialPointRows.set(
+          points.map(([body, longitude]) =>
+            buildRow(body, longitude, Math.floor(longitude / 30), calculateD9Rasi(longitude)),
+          ),
+        );
+
+        this.#grahaKarakas.set(calculateCharaKarakas(d1Chart, birthEphemeris.grahas));
+      });
+    });
+  }
+
+  protected bodyLabel(body: string): string {
+    return formatGrahaBodyLabel(body, this.grahaKarakas()[body as Graha]);
+  }
 
   protected setHover(row: number | null, col: number | null): void {
     this.hoveredRow.set(row);

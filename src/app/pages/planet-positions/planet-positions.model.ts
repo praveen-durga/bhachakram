@@ -22,3 +22,18 @@ export type KarmicDoshaDetails = {
   indications: string;
   remedies: string;
 };
+
+export type CharaKarakaInfo = {
+  abbreviation: string;
+  isRetrograde: boolean;
+};
+
+export type BhavaPositionColumn = {
+  house: number;
+  houseLord: string;
+  ntr: string;
+  d1Dispositor: string;
+  d9Dispositor: string;
+  d1DispositorCombination: string;
+  d9DispositorCombination: string;
+};

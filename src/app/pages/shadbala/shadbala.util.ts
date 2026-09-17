@@ -8,6 +8,7 @@ import {
   calculateD30Rasi,
   calculateHora,
   getHoraLord,
+  RASI_LORD,
   WEEKDAY_LORD,
 } from '../../shared/utils';
 import {
@@ -21,7 +22,6 @@ import {
   NATURAL_RELATION,
   OJHAYUGMA_ODD_SIGN_GRAHAS,
   PAKSHA_BENEFIC_GRAHAS,
-  RASI_LORD,
   DREKKANA_FEMALE_GRAHAS,
   DREKKANA_MALE_GRAHAS,
   DREKKANA_NEUTRAL_GRAHAS,

@@ -45,6 +45,25 @@ export const RASI_NAMES = [
   'Pisces',
 ] as const;
 
+// Own-sign rulership, index = rasi (0-11). Rahu/Ketu own no sign classically,
+// so this is Graha (not the wider set) - Saturn owns both Capricorn and
+// Aquarius, Jupiter both Sagittarius and Pisces, etc. Relocated here from
+// shadbala.data.ts since Planet Positions' Indu Lagna needs it too.
+export const RASI_LORD: Graha[] = [
+  'Mars', // Aries
+  'Venus', // Taurus
+  'Mercury', // Gemini
+  'Moon', // Cancer
+  'Sun', // Leo
+  'Mercury', // Virgo
+  'Venus', // Libra
+  'Mars', // Scorpio
+  'Jupiter', // Sagittarius
+  'Saturn', // Capricorn
+  'Saturn', // Aquarius
+  'Jupiter', // Pisces
+];
+
 const NAKSHATRA_SPAN = 360 / 27;
 
 export const GRAHA_ORDER: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
@@ -121,4 +140,54 @@ export function calculateHora(birthTime: Date, sunTimes: SunTimes, weekday: numb
 export function getHoraLord(weekday: number, horaIndex: number): Graha {
   const weekdayLordIndex = CHALDEAN_ORDER.indexOf(WEEKDAY_LORD[weekday]);
   return CHALDEAN_ORDER[(weekdayLordIndex + horaIndex - 1) % 7];
+}
+
+// Mandi/Gulika's POSITION (not the "Gulika Kalam" muhurta timing-window
+// feature, a different simpler concept using an 8-part division) uses a
+// 15-muhurta division of the day: Mandi's instant = sunrise + (dayLength/15)
+// * muhurtaCount(weekday), with the classic descending-odd-number sequence
+// 13-11-9-7-5-3-1 for Sun-Sat. Verified to sub-second precision against a
+// real reference chart's reported Mandi position (an earlier 8-part-portion
+// implementation was off by up to a full rasi — do not reintroduce it).
+export const MANDI_DAY_MUHURTA_COUNT: number[] = [13, 11, 9, 7, 5, 3, 1]; // index 0 = Sunday
+
+// Night muhurta counts: same descending-odd sequence, rotated by 4 days
+// relative to day (night's 8-part cycle for a given weekday starts 5
+// planets forward from that weekday's own lord). Cross-checked against two
+// independent secondary sources that agree with each other and with the
+// day table's part→muhurta conversion — but UNLIKE the day table, this has
+// NOT been verified against a real night-birth reference chart. Treat as a
+// reasonable default, not a confirmed-correct formula, until tested — see
+// .claude/todo-plans/11-panchang-ui.md.
+export const MANDI_NIGHT_MUHURTA_COUNT: number[] = [5, 3, 1, 13, 11, 9, 7]; // index 0 = Sunday
+
+// Returns the instant at which the Ascendant must be computed to get Mandi's
+// longitude: sunrise + (dayLength / 15) * muhurtaCount for a daytime birth,
+// or sunset + (nightLength / 15) * muhurtaCount for a nighttime birth (the
+// classical 15-muhurta division). Day formula/table verified to sub-second
+// precision against a real reference chart's reported Mandi position — an
+// earlier 8-part-day-portion implementation ("Gulika Kalam" — a different,
+// unrelated concept: an auspicious/inauspicious TIME WINDOW, not Mandi's
+// chart position) was off by up to a full rasi, do not reintroduce it.
+// The NIGHT table is only logically derived/cross-checked against secondary
+// sources, NOT yet verified against a real night-birth reference chart —
+// see .claude/todo-plans/11-panchang-ui.md for the open verification task.
+// Also unresolved: for a birth between midnight and that day's own sunrise,
+// the "weekday" for the preceding night technically belongs to the previous
+// calendar day's sunset — not handled here, `weekday` is always the birth's
+// own calendar-day weekday. Relocated here from panchang.util.ts since
+// Planet Positions needs it too.
+export function getMandiInstant(birthTime: Date, sunTimes: SunTimes, weekday: number): Date {
+  const { sunrise, sunset, nextSunrise } = sunTimes;
+  const isDay = birthTime >= sunrise && birthTime < sunset;
+
+  if (isDay) {
+    const dayLength = sunset.getTime() - sunrise.getTime();
+    const muhurtaLength = dayLength / 15;
+    return new Date(sunrise.getTime() + MANDI_DAY_MUHURTA_COUNT[weekday] * muhurtaLength);
+  }
+
+  const nightLength = nextSunrise.getTime() - sunset.getTime();
+  const muhurtaLength = nightLength / 15;
+  return new Date(sunset.getTime() + MANDI_NIGHT_MUHURTA_COUNT[weekday] * muhurtaLength);
 }

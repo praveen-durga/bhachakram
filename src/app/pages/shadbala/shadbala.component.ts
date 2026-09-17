@@ -8,7 +8,14 @@ import {
   GrahaEphemerisData,
   SunTimes,
 } from '../../shared/services';
-import { calculateD9Rasi, findGraha, formatDegreeInRasi, getRasiDistances, wallTimeToUtc } from '../../shared/utils';
+import {
+  calculateD9Rasi,
+  findGraha,
+  formatDegreeInRasi,
+  getRasiDistances,
+  RASI_LORD,
+  wallTimeToUtc,
+} from '../../shared/utils';
 import {
   BHAVA_OCCUPANT_BALA,
   CHESTA_BALA_MINIMUM,
@@ -17,7 +24,6 @@ import {
   EXALTATION_LONGITUDE,
   KAALA_BALA_MINIMUM,
   NAISARGIKA_BALA,
-  RASI_LORD,
   SHADBALA_GRAHA_ORDER,
   SHADBALA_MINIMUM_REQUIREMENT,
   STHANA_BALA_MINIMUM,

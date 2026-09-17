@@ -1,5 +1,9 @@
 <h1>Planet Positions</h1>
 
+<ng-template #bodyCell let-row>
+  {{ bodyLabel(row.body) }}
+</ng-template>
+
 <ng-template #karmicDoshaCell let-row>
   @if (row.hasKarmicDosha) {
     <div class="cell-with-action">
@@ -22,7 +26,10 @@
   </div>
 </ng-template>
 
-<app-table [columns]="columns()" [rows]="rows()" />
+<app-table [columns]="columns()" [rows]="allRows()" />
+<p class="unverified-note">
+  * Indu Lagna is not from a primary classical source (best-effort formula) - all other rows above are.
+</p>
 
 <p class="navamsa-matrix-title">Navamsa Matrix</p>
 <div class="navamsa-matrix">
@@ -53,6 +60,54 @@
     </tbody>
   </table>
 </div>
+
+@if (bhavaPositionColumns().length > 0) {
+  <p class="bhava-position-title">Bhava Positions</p>
+  <div class="bhava-position-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Bhava</th>
+          @for (column of bhavaPositionColumns(); track column.house) {
+            <th>{{ column.house }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>House Lord</td>
+          @for (column of bhavaPositionColumns(); track column.house) {
+            <td>{{ column.houseLord }}</td>
+          }
+        </tr>
+        <tr>
+          <td>NTR</td>
+          @for (column of bhavaPositionColumns(); track column.house) {
+            <td>{{ column.ntr }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Dispositors</td>
+          @for (column of bhavaPositionColumns(); track column.house) {
+            <td>
+              <span class="dispositor-line">D1: {{ column.d1Dispositor }}</span>
+              <span class="dispositor-line">D9: {{ column.d9Dispositor }}</span>
+            </td>
+          }
+        </tr>
+        <tr>
+          <td>Dispositor Combinations</td>
+          @for (column of bhavaPositionColumns(); track column.house) {
+            <td>
+              <span class="dispositor-line">D1: {{ column.d1DispositorCombination }}</span>
+              <span class="dispositor-line">D9: {{ column.d9DispositorCombination }}</span>
+            </td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}
 
 <app-modal title="Karmic Dosha" [open]="!!selectedDosha()" (closed)="closeDosha()">
   @if (selectedDosha(); as dosha) {

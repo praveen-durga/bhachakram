@@ -57,3 +57,38 @@ focused on running/building the app.
   (`astroParseTable` feature) for the 9-graha + Ascendant table,
   Nakshatra/Pada, Rasi Combination, Karmic Dosha, and Karmic Planet logic —
   not a public external source, kept here for completeness of provenance.
+
+### Special points (Mandi, Hora Lagna, Bhrigu Bindu, Upagrahas, Indu Lagna)
+
+- Brihat Parashara Hora Shastra (BPHS), Chapter 5, v.2-8 — Bhava Lagna,
+  Hora Lagna, and Ghatika Lagna's "repeats every N ghatis from sunrise,
+  added to Surya's longitude at sunrise" formulas. Only Hora Lagna is
+  implemented (v.4-5); Bhava Lagna/Ghatika Lagna weren't requested.
+- Brihat Parashara Hora Shastra (BPHS), Chapter 3, v.61-64 — the 5
+  Sun-longitude-based Upagrahas (Dhuma, Vyatipata, Parivesha, Chapa/
+  Indrachapa, Upaketu), each defined as a fixed offset from the previous.
+- Brihat Parashara Hora Shastra (BPHS), Chapter 3, v.66-69 — Gulika/Mandi
+  and 4 more time-portion-based Upagrahas (Kaala, Mrityu, Yamaghantaka,
+  Ardhaprahara) via an 8-part day/night division. Only Mandi/Gulika is
+  implemented, reusing the Panchang feature's already-verified 15-muhurta
+  replacement for that 8-part method (see the Panchang section above) —
+  the other 4 were deliberately left out since they share the same
+  8-part method already found unreliable for Gulika, and no equivalent
+  verified replacement exists for them yet.
+- Bhrigu Bindu (Moon-Rahu midpoint, shorter arc) and Indu Lagna (Kalanadi
+  table + 9th-lord-from-Ascendant-and-Moon counting rule) are NOT in BPHS
+  — later Jyotish additions. Implemented from general background
+  knowledge, not a fresh citation (web search was intermittently
+  unavailable during this session) — Indu Lagna in particular is flagged
+  as best-effort in the UI (`*`) per the user's explicit choice to
+  proceed without independent verification of its Kalanadi table.
+
+### Jaimini Chara Karakas
+
+- Ranking rule (degree-within-sign descending, Atmakaraka highest down
+  to Darakaraka lowest, 7-planet scheme per the user's explicit choice)
+  and the retrograde-handling rule (regular planets rank by their
+  degree as-is; the "30 minus degree" adjustment is specific to Rahu in
+  the 8-planet scheme) both cross-checked against 2 independent web
+  sources that agree with each other. Also verified end-to-end against
+  the user's own reference screenshot's exact ranking order.
