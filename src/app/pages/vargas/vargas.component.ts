@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { BirthChartService } from '../../shared/services';
 import { ButtonComponent, RasiChartComponent } from '../../shared/ui';
 import { UNVERIFIED_VARGA_KEYS, VARGA_OPTIONS } from './vargas.data';
-import { buildVargaChart } from './vargas.util';
+import { buildGrahaArudhaRows, buildModalityGradeRows, buildRasiDistanceRows, buildVargaChart } from './vargas.util';
 
 @Component({
   selector: 'app-vargas',
@@ -17,6 +17,7 @@ export class VargasComponent {
   #selectedKey = signal(VARGA_OPTIONS[0].key);
 
   protected vargaOptions = VARGA_OPTIONS;
+  protected grahaArudhaVargaKeys = ['D1', ...VARGA_OPTIONS.map((option) => option.key)];
   protected unverifiedVargaKeys = UNVERIFIED_VARGA_KEYS;
   protected selectedKey = this.#selectedKey.asReadonly();
   protected d1Chart = this.birthChart.d1Chart;
@@ -28,6 +29,21 @@ export class VargasComponent {
   protected selectedVargaChart = computed(() => {
     const d1Chart = this.d1Chart();
     return d1Chart ? buildVargaChart(d1Chart, this.selectedOption().calculateRasi) : null;
+  });
+
+  protected rasiDistanceRows = computed(() => {
+    const d1Chart = this.d1Chart();
+    return d1Chart ? buildRasiDistanceRows(d1Chart, this.vargaOptions) : [];
+  });
+
+  protected modalityGradeRows = computed(() => {
+    const d1Chart = this.d1Chart();
+    return d1Chart ? buildModalityGradeRows(d1Chart, this.vargaOptions) : [];
+  });
+
+  protected grahaArudhaRows = computed(() => {
+    const d1Chart = this.d1Chart();
+    return d1Chart ? buildGrahaArudhaRows(d1Chart, this.vargaOptions) : [];
   });
 
   protected selectVarga(key: string): void {

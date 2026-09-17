@@ -35,3 +35,117 @@
     </div>
   }
 </div>
+
+@if (rasiDistanceRows().length > 0) {
+  <section class="rasi-distance">
+    <h2 class="section-title">D1 vs Vargas (rasi combination)</h2>
+    <p class="section-subtitle">
+      Each cell is the house axis from that body's D1 sign to its sign in the divisional chart (1-1 = same sign).
+    </p>
+
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Body</th>
+            <th>D1 sign</th>
+            @for (option of vargaOptions; track option.key) {
+              <th>{{ option.key }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of rasiDistanceRows(); track row.body) {
+            <tr>
+              <td>{{ row.body }}</td>
+              <td>{{ row.d1SignLabel }}</td>
+              @for (cell of row.cells; track cell.vargaKey) {
+                <td [class.vargottam]="cell.isVargottam">{{ cell.label }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
+
+@if (modalityGradeRows().length > 0) {
+  <section class="modality-grade">
+    <h2 class="section-title">D1 vs Vargas Signs</h2>
+    <p class="section-subtitle">
+      Compare D1 sign quality with each varga sign: M=Movable, F=Fixed, D=Dual. Grades: M+M=E, M+F=A, M+D=B, F+F=B,
+      F+D=E, D+D=A.
+    </p>
+
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Body</th>
+            <th>D1 sign</th>
+            <th>Quality</th>
+            @for (option of vargaOptions; track option.key) {
+              <th>{{ option.key }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of modalityGradeRows(); track row.body) {
+            <tr>
+              <td>{{ row.body }}</td>
+              <td>{{ row.d1SignLabel }}</td>
+              <td>{{ row.d1ModalityLabel }}</td>
+              @for (cell of row.cells; track cell.vargaKey) {
+                <td class="grade" [class]="'grade-' + cell.grade.toLowerCase()">{{ cell.grade }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}
+
+@if (grahaArudhaRows().length > 0) {
+  <section class="graha-arudha">
+    <h2 class="section-title">Graha Arudha</h2>
+    <p class="section-subtitle">
+      Each varga column is the position (1-12) from that planet's sign in the divisional chart to its Graha Arudha sign.
+      Darker green = better, darker red = worse.
+    </p>
+
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Body</th>
+            <th>D1 sign</th>
+            <th class="text-left">Final GA</th>
+            <th class="text-left house-col">House from Lagna</th>
+            @for (vargaKey of grahaArudhaVargaKeys; track vargaKey) {
+              <th>{{ vargaKey }}</th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of grahaArudhaRows(); track row.body) {
+            <tr>
+              <td>{{ row.body }}</td>
+              <td>{{ row.d1SignLabel }}</td>
+              <td class="text-left">{{ row.finalGaLabel }}</td>
+              <td class="text-left house-col">{{ row.houseFromLagnaLabel }}</td>
+              @for (cell of row.cells; track cell.vargaKey) {
+                <td class="graha-arudha-cell">
+                  @for (value of cell.values; track $index) {
+                    <span class="ga-value" [style.background]="value.background">{{ value.position }}</span>
+                  }
+                </td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

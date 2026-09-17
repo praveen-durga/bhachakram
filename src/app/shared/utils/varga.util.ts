@@ -1,12 +1,13 @@
 // Rasi-mapping (which sign a division falls into) for the divisional/varga
-// charts used by the Vargas route, plus D3/D7/D12/D30 (relocated here from
-// shadbala.util.ts since the Vargas route needs the exact same functions
-// Shadbala's Saptavargaja Bala already used — avoiding a second copy).
+// charts used by the Vargas route, plus D2/D3/D7/D12/D30 (relocated here
+// from shadbala.util.ts since the Vargas route needs the exact same
+// functions Shadbala's Saptavargaja Bala already used — avoiding a second
+// copy).
 //
-// D3/D4/D7/D9(in ephemeris.util.ts)/D10/D12/D16/D24/D30/D45/D60 are sourced
-// directly from BPHS Ch.6 ("Shodasavarga") verses 7-41 - the same primary
-// source already used for the Deities route, now applied to rasi mapping
-// instead of deity names.
+// D2/D3/D4/D7/D9(in ephemeris.util.ts)/D10/D12/D16/D24/D30/D45/D60 are
+// sourced directly from BPHS Ch.6 ("Shodasavarga") verses 7-41 - the same
+// primary source already used for the Deities route, now applied to rasi
+// mapping instead of deity names.
 //
 // D5/D6/D8/D11/D27 are NOT part of BPHS's 16-fold Shodasavarga scheme at
 // all. Their formulas below come from cross-checking 2+ independent
@@ -31,6 +32,24 @@ function isOddRasi(rasi: number): boolean {
 // 0 = movable (chara), 1 = fixed (sthira), 2 = dual (dwiswabhava).
 function modality(rasi: number): number {
   return rasi % 3;
+}
+
+export type RasiModality = 'Movable' | 'Fixed' | 'Dual';
+
+const MODALITY_LABELS: RasiModality[] = ['Movable', 'Fixed', 'Dual'];
+
+export function getRasiModality(rasi: number): RasiModality {
+  return MODALITY_LABELS[modality(rasi)];
+}
+
+// D2 (Hora), BPHS: odd signs 0-15° -> Sun's hora (Leo), 15-30° -> Moon's
+// hora (Cancer); even signs are the reverse. Relocated here from
+// shadbala.util.ts since the Vargas route needs it too.
+export function calculateD2Rasi(longitude: number): number {
+  const { rasi, degreeInRasi } = toRasiAndDegree(longitude);
+  const isFirstHalf = degreeInRasi < 15;
+  const sunHora = isOddRasi(rasi) === isFirstHalf;
+  return sunHora ? 4 : 3; // Leo or Cancer
 }
 
 // D3 (Drekkana), BPHS v.7-8: each 10° third of a sign maps to that sign, the

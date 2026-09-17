@@ -1,5 +1,6 @@
 import { Graha, SunTimes } from '../../shared/services';
 import {
+  calculateD2Rasi,
   calculateD3Rasi,
   calculateD7Rasi,
   calculateD9Rasi,
@@ -30,17 +31,6 @@ import {
   TRIBHAGA_DAY_LORDS,
   TRIBHAGA_NIGHT_LORDS,
 } from './shadbala.data';
-
-// D2 (Hora): odd signs 0-15° -> Sun's hora (Leo), 15-30° -> Moon's hora (Cancer);
-// even signs are the reverse.
-export function calculateD2Rasi(longitude: number): number {
-  const rasi = Math.floor(longitude / 30);
-  const degreeInRasi = longitude % 30;
-  const isOddRasi = rasi % 2 === 0; // rasi 0 = Aries = 1st sign = odd
-  const isFirstHalf = degreeInRasi < 15;
-  const sunHora = isOddRasi === isFirstHalf;
-  return sunHora ? 4 : 3; // Leo or Cancer
-}
 
 type DignityRelation = 'own' | 'greatFriend' | 'friend' | 'neutral' | 'enemy' | 'greatEnemy';
 
