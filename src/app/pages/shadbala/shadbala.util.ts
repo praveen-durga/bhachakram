@@ -1,5 +1,14 @@
 import { Graha, SunTimes } from '../../shared/services';
-import { calculateD9Rasi, calculateHora, getHoraLord, WEEKDAY_LORD } from '../../shared/utils';
+import {
+  calculateD3Rasi,
+  calculateD7Rasi,
+  calculateD9Rasi,
+  calculateD12Rasi,
+  calculateD30Rasi,
+  calculateHora,
+  getHoraLord,
+  WEEKDAY_LORD,
+} from '../../shared/utils';
 import {
   AYANA_NORTHERN_ADD_GRAHAS,
   AYANA_SOUTHERN_ADD_GRAHAS,
@@ -31,65 +40,6 @@ export function calculateD2Rasi(longitude: number): number {
   const isFirstHalf = degreeInRasi < 15;
   const sunHora = isOddRasi === isFirstHalf;
   return sunHora ? 4 : 3; // Leo or Cancer
-}
-
-// D3 (Drekkana): each 10° third of a sign maps to that sign, the 5th-from-it,
-// or the 9th-from-it.
-export function calculateD3Rasi(longitude: number): number {
-  const rasi = Math.floor(longitude / 30);
-  const degreeInRasi = longitude % 30;
-  const third = Math.floor(degreeInRasi / 10);
-  return (rasi + third * 4) % 12;
-}
-
-// D7 (Saptamsa): the 7 divisions starting from the sign itself if the sign is
-// odd, or from the 7th sign if even.
-export function calculateD7Rasi(longitude: number): number {
-  const rasi = Math.floor(longitude / 30);
-  const degreeInRasi = longitude % 30;
-  const division = Math.floor(degreeInRasi / (30 / 7));
-  const isOddRasi = rasi % 2 === 0;
-  const startRasi = isOddRasi ? rasi : (rasi + 6) % 12;
-  return (startRasi + division) % 12;
-}
-
-// D12 (Dwadasamsa): 12 divisions of 2°30' each, starting from the sign itself.
-export function calculateD12Rasi(longitude: number): number {
-  const rasi = Math.floor(longitude / 30);
-  const degreeInRasi = longitude % 30;
-  const division = Math.floor(degreeInRasi / 2.5);
-  return (rasi + division) % 12;
-}
-
-// D30 (Trimsamsa): unequal divisions ruled by Mars/Saturn/Jupiter/Mercury/Venus
-// for odd signs, reversed order for even signs.
-export function calculateD30Rasi(longitude: number): number {
-  const rasi = Math.floor(longitude / 30);
-  const degreeInRasi = longitude % 30;
-  const isOddRasi = rasi % 2 === 0;
-
-  const oddBoundaries: [number, number][] = [
-    [5, 0], // Mars 0-5 -> Aries
-    [10, 10], // Saturn 5-10 -> Aquarius
-    [18, 8], // Jupiter 10-18 -> Sagittarius
-    [25, 2], // Mercury 18-25 -> Gemini
-    [30, 6], // Venus 25-30 -> Libra
-  ];
-  const evenBoundaries: [number, number][] = [
-    [5, 1], // Venus 0-5 -> Taurus
-    [12, 5], // Mercury 5-12 -> Virgo
-    [20, 9], // Jupiter 12-20 -> Capricorn
-    [25, 10], // Saturn 20-25 -> Aquarius
-    [30, 7], // Mars 25-30 -> Scorpio
-  ];
-
-  const boundaries = isOddRasi ? oddBoundaries : evenBoundaries;
-  for (const [upTo, targetRasi] of boundaries) {
-    if (degreeInRasi < upTo) {
-      return targetRasi;
-    }
-  }
-  return boundaries[boundaries.length - 1][1];
 }
 
 type DignityRelation = 'own' | 'greatFriend' | 'friend' | 'neutral' | 'enemy' | 'greatEnemy';

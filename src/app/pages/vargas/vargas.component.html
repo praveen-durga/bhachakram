@@ -1,0 +1,37 @@
+<h1>Vargas</h1>
+
+<nav class="varga-buttons">
+  @for (option of vargaOptions; track option.key) {
+    <app-button
+      size="sm"
+      [variant]="selectedKey() === option.key ? 'primary' : 'primary-outline'"
+      (click)="selectVarga(option.key)"
+    >
+      {{ option.key }}
+      @if (unverifiedVargaKeys.includes(option.key)) {
+        <span class="unverified-mark" title="Not from a primary classical source - best-effort formula">*</span>
+      }
+    </app-button>
+  }
+</nav>
+
+<div class="charts">
+  @if (d1Chart(); as chart) {
+    <div class="chart-item">
+      <h2 class="chart-title">D1 - Rasi</h2>
+      <app-rasi-chart [chartData]="chart" />
+    </div>
+  }
+
+  @if (selectedVargaChart(); as chart) {
+    <div class="chart-item">
+      <h2 class="chart-title">
+        {{ selectedOption().label }}
+        @if (unverifiedVargaKeys.includes(selectedOption().key)) {
+          <span class="unverified-note">(not from a primary classical source - best-effort formula)</span>
+        }
+      </h2>
+      <app-rasi-chart [chartData]="chart" />
+    </div>
+  }
+</div>

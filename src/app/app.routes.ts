@@ -35,6 +35,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/sade-sati/sade-sati.component').then((m) => m.SadeSatiComponent),
   },
   {
+    path: 'vargas',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () => import('./pages/vargas/vargas.component').then((m) => m.VargasComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),

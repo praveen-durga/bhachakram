@@ -6,3 +6,4 @@
 - [ ] Shadbala route (planetary strength tables, awaiting formulas) — [.claude/todo-plans/12-shadbala-route.md](.claude/todo-plans/12-shadbala-route.md)
 - [x] Deities route (D3/D4/D9/D10/D12/D16/D24/D30/D45/D60 presiding deities table) — [.claude/todo-plans/13-deities-route.md](.claude/todo-plans/13-deities-route.md)
 - [ ] Sade Sati route (Sade Sati/Ardhashtama/Ashtama occurrence list, vehicle animal, body-part timeline) — [.claude/todo-plans/14-sade-sati-route.md](.claude/todo-plans/14-sade-sati-route.md)
+- [ ] Vargas route (D3-D60 chart selector, 16 vargas) — [.claude/todo-plans/15-vargas-route.md](.claude/todo-plans/15-vargas-route.md)
