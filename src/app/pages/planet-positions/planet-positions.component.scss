@@ -9,7 +9,13 @@
   }
 
   app-table {
-    @apply block mb-6;
+    @apply block;
+  }
+
+  .unverified-note {
+    @apply mb-6;
+    font-size: var(--font-size-xs);
+    color: color-mix(in oklch, var(--color-warning) 80%, var(--color-base-content));
   }
 
   .cell-with-action {

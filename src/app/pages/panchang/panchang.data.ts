@@ -156,25 +156,6 @@ export const MOVABLE_KARNAM_NAMES: string[] = ['Bava', 'Balava', 'Kaulava', 'Tai
 // Weekday index 0 = Sunday, matching JS Date#getDay().
 export const WEEKDAY_NAMES: string[] = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-// Mandi/Gulika's POSITION (not the "Gulika Kalam" muhurta timing-window
-// feature, a different simpler concept using an 8-part division) uses a
-// 15-muhurta division of the day: Mandi's instant = sunrise + (dayLength/15)
-// * muhurtaCount(weekday), with the classic descending-odd-number sequence
-// 13-11-9-7-5-3-1 for Sun-Sat. Verified to sub-second precision against a
-// real reference chart's reported Mandi position (an earlier 8-part-portion
-// implementation was off by up to a full rasi — do not reintroduce it).
-export const MANDI_DAY_MUHURTA_COUNT: number[] = [13, 11, 9, 7, 5, 3, 1]; // index 0 = Sunday
-
-// Night muhurta counts: same descending-odd sequence, rotated by 4 days
-// relative to day (night's 8-part cycle for a given weekday starts 5
-// planets forward from that weekday's own lord). Cross-checked against two
-// independent secondary sources that agree with each other and with the
-// day table's part→muhurta conversion — but UNLIKE the day table, this has
-// NOT been verified against a real night-birth reference chart. Treat as a
-// reasonable default, not a confirmed-correct formula, until tested — see
-// .claude/todo-plans/11-panchang-ui.md.
-export const MANDI_NIGHT_MUHURTA_COUNT: number[] = [5, 3, 1, 13, 11, 9, 7]; // index 0 = Sunday
-
 // "Reverse-engineering" remedies for Mandi/Gulika by house (1-12): each house's
 // significations plus a discipline that symbolically withdraws from/neglects
 // that house's theme without actively harming it. Keyed by house number as

@@ -193,23 +193,6 @@ export const BHAVA_OCCUPANT_BALA: Record<Graha, number> = {
   Ketu: 0,
 };
 
-// Own-sign rulership, index = rasi (0-11), used for Sapta-vargaja Bala's "Own"
-// dignity and to derive Moolatrikona/friendship below.
-export const RASI_LORD: Graha[] = [
-  'Mars', // Aries
-  'Venus', // Taurus
-  'Mercury', // Gemini
-  'Moon', // Cancer
-  'Sun', // Leo
-  'Mercury', // Virgo
-  'Venus', // Libra
-  'Mars', // Scorpio
-  'Jupiter', // Sagittarius
-  'Saturn', // Capricorn
-  'Saturn', // Aquarius
-  'Jupiter', // Pisces
-];
-
 // Moolatrikona sign + degree range per planet (classical BPHS ranges); Rahu/Ketu
 // have no Moolatrikona and are excluded from Shadbala entirely.
 export const MOOLATRIKONA: Partial<Record<Graha, { rasi: number; from: number; to: number }>> = {
