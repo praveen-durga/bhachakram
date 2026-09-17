@@ -22,6 +22,25 @@
     @apply flex items-center gap-2;
   }
 
+  .longitude-cell,
+  .nakshatra-cell {
+    @apply inline-flex items-center gap-2;
+  }
+
+  .pushkar-badge {
+    @apply rounded-full px-2 py-0.5 text-xs font-semibold;
+    background: color-mix(in oklch, var(--color-success) 15%, transparent);
+    color: var(--color-success);
+  }
+
+  .visha-badge,
+  .gandanta-badge,
+  .temp-gandanta-badge {
+    @apply rounded-full px-2 py-0.5 text-xs font-semibold;
+    background: color-mix(in oklch, var(--color-error) 15%, transparent);
+    color: var(--color-error-content);
+  }
+
   .navamsa-matrix-title {
     @apply font-semibold mb-3;
   }

@@ -36,20 +36,26 @@
   .band-badge {
     @apply text-xs font-semibold tracking-wide;
 
-    &.band-adhimitra {
+    &.band-exceptional-comfort {
       color: var(--color-success);
     }
 
-    &.band-mitra {
+    &.band-moderate-comfort {
       color: color-mix(in oklch, var(--color-success) 70%, var(--color-base-content));
     }
 
-    &.band-sama {
+    &.band-friction-strain {
       color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
     }
 
-    &.band-shatru {
+    &.band-severe-distress {
       color: var(--color-error);
     }
+  }
+
+  .pushkar-badge {
+    @apply ml-2 rounded-full px-2 py-0.5 text-xs font-semibold;
+    background: color-mix(in oklch, var(--color-success) 15%, transparent);
+    color: var(--color-success);
   }
 }

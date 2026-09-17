@@ -5,6 +5,11 @@ import {
   findGraha,
   formatDegreeInRasi,
   getRasiDistances,
+  isGandanta,
+  isPushkarBhaga,
+  isPushkarNavamsa,
+  isTempGandanta,
+  isVishaNavamsa,
   NAKSHATRA_NAMES,
   RASI_LORD,
   RASI_NAMES,
@@ -28,6 +33,7 @@ export function buildRow(
   longitude: number,
   rasiIndex: number,
   navamsaRasiIndex: number,
+  ascendantLongitude: number,
 ): PlanetPositionRow {
   const nakshatraIndex = calculateNakshatra(longitude);
   const pada = calculatePada(longitude);
@@ -47,7 +53,12 @@ export function buildRow(
   return {
     body,
     longitude: `${RASI_NAMES[rasiIndex]} ${formatDegreeInRasi(longitude)}`,
+    isPushkarBhaga: isPushkarBhaga(longitude),
     nakshatra: NAKSHATRA_NAMES[nakshatraIndex],
+    isGandanta: isGandanta(longitude),
+    isTempGandanta: isTempGandanta(longitude, ascendantLongitude),
+    isPushkarNavamsa: isPushkarNavamsa(longitude),
+    isVishaNavamsa: isVishaNavamsa(longitude),
     pada,
     rasi: RASI_NAMES[rasiIndex],
     navamsa: RASI_NAMES[navamsaRasiIndex],

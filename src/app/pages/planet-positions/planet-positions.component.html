@@ -4,6 +4,33 @@
   {{ bodyLabel(row.body) }}
 </ng-template>
 
+<ng-template #longitudeCell let-row>
+  <span class="longitude-cell">
+    {{ row.longitude }}
+    @if (row.isPushkarBhaga) {
+      <span class="pushkar-badge">Pushkar Bhaga</span>
+    }
+  </span>
+</ng-template>
+
+<ng-template #nakshatraCell let-row>
+  <span class="nakshatra-cell">
+    {{ row.nakshatra }}
+    @if (row.isPushkarNavamsa) {
+      <span class="pushkar-badge">Pushkar</span>
+    }
+    @if (row.isVishaNavamsa) {
+      <span class="visha-badge">Visha</span>
+    }
+    @if (row.isGandanta) {
+      <span class="gandanta-badge">Gandanta</span>
+    }
+    @if (row.isTempGandanta) {
+      <span class="temp-gandanta-badge">Temp Gandanta</span>
+    }
+  </span>
+</ng-template>
+
 <ng-template #karmicDoshaCell let-row>
   @if (row.hasKarmicDosha) {
     <div class="cell-with-action">

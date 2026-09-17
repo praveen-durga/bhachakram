@@ -1,6 +1,7 @@
 <h1>Planet Comfort</h1>
 <p class="subtitle">
-  Star Devata Comfort — 40-point Guna compatibility, enemy penalty, and Yogakaraka/Subhakaraka uplift.
+  Star Devata Comfort — 40-point Guna compatibility, enemy penalty, Yogakaraka/Subhakaraka uplift, and Pushkar Navamsa
+  boost.
 </p>
 
 <ng-template #starDevataCell let-row>
@@ -21,7 +22,12 @@
 </ng-template>
 
 <ng-template #bandCell let-row>
-  <span class="band-badge" [class]="'band-' + row.band.toLowerCase()">{{ row.band | uppercase }}</span>
+  <span class="band-badge" [class]="'band-' + row.band.toLowerCase().split(' ').join('-')">{{
+    row.band | uppercase
+  }}</span>
+  @if (row.isPushkarNavamsa) {
+    <span class="pushkar-badge">Pushkar Navamsa</span>
+  }
 </ng-template>
 
 <app-table [columns]="columns()" [rows]="rows()" />

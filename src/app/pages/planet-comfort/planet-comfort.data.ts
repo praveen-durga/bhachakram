@@ -14,6 +14,39 @@ export const PLANET_GUNA: Record<Graha, Guna> = {
   Ketu: 'Tamasik',
 };
 
+// Nakshatra Gana (Deva/Manushya/Rakshasa), indexed exactly as NAKSHATRA_NAMES
+// - the nakshatra's own classification, not the Tri-Guna of its ruling lord
+// (e.g. Swati is Deva/Sathvik despite being Rahu-ruled).
+export const NAKSHATRA_GUNA: Guna[] = [
+  'Sathvik', // Ashwini
+  'Rajasik', // Bharani
+  'Tamasik', // Krittika
+  'Rajasik', // Rohini
+  'Sathvik', // Mrigashira
+  'Rajasik', // Ardra
+  'Sathvik', // Punarvasu
+  'Sathvik', // Pushya
+  'Tamasik', // Ashlesha
+  'Tamasik', // Magha
+  'Rajasik', // Purva Phalguni
+  'Rajasik', // Uttara Phalguni
+  'Sathvik', // Hasta
+  'Tamasik', // Chitra
+  'Sathvik', // Swati
+  'Tamasik', // Vishakha
+  'Sathvik', // Anuradha
+  'Tamasik', // Jyeshta
+  'Tamasik', // Moola
+  'Rajasik', // Purva Ashadha
+  'Rajasik', // Uttara Ashadha
+  'Sathvik', // Sravana
+  'Tamasik', // Dhanishta
+  'Tamasik', // Satabhisha
+  'Rajasik', // Purva Bhadra
+  'Rajasik', // Uttara Bhadra
+  'Sathvik', // Revati
+];
+
 // Ordinal position of each Guna, used to measure Tier 1's Same/Other/Opposite
 // distance (0 apart = Same, 1 apart = Other, 2 apart = Opposite).
 export const GUNA_ORDER: Guna[] = ['Sathvik', 'Rajasik', 'Tamasik'];
@@ -25,7 +58,6 @@ export const TIER1_BY_GUNA_DISTANCE: Record<number, number> = { 0: 30, 1: 15, 2:
 export const TIER2_ENEMY_PENALTY = 6;
 export const TIER3_YK_UPLIFT = 10;
 export const TIER3_SK_UPLIFT = 6;
-export const TIER3_GROUP_UPLIFT = 5;
 
 // Specific enemy pairs, Section 4 - directional/asymmetric exactly as given
 // (e.g. Mercury's specific enemy is Mars, but Mars's specific enemy is only
@@ -44,15 +76,19 @@ export const SPECIFIC_ENEMY: Record<Graha, Graha[]> = {
   Ketu: ['Saturn', 'Venus'],
 };
 
-// House offsets (0-indexed, i.e. house N = offset N-1) for Kona (1/5/9) and
-// Trika (6/8/12), used for Tier 3's Yogakaraka/Subhakaraka determination.
+// House offsets (0-indexed, i.e. house N = offset N-1) for Kendra (1/4/7/10)
+// and Kona/Trikona (1/5/9), used for Tier 3's Yogakaraka (owns both) /
+// Subhakaraka (owns Kona only) determination.
+export const KENDRA_HOUSE_OFFSETS = [0, 3, 6, 9];
 export const KONA_HOUSE_OFFSETS = [0, 4, 8];
-export const TRIKA_HOUSE_OFFSETS = [5, 7, 11];
 
-// Section 8 score bands.
-export const COMFORT_BAND_THRESHOLDS: { min: number; band: 'Adhimitra' | 'Mitra' | 'Sama' | 'Shatru' }[] = [
-  { min: 31, band: 'Adhimitra' },
-  { min: 20, band: 'Mitra' },
-  { min: 10, band: 'Sama' },
-  { min: 0, band: 'Shatru' },
+// Result Analysis score bands.
+export const COMFORT_BAND_THRESHOLDS: {
+  min: number;
+  band: 'Exceptional Comfort' | 'Moderate Comfort' | 'Friction Strain' | 'Severe Distress';
+}[] = [
+  { min: 32, band: 'Exceptional Comfort' },
+  { min: 22, band: 'Moderate Comfort' },
+  { min: 10, band: 'Friction Strain' },
+  { min: 0, band: 'Severe Distress' },
 ];

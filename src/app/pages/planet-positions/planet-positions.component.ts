@@ -47,6 +47,8 @@ export class PlanetPositionsComponent {
   private ephemeris = inject(EphemerisService);
 
   protected bodyCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('bodyCell');
+  protected longitudeCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('longitudeCell');
+  protected nakshatraCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('nakshatraCell');
   protected karmicDoshaCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicDoshaCell');
   protected karmicPlanetCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicPlanetCell');
 
@@ -62,8 +64,8 @@ export class PlanetPositionsComponent {
 
   protected columns = computed<TableColumn<PlanetPositionRow>[]>(() => [
     { key: 'body', label: 'Body', cellTemplate: this.bodyCell() },
-    { key: 'longitude', label: 'Longitude' },
-    { key: 'nakshatra', label: 'Nakshatra' },
+    { key: 'longitude', label: 'Longitude', cellTemplate: this.longitudeCell() },
+    { key: 'nakshatra', label: 'Nakshatra', cellTemplate: this.nakshatraCell() },
     { key: 'pada', label: 'Pada' },
     { key: 'rasi', label: 'Rasi (D1)' },
     { key: 'navamsa', label: 'Navamsa (D9)' },
@@ -81,17 +83,20 @@ export class PlanetPositionsComponent {
       return [];
     }
 
+    const ascendantLongitude = d1Chart.ascendantLongitude ?? 0;
+
     const ascendantRow = buildRow(
       'Ascendant',
-      d1Chart.ascendantLongitude ?? 0,
+      ascendantLongitude,
       d1Chart.ascendantRasi,
       d9Chart.ascendantRasi,
+      ascendantLongitude,
     );
 
     const grahaRows = GRAHA_ORDER.map((graha) => {
       const d1Graha = findGraha(d1Chart.grahas, graha);
       const d9Graha = findGraha(d9Chart.grahas, graha);
-      return buildRow(graha, d1Graha.longitude, d1Graha.rasi, d9Graha.rasi);
+      return buildRow(graha, d1Graha.longitude, d1Graha.rasi, d9Graha.rasi, ascendantLongitude);
     });
 
     return [ascendantRow, ...grahaRows];
@@ -179,9 +184,11 @@ export class PlanetPositionsComponent {
           ['Upaketu', upaketuLongitude],
         ];
 
+        const ascendantLongitude = d1Chart.ascendantLongitude ?? 0;
+
         this.#specialPointRows.set(
           points.map(([body, longitude]) =>
-            buildRow(body, longitude, Math.floor(longitude / 30), calculateD9Rasi(longitude)),
+            buildRow(body, longitude, Math.floor(longitude / 30), calculateD9Rasi(longitude), ascendantLongitude),
           ),
         );
 

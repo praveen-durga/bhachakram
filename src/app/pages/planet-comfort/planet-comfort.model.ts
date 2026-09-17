@@ -1,6 +1,6 @@
 export type Guna = 'Sathvik' | 'Rajasik' | 'Tamasik';
 
-export type ComfortBand = 'Adhimitra' | 'Mitra' | 'Sama' | 'Shatru';
+export type ComfortBand = 'Exceptional Comfort' | 'Moderate Comfort' | 'Friction Strain' | 'Severe Distress';
 
 export type PlanetComfortRow = {
   planet: string;
@@ -14,5 +14,6 @@ export type PlanetComfortRow = {
   tier3: number;
   tier3Label: string;
   total: number;
+  isPushkarNavamsa: boolean;
   band: ComfortBand;
 };

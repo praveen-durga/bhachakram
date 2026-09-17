@@ -115,6 +115,86 @@ export function getRasiDistances(
   return { forward, backward, isVargottam };
 }
 
+// 1-indexed navamsa pada (1-9) within the planet's own rasi.
+export function calculateNavamsaPada(longitude: number): number {
+  const degreeInRasi = longitude % 30;
+  return Math.floor(degreeInRasi / (30 / 9)) + 1;
+}
+
+// Pushkara Navamsa pada pairs by the D1 sign's element (Fire/Earth/Air/Water,
+// i.e. rasi index % 4), per Jataka Parijata 1.58 - "7th/9th Navamsa of Fiery
+// signs, 3rd/5th in Earth signs, 6th/8th in Airy signs, 1st/3rd in Watery
+// signs".
+const PUSHKAR_NAVAMSA_PADAS_BY_ELEMENT: number[][] = [
+  [7, 9], // Fire: Aries, Leo, Sagittarius
+  [3, 5], // Earth: Taurus, Virgo, Capricorn
+  [6, 8], // Air: Gemini, Libra, Aquarius
+  [1, 3], // Water: Cancer, Scorpio, Pisces
+];
+
+export function isPushkarNavamsa(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const pada = calculateNavamsaPada(longitude);
+  return PUSHKAR_NAVAMSA_PADAS_BY_ELEMENT[rasi % 4].includes(pada);
+}
+
+// Visha Navamsa ("poison" navamsa) pada by rasi (0-indexed, Aries first):
+// 1st pada of Aries/Taurus/Virgo/Sagittarius (Sarpa), 5th pada of
+// Gemini/Leo/Libra/Aquarius (Gridha), 9th pada of Cancer/Scorpio/
+// Capricorn/Pisces (Shooker).
+const VISHA_NAVAMSA_PADA_BY_RASI = [1, 1, 5, 9, 5, 1, 5, 9, 1, 9, 5, 9];
+
+export function isVishaNavamsa(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const pada = calculateNavamsaPada(longitude);
+  return VISHA_NAVAMSA_PADA_BY_RASI[rasi] === pada;
+}
+
+// Gandanta - the water-to-fire sign junction zone: the 1st navamsa of a Fire
+// sign (Aries/Leo/Sagittarius), or the last (9th) navamsa of a Water sign
+// (Cancer/Scorpio/Pisces).
+export function isGandanta(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const pada = calculateNavamsaPada(longitude);
+  const element = rasi % 4;
+  return (element === 0 && pada === 1) || (element === 3 && pada === 9);
+}
+
+// Pushkara Bhaga degree by the D1 sign's element (Fire/Earth/Air/Water), per
+// CS Patel / Vidyamadhviyam / Kalamitram / Kalavidhanam. Treated as falling
+// within 1 whole degree below to 30' above the listed degree (per the user's
+// explicit tolerance), since birth longitudes practically never land on the
+// exact minute.
+const PUSHKAR_BHAGA_DEGREE_BY_ELEMENT = [21, 14, 24, 7];
+
+export function isPushkarBhaga(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const degreeInRasi = longitude % 30;
+  const target = PUSHKAR_BHAGA_DEGREE_BY_ELEMENT[rasi % 4];
+  return degreeInRasi >= target - 1 && degreeInRasi <= target + 0.5;
+}
+
+// 1-indexed pada across the full 108-pada zodiac cycle (27 nakshatras x 4
+// padas each, 3°20' apart), Ashwini pada 1 = 1, Revati pada 4 = 108.
+function calculateGlobalPada(longitude: number): number {
+  return calculateNakshatra(longitude) * 4 + calculatePada(longitude);
+}
+
+// "Temp Gandanta" - trine-boundary junction padas, counted as whole padas
+// forward from (i.e. not including) the Ascendant's own pada: the 36th and
+// 37th padas forward straddle the exact 120° trine point, the 72nd and 73rd
+// straddle 240°, and the 107th (the "108th" counting the Ascendant's own
+// pada as the 1st of 108) is the pada just before completing the full 360°
+// circle back to the Ascendant's own pada.
+const TEMP_GANDANTA_DISTANCES = [36, 37, 72, 73, 107];
+
+export function isTempGandanta(longitude: number, ascendantLongitude: number): boolean {
+  const globalPada = calculateGlobalPada(longitude);
+  const ascendantGlobalPada = calculateGlobalPada(ascendantLongitude);
+  const distance = (globalPada - ascendantGlobalPada + 108) % 108;
+  return TEMP_GANDANTA_DISTANCES.includes(distance);
+}
+
 export function calculateD9Rasi(longitude: number): number {
   const rasi = Math.floor(longitude / 30);
   const degreeInRasi = longitude % 30;
