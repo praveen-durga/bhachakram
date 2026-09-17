@@ -260,18 +260,6 @@
             <td>{{ column.drishtiBala | number: '1.2-2' }}</td>
           }
         </tr>
-        <tr class="sub-row">
-          <td>Planets in</td>
-          @for (column of bhavaBalaColumns; track column.house) {
-            <td>{{ column.planetsInBala | number: '1.2-2' }}</td>
-          }
-        </tr>
-        <tr class="sub-row">
-          <td>Day-Night</td>
-          @for (column of bhavaBalaColumns; track column.house) {
-            <td>{{ column.dayNightBala | number: '1.2-2' }}</td>
-          }
-        </tr>
         <tr class="grand-total-row">
           <td>Bhava Bala Total</td>
           @for (column of bhavaBalaColumns; track column.house) {

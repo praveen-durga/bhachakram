@@ -17,9 +17,9 @@ import {
   wallTimeToUtc,
 } from '../../shared/utils';
 import {
-  BHAVA_OCCUPANT_BALA,
   CHESTA_BALA_MINIMUM,
   DIG_BALA_MINIMUM,
+  DIG_BALA_WEAKEST_HOUSE,
   DISC_DIAMETER_ARCSEC,
   EXALTATION_LONGITUDE,
   KAALA_BALA_MINIMUM,
@@ -33,11 +33,10 @@ import { BhavaBalaColumn, KaalaBala, ShadbalaRow, SthanaBala } from './shadbala.
 import {
   areGrahasAtWar,
   calculateAyanaBala,
-  calculateBhavaDayNightBala,
+  calculateBeneficMalefic,
   calculateBhavaDigBala,
   calculateBhavaDrishtiBala,
-  calculateChestaBalaForMoon,
-  calculateChestaBalaFromSeeghraKendra,
+  calculateChestaBalaSeeghraKendra,
   calculateClosenessToNoon,
   calculateDigBala,
   calculateDrekkanaBala,
@@ -48,18 +47,19 @@ import {
   calculateKashtaPhala,
   calculateKendradiBala,
   calculateMaasaBala,
+  calculateMoonChestaBalaForPhala,
   calculateNataUnnataBala,
   calculateOjhayugmaBala,
   calculatePakshaBala,
   calculateSaptavargajaBala,
+  calculateSunChestaBalaForPhala,
   calculateTribhagaBala,
   calculateUcchaBala,
   calculateVaaraBala,
   calculateVarshaBala,
-  calculateVisesheDrishtiBonus,
   calculateYuddhaBalaMagnitude,
   determineYuddhaVictor,
-  isDrishtiBenefic,
+  isBhavaDrishtiBenefic,
 } from './shadbala.util';
 
 type BaseGrahaBala = {
@@ -69,9 +69,10 @@ type BaseGrahaBala = {
   kaalaBala: KaalaBala;
   chestaBala: number;
   drigBala: number;
-  // Combined strength up through Hora Bala (Sthana + Dig + every Kaala Bala
-  // sub-row except Ayana and Yuddha themselves) — Yuddha Bala's magnitude
-  // formula needs this before Kaala Bala's own total is finalized.
+  // Combined strength up through Hora Bala (Sthana + Dig + Nata-Unnata +
+  // Paksha + Tribhaga + Hora Bala — excluding Varsha/Maasa/Vaara, Ayana, and
+  // Yuddha themselves) — Yuddha Bala's magnitude formula needs this before
+  // Kaala Bala's own total is finalized.
   strengthUpToHora: number;
 };
 
@@ -107,30 +108,24 @@ export class ShadbalaComponent {
 
       const birthTime = wallTimeToUtc(details.dob, details.tob, details.timezone);
       const weekday = new Date(details.dob).getUTCDay();
-      const isDayBirth = birthTime >= sunTimes.sunrise && birthTime < sunTimes.sunset;
 
       Promise.all([
         this.ephemeris.calculateGrahaEphemerisData(birthTime, details.ayanamsa),
-        this.ephemeris.findMostRecentSankranti(birthTime, details.ayanamsa, 360),
-        this.ephemeris.findMostRecentSankranti(birthTime, details.ayanamsa, 30),
-      ]).then(([{ grahas: ephemerisData, obliquity }, varshaSankranti, maasaSankranti]) => {
-        const sun = findGraha(d1Chart.grahas, 'Sun');
-        const moon = findGraha(d1Chart.grahas, 'Moon');
-        const moonSunElongation = (moon.longitude - sun.longitude + 360) % 360;
-        const isMoonWaxing = calculateIsMoonWaxing(moonSunElongation);
-
+        this.ephemeris.calculatePlacidusCusps(birthTime, details.lat, details.lng, details.ayanamsa),
+      ]).then(([{ grahas: ephemerisData, obliquity, ayanamsaDeg }, placidusCusps]) => {
         const rows = buildShadbalaRows(
           d1Chart,
+          placidusCusps,
           sunTimes,
           birthTime,
           weekday,
           ephemerisData,
           obliquity,
-          varshaSankranti.getUTCDay(),
-          maasaSankranti.getUTCDay(),
+          ayanamsaDeg,
+          details.lng,
         );
         this.#rows.set(rows);
-        this.#bhavaBala.set(buildBhavaBalaColumns(d1Chart, bhavaChalitChart.cusps!, rows, isDayBirth, isMoonWaxing));
+        this.#bhavaBala.set(buildBhavaBalaColumns(d1Chart, bhavaChalitChart.cusps!, rows));
       });
     });
   }
@@ -139,16 +134,15 @@ export class ShadbalaComponent {
 function buildBaseGrahaBala(
   graha: Graha,
   d1Chart: D1Chart,
+  placidusCusps: number[],
   sunTimes: SunTimes,
   birthTime: Date,
   weekday: number,
   ephemerisData: Record<Graha, GrahaEphemerisData>,
   obliquity: number,
-  varshaWeekday: number,
-  maasaWeekday: number,
-  moonSunElongation: number,
   closenessToNoon: number,
   isMoonWaxing: boolean,
+  geoLongitudeDeg: number,
 ): BaseGrahaBala {
   const position = findGraha(d1Chart.grahas, graha);
   const houseFromAscendant = getRasiDistances(d1Chart.ascendantRasi, position.rasi).forward;
@@ -156,7 +150,7 @@ function buildBaseGrahaBala(
 
   const sthanaBala: SthanaBala = {
     ucchaBala: calculateUcchaBala(graha, position.longitude, EXALTATION_LONGITUDE[graha]),
-    saptavargajaBala: calculateSaptavargajaBala(graha, position.longitude),
+    saptavargajaBala: calculateSaptavargajaBala(graha, position.longitude, d1Chart.grahas),
     ojhayugmaBala: calculateOjhayugmaBala(graha, position.rasi, d9Rasi),
     kendradiBala: calculateKendradiBala(houseFromAscendant),
     drekkanaBala: calculateDrekkanaBala(graha, position.longitude),
@@ -169,15 +163,20 @@ function buildBaseGrahaBala(
     sthanaBala.kendradiBala +
     sthanaBala.drekkanaBala;
 
-  const digBala = calculateDigBala(graha, houseFromAscendant);
+  const weakestHouseCuspLongitude = placidusCusps[DIG_BALA_WEAKEST_HOUSE[graha] - 1];
+  const digBala = calculateDigBala(position.longitude, weakestHouseCuspLongitude);
+
+  const sun = findGraha(d1Chart.grahas, 'Sun');
+  const moon = findGraha(d1Chart.grahas, 'Moon');
+  const benefics = calculateBeneficMalefic(d1Chart.grahas, isMoonWaxing);
 
   const kaalaBala: KaalaBala = {
     nataUnnataBala: calculateNataUnnataBala(graha, closenessToNoon),
-    pakshaBala: calculatePakshaBala(graha, moonSunElongation),
+    pakshaBala: calculatePakshaBala(graha, sun.longitude, moon.longitude, benefics),
     tribhagaBala: calculateTribhagaBala(graha, birthTime, sunTimes),
-    varshaBala: calculateVarshaBala(graha, varshaWeekday),
-    maasaBala: calculateMaasaBala(graha, maasaWeekday),
-    vaaraBala: calculateVaaraBala(graha, weekday),
+    varshaBala: calculateVarshaBala(graha, birthTime),
+    maasaBala: calculateMaasaBala(graha, birthTime),
+    vaaraBala: calculateVaaraBala(graha, birthTime, sunTimes.sunrise),
     horaBala: calculateHoraBala(graha, birthTime, sunTimes, weekday),
     ayanaBala: calculateAyanaBala(graha, ephemerisData[graha].declination, obliquity),
     yuddhaBala: 0,
@@ -190,26 +189,21 @@ function buildBaseGrahaBala(
     kaalaBala.nataUnnataBala +
     kaalaBala.pakshaBala +
     kaalaBala.tribhagaBala +
-    kaalaBala.varshaBala +
-    kaalaBala.maasaBala +
-    kaalaBala.vaaraBala +
     kaalaBala.horaBala;
 
-  const sun = findGraha(d1Chart.grahas, 'Sun');
-  const grahaSunElongation = (ephemerisData[graha].longitude - sun.longitude + 360) % 360;
   const chestaBala =
-    graha === 'Moon'
-      ? calculateChestaBalaForMoon(moonSunElongation)
-      : calculateChestaBalaFromSeeghraKendra(grahaSunElongation);
+    graha === 'Sun' || graha === 'Moon'
+      ? 0
+      : calculateChestaBalaSeeghraKendra(graha, birthTime, geoLongitudeDeg, position.longitude, sun.longitude);
 
-  const drigBala = SHADBALA_GRAHA_ORDER.filter((other) => other !== graha).reduce((sum, other) => {
+  const drigBalaSum = SHADBALA_GRAHA_ORDER.filter((other) => other !== graha).reduce((sum, other) => {
     const otherPosition = findGraha(d1Chart.grahas, other);
-    const angularDistance = (otherPosition.longitude - position.longitude + 360) % 360;
-    const houseDistance = getRasiDistances(position.rasi, otherPosition.rasi).forward;
-    const strength = calculateDrigBala(angularDistance) + calculateVisesheDrishtiBonus(other, houseDistance);
-    const isBenefic = isDrishtiBenefic(other, isMoonWaxing);
-    return sum + (isBenefic ? strength : -strength);
+    // Drishti Kendra = aspected graha's longitude - aspecting graha's longitude.
+    const angularDistance = (position.longitude - otherPosition.longitude + 360) % 360;
+    const strength = calculateDrigBala(angularDistance, other);
+    return sum + (benefics.has(other) ? strength : -strength);
   }, 0);
+  const drigBala = drigBalaSum / 4;
 
   return { graha, sthanaBala, digBala, kaalaBala, chestaBala, drigBala, strengthUpToHora };
 }
@@ -228,9 +222,9 @@ function applyYuddhaBala(
 
       const victor = determineYuddhaVictor(
         grahaA,
-        ephemerisData[grahaA].eclipticLatitude,
+        ephemerisData[grahaA].longitude,
         grahaB,
-        ephemerisData[grahaB].eclipticLatitude,
+        ephemerisData[grahaB].longitude,
       );
       const loser = victor === grahaA ? grahaB : grahaA;
 
@@ -249,19 +243,21 @@ function applyYuddhaBala(
 
 function buildShadbalaRows(
   d1Chart: D1Chart,
+  placidusCusps: number[],
   sunTimes: SunTimes,
   birthTime: Date,
   weekday: number,
   ephemerisData: Record<Graha, GrahaEphemerisData>,
   obliquity: number,
-  varshaWeekday: number,
-  maasaWeekday: number,
+  ayanamsaDeg: number,
+  geoLongitudeDeg: number,
 ): ShadbalaRow[] {
   const sun = findGraha(d1Chart.grahas, 'Sun');
   const moon = findGraha(d1Chart.grahas, 'Moon');
   const moonSunElongation = (moon.longitude - sun.longitude + 360) % 360;
   const closenessToNoon = calculateClosenessToNoon(birthTime, sunTimes.sunrise, sunTimes.sunset, sunTimes.nextSunrise);
   const isMoonWaxing = calculateIsMoonWaxing(moonSunElongation);
+  const sayanaSunLongitude = sun.longitude + ayanamsaDeg;
 
   const baseByGraha = new Map(
     SHADBALA_GRAHA_ORDER.map((graha) => [
@@ -269,16 +265,15 @@ function buildShadbalaRows(
       buildBaseGrahaBala(
         graha,
         d1Chart,
+        placidusCusps,
         sunTimes,
         birthTime,
         weekday,
         ephemerisData,
         obliquity,
-        varshaWeekday,
-        maasaWeekday,
-        moonSunElongation,
         closenessToNoon,
         isMoonWaxing,
+        geoLongitudeDeg,
       ),
     ]),
   );
@@ -287,6 +282,12 @@ function buildShadbalaRows(
 
   const rows = SHADBALA_GRAHA_ORDER.map((graha) => {
     const { sthanaBala, digBala, kaalaBala, chestaBala, drigBala } = baseByGraha.get(graha)!;
+    const chestaBalaForPhala =
+      graha === 'Sun'
+        ? calculateSunChestaBalaForPhala(sayanaSunLongitude)
+        : graha === 'Moon'
+          ? calculateMoonChestaBalaForPhala(sun.longitude, moon.longitude)
+          : chestaBala;
 
     kaalaBala.total =
       kaalaBala.nataUnnataBala +
@@ -321,8 +322,8 @@ function buildShadbalaRows(
       kaalaBalaPercentReq: (kaalaBala.total / KAALA_BALA_MINIMUM[graha]) * 100,
       chestaBalaPercentReq: (chestaBala / CHESTA_BALA_MINIMUM[graha]) * 100,
       relativeRank: 0,
-      ishtaPhala: calculateIshtaPhala(sthanaBala.ucchaBala, chestaBala),
-      kashtaPhala: calculateKashtaPhala(sthanaBala.ucchaBala, chestaBala),
+      ishtaPhala: calculateIshtaPhala(sthanaBala.ucchaBala, chestaBalaForPhala),
+      kashtaPhala: calculateKashtaPhala(sthanaBala.ucchaBala, chestaBalaForPhala),
     };
   });
 
@@ -333,13 +334,7 @@ function buildShadbalaRows(
   return rows.map((row) => ({ ...row, relativeRank: rankByGraha.get(row.graha)! }));
 }
 
-function buildBhavaBalaColumns(
-  d1Chart: D1Chart,
-  cusps: number[],
-  rows: ShadbalaRow[],
-  isDayBirth: boolean,
-  isMoonWaxing: boolean,
-): BhavaBalaColumn[] {
+function buildBhavaBalaColumns(d1Chart: D1Chart, cusps: number[], rows: ShadbalaRow[]): BhavaBalaColumn[] {
   const rowByGraha = new Map(rows.map((row) => [row.graha, row]));
 
   return cusps.map((cuspLongitude, index) => {
@@ -348,23 +343,21 @@ function buildBhavaBalaColumns(
     const houseLord = RASI_LORD[rasi];
     const fromLordBala = rowByGraha.get(houseLord)?.totalShadbala ?? 0;
 
-    const digBala = calculateBhavaDigBala(rasi, house);
+    const digBala = calculateBhavaDigBala(cuspLongitude, house);
 
     const drishtiBala = calculateBhavaDrishtiBala(
       d1Chart.grahas.map((graha) => ({
         graha: graha.graha,
-        angularDistanceToCuspDeg: (graha.longitude - cuspLongitude + 360) % 360,
-        isBenefic: isDrishtiBenefic(graha.graha, isMoonWaxing),
+        grahaRasi: graha.rasi,
+        grahaHouse: getRasiDistances(d1Chart.ascendantRasi, graha.rasi).forward,
+        targetRasi: rasi,
+        targetHouse: house,
+        // Drishti Kendra = aspected cusp's longitude - aspecting graha's longitude.
+        angularDistanceToCuspDeg: (cuspLongitude - graha.longitude + 360) % 360,
       })),
     );
 
-    const planetsInBala = d1Chart.grahas
-      .filter((graha) => Math.floor(graha.longitude / 30) === rasi)
-      .reduce((sum, graha) => sum + (BHAVA_OCCUPANT_BALA[graha.graha] ?? 0), 0);
-
-    const dayNightBala = calculateBhavaDayNightBala(houseLord, isDayBirth);
-
-    const total = fromLordBala + digBala + drishtiBala + planetsInBala + dayNightBala;
+    const total = fromLordBala + digBala + drishtiBala;
 
     return {
       house,
@@ -373,8 +366,6 @@ function buildBhavaBalaColumns(
       fromLordBala,
       digBala,
       drishtiBala,
-      planetsInBala,
-      dayNightBala,
       total,
     };
   });

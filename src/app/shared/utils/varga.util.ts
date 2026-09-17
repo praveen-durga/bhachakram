@@ -219,8 +219,8 @@ export function calculateD30Rasi(longitude: number): number {
   const evenBoundaries: [number, number][] = [
     [5, 1], // Venus 0-5 -> Taurus
     [12, 5], // Mercury 5-12 -> Virgo
-    [20, 9], // Jupiter 12-20 -> Capricorn
-    [25, 10], // Saturn 20-25 -> Aquarius
+    [20, 11], // Jupiter 12-20 -> Pisces
+    [25, 9], // Saturn 20-25 -> Capricorn
     [30, 7], // Mars 25-30 -> Scorpio
   ];
 

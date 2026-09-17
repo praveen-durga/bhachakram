@@ -100,6 +100,25 @@ export class EphemerisService {
     };
   }
 
+  // Dig Bala measures a planet's distance from the weakest house's cusp using
+  // Placidus cusps specifically (JHora's shad_bala() Dig Bala calls
+  // bhaava_madhya with no method override, defaulting to Placidus/KP) — a
+  // different house system from calculateBhavaChalitChart's Sripati cusps,
+  // which serve the Bhava Chalit chart display and Bhava Bala instead.
+  async calculatePlacidusCusps(
+    datetime: Date,
+    latitude: number,
+    longitude: number,
+    ayanamsa: Ayanamsa,
+  ): Promise<number[]> {
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+    const julianDay = this.#toJulianDay(ephemeris, datetime);
+
+    const houses = ephemeris.houses_ex(julianDay, EPHEMERIS_FLAG_SIDEREAL, latitude, longitude, 'P');
+    return Array.from(houses.cusps).slice(1, 13);
+  }
+
   async calculateAscendant(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<number> {
     const ephemeris = await this.#getEphemeris();
     ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
@@ -112,10 +131,14 @@ export class EphemerisService {
   // Raw per-graha data needed by Shadbala's Chesta/Ayana/Drig Bala sub-components:
   // sidereal longitude + longitude speed (negative = retrograde), and tropical
   // declination (ayanamsa-independent, so always computed non-sidereal).
+  // ayanamsaDeg (sidereal longitude + this = Sayana/tropical longitude) is
+  // needed for Ishta/Kashta Phala's Sun-specific Chesta Kendra formula (B.V.
+  // Raman's Graha and Bhava Balas Ch. X Art. 136), which is defined in terms
+  // of the Sayana Sun, not the sidereal one.
   async calculateGrahaEphemerisData(
     datetime: Date,
     ayanamsa: Ayanamsa,
-  ): Promise<{ grahas: Record<Graha, GrahaEphemerisData>; obliquity: number }> {
+  ): Promise<{ grahas: Record<Graha, GrahaEphemerisData>; obliquity: number; ayanamsaDeg: number }> {
     const ephemeris = await this.#getEphemeris();
     ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
     const julianDay = this.#toJulianDay(ephemeris, datetime);
@@ -138,7 +161,8 @@ export class EphemerisService {
     };
 
     const [, obliquity] = ephemeris.calc_ut(julianDay, ECLIPTIC_OBLIQUITY_AND_NUTATION, 0);
-    return { grahas, obliquity };
+    const ayanamsaDeg = ephemeris.get_ayanamsa(julianDay);
+    return { grahas, obliquity, ayanamsaDeg };
   }
 
   // Finds the most recent instant before `datetime` at which the Sun's sidereal
