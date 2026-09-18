@@ -1,0 +1,261 @@
+<h1>Tajik (Varshaphal)</h1>
+
+<nav class="tajik-tabs">
+  <app-button
+    size="sm"
+    [variant]="selectedTab() === 'current' ? 'primary' : 'primary-outline'"
+    (click)="selectTab('current')"
+  >
+    ATP
+  </app-button>
+  @for (key of decadeKeys; track key) {
+    <app-button size="sm" [variant]="selectedTab() === key ? 'primary' : 'primary-outline'" (click)="selectTab(key)">
+      {{ key.replace('-', ' to ') }}
+    </app-button>
+  }
+</nav>
+
+@if (selectedTab() === 'current') {
+  <app-select
+    class="age-select"
+    label="Age"
+    [options]="ageOptions"
+    [ngModel]="selectedAgeValue()"
+    (ngModelChange)="selectAge($event)"
+  />
+
+  @if (currentAtp(); as data) {
+    <div class="atp-layout">
+      <div class="atp-chart">
+        <h2 class="chart-title">D1 - Varsha Kundali</h2>
+        <app-rasi-chart [chartData]="data.annualChart.chart" [munthaRasi]="data.annualChart.munthaRasi" />
+        <p class="atp-instant">
+          Varshapravesh: {{ data.annualChart.instant | date: 'd MMM y, h:mm a' : displayTimezone() }} (age
+          {{ data.annualChart.age }})
+        </p>
+      </div>
+
+      <div class="atp-chart">
+        <h2 class="chart-title">
+          D9 - Navamsa
+          <span class="unverified-mark" title="Annual chart's Navamsa, not a distinct classical Tajik varga">*</span>
+        </h2>
+        <app-rasi-chart [chartData]="data.annualD9Chart" [showDegrees]="false" />
+      </div>
+
+      <div class="atp-chart">
+        <h2 class="chart-title">
+          D4 - Chaturthamsa
+          <span class="unverified-mark" title="Annual chart's Chaturthamsa, not a distinct classical Tajik varga"
+            >*</span
+          >
+        </h2>
+        <app-rasi-chart [chartData]="data.annualD4Chart" [showDegrees]="false" />
+      </div>
+
+      <div class="atp-chart">
+        <h2 class="chart-title">
+          D10 - Dasamsa
+          <span class="unverified-mark" title="Annual chart's Dasamsa, not a distinct classical Tajik varga">*</span>
+        </h2>
+        <app-rasi-chart [chartData]="data.annualD10Chart" [showDegrees]="false" />
+      </div>
+
+      <div class="atp-details">
+        <div class="atp-details-primary">
+          <app-card>
+            <span title>Planet Details</span>
+            <div class="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Planet</th>
+                    <th>Rasi</th>
+                    <th>Degree</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (graha of data.annualChart.chart.grahas; track graha.graha) {
+                    <tr>
+                      <td>
+                        {{ graha.graha }}
+                        @if (graha.isRetrograde) {
+                          (R)
+                        }
+                        @if (graha.isCombust) {
+                          *
+                        }
+                      </td>
+                      <td>{{ graha.rasi + 1 }}</td>
+                      <td>{{ (graha.longitude % 30).toFixed(2) }}°</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </app-card>
+        </div>
+
+        <div class="atp-details-secondary">
+          <app-card>
+            <span title>Yogi / Avayogi</span>
+            <p>Yogi: {{ data.yogiAvayogi.yogiPlanet }} ({{ data.yogiAvayogi.yogiNakshatra }})</p>
+            <p>Avayogi: {{ data.yogiAvayogi.avayogiPlanet }} ({{ data.yogiAvayogi.avayogiNakshatra }})</p>
+          </app-card>
+
+          <app-card>
+            <span title>Year Highlights</span>
+            <p>Muntha: house {{ data.munthaHouse }} from Varsha Lagna</p>
+            <p>Year Lord ({{ data.yearLord.lord }}): house {{ data.yearLordHouse }} from Varsha Lagna</p>
+          </app-card>
+
+          <app-card>
+            <span title>Panchadhikari (Year Lord contest)</span>
+            <p>Muntha Lord: {{ data.candidates[2].lord }}</p>
+            <p>
+              Year Lord (Varsheshwar): {{ data.yearLord.lord }}
+              <span
+                class="unverified-mark"
+                title="Simplified: highest Panchavargiya Bala only, no Tajika aspect override"
+              >
+                *
+              </span>
+            </p>
+            <table class="lords-table">
+              <thead>
+                <tr>
+                  <th>Candidate</th>
+                  <th>Lord</th>
+                  <th>Bala</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (candidate of data.candidates; track candidate.role) {
+                  <tr [class.winner]="candidate.role === data.yearLord.role">
+                    <td>{{ candidate.role }}</td>
+                    <td>{{ candidate.lord }}</td>
+                    <td>{{ candidate.bala.toFixed(1) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </app-card>
+        </div>
+      </div>
+
+      <div class="atp-dasha-row">
+        <app-card>
+          <span title>Panchavargiya Bala - All Planets</span>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Planet</th>
+                  <th>Kshetra</th>
+                  <th>Uchcha</th>
+                  <th>Hadda</th>
+                  <th>Drekkana</th>
+                  <th>Navamsa</th>
+                  <th>Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (bala of data.planetBala; track bala.graha) {
+                  <tr>
+                    <td>{{ bala.graha }}</td>
+                    <td>{{ bala.kshetra.toFixed(1) }}</td>
+                    <td>{{ bala.uchcha.toFixed(1) }}</td>
+                    <td>{{ bala.hadda.toFixed(1) }}</td>
+                    <td>{{ bala.drekkana.toFixed(1) }}</td>
+                    <td>{{ bala.navamsa.toFixed(1) }}</td>
+                    <td>{{ bala.total.toFixed(1) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+
+        <app-card>
+          <span title>Mudda Dasha</span>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Lord</th>
+                  <th>Start</th>
+                  <th>End</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of muddaRows(); track row.id) {
+                  <tr>
+                    <td [style.paddingLeft.rem]="row.level * 1.5">
+                      @if (row.level < 1) {
+                        <button type="button" class="expand-toggle" (click)="toggleMudda(row)">
+                          {{ isMuddaExpanded(row) ? '▾' : '▸' }}
+                        </button>
+                      }
+                      {{ row.lord }}
+                    </td>
+                    <td>{{ row.start | date: 'd MMM y' : displayTimezone() }}</td>
+                    <td>{{ row.end | date: 'd MMM y' : displayTimezone() }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+
+        <app-card>
+          <span title>
+            Patyayini Dasha
+            <span class="unverified-mark" title="Thinner sourcing than Mudda Dasha - best-effort">*</span>
+          </span>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Lord</th>
+                  <th>Start</th>
+                  <th>End</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of patyayiniRows(); track row.id) {
+                  <tr>
+                    <td [style.paddingLeft.rem]="row.level * 1.5">
+                      @if (row.level < 1) {
+                        <button type="button" class="expand-toggle" (click)="togglePatyayini(row)">
+                          {{ isPatyayiniExpanded(row) ? '▾' : '▸' }}
+                        </button>
+                      }
+                      {{ row.lord }}
+                    </td>
+                    <td>{{ row.start | date: 'd MMM y' : displayTimezone() }}</td>
+                    <td>{{ row.end | date: 'd MMM y' : displayTimezone() }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </app-card>
+      </div>
+    </div>
+  } @else {
+    <p class="empty-state">Calculating annual chart…</p>
+  }
+} @else {
+  @if (decadeChart(); as charts) {
+    <div class="decade-grid">
+      @for (annual of charts; track annual.age) {
+        <div class="decade-tile">
+          <p class="decade-age">Age {{ annual.age }}</p>
+          <app-rasi-chart [chartData]="annual.chart" [munthaRasi]="annual.munthaRasi" [showDegrees]="false" />
+        </div>
+      }
+    </div>
+  } @else {
+    <p class="empty-state">Calculating annual charts…</p>
+  }
+}

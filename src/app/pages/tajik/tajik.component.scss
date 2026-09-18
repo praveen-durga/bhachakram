@@ -1,0 +1,123 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .tajik-tabs {
+    @apply flex flex-wrap gap-2 mb-6;
+  }
+
+  .empty-state {
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .unverified-mark {
+    color: var(--color-warning);
+  }
+
+  .age-select {
+    @apply block mb-4;
+    max-width: 12rem;
+  }
+
+  .atp-layout {
+    @apply grid gap-6;
+    grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  }
+
+  .atp-chart {
+    @apply mx-auto w-full;
+    max-width: 34rem;
+
+    .chart-title {
+      @apply text-center font-semibold mb-2;
+      color: var(--color-base-content);
+    }
+
+    .atp-instant {
+      @apply text-center mt-2;
+      font-size: var(--font-size-sm);
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    }
+  }
+
+  .atp-details {
+    @apply grid gap-4;
+    grid-template-columns: 1fr 1fr;
+    grid-column: 1 / -1;
+
+    @media (max-width: 900px) {
+      grid-template-columns: 1fr;
+    }
+
+    .section-subtitle {
+      @apply mt-2;
+      font-size: var(--font-size-xs);
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    }
+  }
+
+  .atp-details-primary,
+  .atp-details-secondary {
+    @apply flex flex-col gap-4;
+  }
+
+  .atp-dasha-row {
+    @apply grid gap-4;
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(3, 1fr);
+
+    @media (max-width: 1100px) {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    @media (max-width: 700px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .lords-table {
+    @apply w-full mt-3 text-sm;
+
+    th,
+    td {
+      @apply text-left py-1;
+    }
+
+    tr.winner td {
+      @apply font-semibold;
+      color: var(--color-success);
+    }
+  }
+
+  .expand-toggle {
+    @apply mr-2 w-4 inline-block text-center;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .decade-grid {
+    @apply grid gap-6;
+    grid-template-columns: repeat(4, 1fr);
+
+    @media (max-width: 900px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 480px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .decade-tile {
+    .decade-age {
+      @apply text-center font-semibold mb-1;
+      font-size: var(--font-size-sm);
+      color: var(--color-base-content);
+    }
+  }
+}

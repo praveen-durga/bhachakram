@@ -47,6 +47,7 @@ export class RasiChartComponent {
 
   chartData = input.required<D1Chart>();
   dagdhaRasis = input<number[]>([]);
+  munthaRasi = input<number | null>(null);
   showDegrees = input<boolean>(true);
 
   protected chartStyle = this.chartStyleService.style;
@@ -54,6 +55,7 @@ export class RasiChartComponent {
   protected regions = computed<RasiHouseRegion[]>(() => {
     const { ascendantRasi, ascendantLongitude, grahas } = this.chartData();
     const dagdhaRasis = this.dagdhaRasis();
+    const munthaRasi = this.munthaRasi();
     const showDegrees = this.showDegrees();
     const chartStyle = this.chartStyle();
     const isFixedRasi = IS_FIXED_RASI_STYLE[chartStyle];
@@ -75,6 +77,10 @@ export class RasiChartComponent {
 
       if (dagdhaRasis.includes(rasi)) {
         labels.unshift({ baseText: '🔥', isCombust: false, degreeSuffix: '' });
+      }
+
+      if (munthaRasi === rasi) {
+        labels.unshift({ baseText: 'Mu', isCombust: false, degreeSuffix: '' });
       }
 
       // North: the Ascendant's house is always array position 0 (by

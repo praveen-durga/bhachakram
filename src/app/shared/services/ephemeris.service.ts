@@ -24,6 +24,10 @@ const RISE_TRANSIT_RISE = 1;
 const RISE_TRANSIT_SET = 2;
 const ECLIPTIC_OBLIQUITY_AND_NUTATION = -1;
 
+// Sidereal year length (days), per PyJHora's const.sidereal_year - used only
+// as a search seed for findSolarReturn, not as the final answer.
+const SIDEREAL_YEAR_DAYS = 365.256364;
+
 // Classical combustion (Asta) orbs in degrees from the Sun - Sun/Rahu/Ketu
 // are not subject to combustion, so they're intentionally absent here.
 const COMBUSTION_ORB_DEG: Partial<Record<Graha, number>> = {
@@ -233,6 +237,69 @@ export class EphemerisService {
     }
 
     return this.#julianDayToUtcDate(ephemeris, laterJulianDay);
+  }
+
+  // Varshapravesh (Tajik annual return): the exact instant, `elapsedYears`
+  // after birth, at which the Sun's sidereal longitude returns to its natal
+  // value (elapsedYears=0 is the birth instant itself, elapsedYears=1 the
+  // first birthday, etc). Confirmed against PyJHora's tajaka.py/drik.py,
+  // which matches sidereal longitude (not tropical) and uses the sidereal
+  // year purely as a search seed, not as the actual answer (no manual leap/
+  // precession bookkeeping needed once the ephemeris match converges).
+  // Seeds from `birthDatetime` advanced by the sidereal year x
+  // elapsedYears, then walks day-by-day to bracket the crossing within 1
+  // day before the same 40-iteration binary search `findMostRecentSankranti`
+  // uses.
+  async findSolarReturn(
+    natalSunLongitude: number,
+    birthDatetime: Date,
+    elapsedYears: number,
+    ayanamsa: Ayanamsa,
+  ): Promise<Date> {
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+
+    const rawSunLongitude = (julianDay: number) =>
+      ephemeris.calc_ut(julianDay, 0, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL)[0];
+
+    // Signed shortest-path offset of the Sun from the natal target, in
+    // (-180, 180]: negative means the Sun hasn't reached the target yet
+    // (crossing is later), positive means it's passed it (crossing was
+    // earlier) - so a sign flip between two consecutive days brackets the
+    // exact crossing.
+    const signedOffset = (julianDay: number): number => {
+      const diff = (((rawSunLongitude(julianDay) - natalSunLongitude) % 360) + 360) % 360;
+      return diff > 180 ? diff - 360 : diff;
+    };
+
+    const seedJulianDay = this.#toJulianDay(ephemeris, birthDatetime) + elapsedYears * SIDEREAL_YEAR_DAYS;
+
+    // The sidereal-year seed lands within a day or two of the true crossing
+    // even after many decades, so a small ±10-day scan for a sign flip is
+    // always enough - no directional guessing needed.
+    let lowJulianDay = seedJulianDay - 10;
+    let lowOffset = signedOffset(lowJulianDay);
+    let highJulianDay = lowJulianDay;
+    for (let day = -9; day <= 10; day++) {
+      highJulianDay = seedJulianDay + day;
+      const highOffset = signedOffset(highJulianDay);
+      if (Math.sign(highOffset) !== Math.sign(lowOffset)) {
+        break;
+      }
+      lowJulianDay = highJulianDay;
+      lowOffset = highOffset;
+    }
+
+    for (let i = 0; i < 40; i++) {
+      const midJulianDay = (lowJulianDay + highJulianDay) / 2;
+      if (signedOffset(midJulianDay) < 0) {
+        lowJulianDay = midJulianDay;
+      } else {
+        highJulianDay = midJulianDay;
+      }
+    }
+
+    return this.#julianDayToUtcDate(ephemeris, highJulianDay);
   }
 
   async calculateSunriseSunset(

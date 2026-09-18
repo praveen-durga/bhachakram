@@ -310,6 +310,24 @@ export function getNakshatraLord(nakshatra: number): Graha {
   return NAKSHATRA_LORD_CYCLE[nakshatra % 9];
 }
 
+// Full Vimshottari dasha length per lord (years), sums to 120, same 9-lord
+// order as NAKSHATRA_LORD_CYCLE. Relocated here from dasha.data.ts since
+// Tajik's Mudda Dasha needs it too (it's the same table compressed 3x into
+// a 360-day year).
+export const VIMSHOTTARI_DASHA_YEARS: Record<Graha, number> = {
+  Ketu: 7,
+  Venus: 20,
+  Sun: 6,
+  Moon: 10,
+  Mars: 7,
+  Rahu: 18,
+  Jupiter: 16,
+  Saturn: 19,
+  Mercury: 17,
+};
+
+export const VIMSHOTTARI_TOTAL_YEARS = 120;
+
 // Relocated here from panchang.util.ts since the main D1 chart's Dagdha
 // Rasi indicator needs it too.
 export function calculateBirthTithiNumber(sunLongitude: number, moonLongitude: number): number {
