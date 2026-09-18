@@ -1,8 +1,8 @@
 import { EGYPTIAN_TERMS, HADDA_BALA_MAX, KSHETRA_BALA_MAX, TRI_RASHI_PATI, UCHCHA_BALA_MAX } from './tajik.data';
 import { EXALTATION_LONGITUDE, NATURAL_RELATION, Relation } from '../shadbala/shadbala.data';
-import { D1Chart, EphemerisService, Graha } from '../../shared/services';
+import { AnnualChart, D1Chart, EphemerisService, Graha } from '../../shared/services';
 import { calculateD3Rasi, calculateD9Rasi, findGraha, RASI_LORD } from '../../shared/utils';
-import { AnnualChart, PanchadhikariCandidate, PanchadhikariRole, PlanetBala } from './tajik.model';
+import { PanchadhikariCandidate, PanchadhikariRole, PlanetBala } from './tajik.model';
 
 // Panchadhikari candidates are always sign lords, so RASI_LORD never yields
 // Rahu/Ketu here - narrowed so NATURAL_RELATION/EXALTATION_LONGITUDE (which

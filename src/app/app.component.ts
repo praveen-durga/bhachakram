@@ -1,8 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
-import { BirthChartService } from './shared/services';
+import { AnnualChart, BirthChartService, EphemerisService } from './shared/services';
 import { HeaderComponent, RasiChartComponent } from './shared/ui';
-import { calculateBirthTithiNumber, findGraha, getDagdhaRasis } from './shared/utils';
+import {
+  buildAnnualChart,
+  calculateBirthTithiNumber,
+  currentAge,
+  findGraha,
+  getDagdhaRasis,
+  wallTimeToUtc,
+} from './shared/utils';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +21,9 @@ import { calculateBirthTithiNumber, findGraha, getDagdhaRasis } from './shared/u
 })
 export class AppComponent {
   protected birthChart = inject(BirthChartService);
+  private ephemeris = inject(EphemerisService);
+
+  #tajikChart = signal<AnnualChart | null>(null);
 
   protected dagdhaRasis = computed(() => {
     const d1Chart = this.birthChart.d1Chart();
@@ -23,4 +33,32 @@ export class AppComponent {
     const moon = findGraha(d1Chart.grahas, 'Moon');
     return getDagdhaRasis(calculateBirthTithiNumber(sun.longitude, moon.longitude));
   });
+
+  protected tajikChart = this.#tajikChart.asReadonly();
+
+  constructor() {
+    effect(() => {
+      const d1Chart = this.birthChart.d1Chart();
+      const details = this.birthChart.birthDetails();
+      if (!d1Chart || !details) {
+        this.#tajikChart.set(null);
+        return;
+      }
+
+      const natalSun = findGraha(d1Chart.grahas, 'Sun');
+      const birthDatetime = wallTimeToUtc(details.dob, details.tob, details.timezone);
+      const age = currentAge(birthDatetime, new Date());
+
+      buildAnnualChart(
+        this.ephemeris,
+        natalSun.longitude,
+        d1Chart.ascendantRasi,
+        birthDatetime,
+        age,
+        details.lat,
+        details.lng,
+        details.ayanamsa,
+      ).then((chart) => this.#tajikChart.set(chart));
+    });
+  }
 }

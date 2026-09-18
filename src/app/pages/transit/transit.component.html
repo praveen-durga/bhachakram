@@ -1,0 +1,24 @@
+<h1>Transit (Gochar)</h1>
+
+<div class="charts">
+  @if (transitD1(); as chart) {
+    <div class="chart-item">
+      <h2 class="chart-title">Transit D1 - Rasi</h2>
+      <app-rasi-chart [chartData]="chart" />
+    </div>
+  }
+
+  @if (transitD9(); as chart) {
+    <div class="chart-item">
+      <h2 class="chart-title">Transit D9 - Navamsa</h2>
+      <app-rasi-chart [chartData]="chart" [showDegrees]="false" />
+    </div>
+  }
+
+  @if (transitD10(); as chart) {
+    <div class="chart-item">
+      <h2 class="chart-title">Transit D10 - Dasamsa</h2>
+      <app-rasi-chart [chartData]="chart" [showDegrees]="false" />
+    </div>
+  }
+</div>

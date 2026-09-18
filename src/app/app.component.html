@@ -21,6 +21,13 @@
             <app-rasi-chart [chartData]="bhavaChalitChart" />
           </div>
         }
+
+        @if (tajikChart(); as tajikChart) {
+          <div class="chart-item">
+            <h2 class="chart-title">Tajik - Current Year</h2>
+            <app-rasi-chart [chartData]="tajikChart.chart" [munthaRasi]="tajikChart.munthaRasi" [showDegrees]="false" />
+          </div>
+        }
       </div>
 
       <nav class="chart-links">
@@ -34,6 +41,7 @@
         <a routerLink="/ashtakavarga">Ashtaka Varga</a>
         <a routerLink="/dasha">Dasha</a>
         <a routerLink="/tajik">Tajik</a>
+        <a routerLink="/transit">Transit</a>
       </nav>
 
       <router-outlet />

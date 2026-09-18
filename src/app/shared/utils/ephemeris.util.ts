@@ -1,4 +1,4 @@
-import { Graha, GrahaPosition, HoraResult, SunTimes } from '../services';
+import { AnnualChart, Ayanamsa, EphemerisService, Graha, GrahaPosition, HoraResult, SunTimes } from '../services';
 
 export const NAKSHATRA_NAMES = [
   'Ashwini',
@@ -362,4 +362,44 @@ const DAGDHA_RASI_BY_TITHI: number[][] = [
 export function getDagdhaRasis(tithiNumber: number): number[] {
   const dayInPaksha = ((tithiNumber - 1) % 15) + 1;
   return DAGDHA_RASI_BY_TITHI[dayInPaksha - 1];
+}
+
+// Muntha - sign-only progression of the natal Ascendant, one rasi per
+// elapsed year (age=0 at birth = the natal Lagna's own sign). Confirmed
+// directly against PyJHora's tajaka.py (muntha_house), this project's
+// existing reference standard for classical formulas. Relocated here from
+// pages/tajik/tajik-chart.util.ts since the root app component's chart
+// display is now a 2nd consumer.
+export function calculateMuntha(natalAscendantRasi: number, age: number): number {
+  return (((natalAscendantRasi + age) % 12) + 12) % 12;
+}
+
+// Varshapravesh (Tajik annual return) chart, `age` years after birth.
+export async function buildAnnualChart(
+  ephemeris: EphemerisService,
+  natalSunLongitude: number,
+  natalAscendantRasi: number,
+  birthDatetime: Date,
+  age: number,
+  lat: number,
+  lng: number,
+  ayanamsa: Ayanamsa,
+): Promise<AnnualChart> {
+  const instant = await ephemeris.findSolarReturn(natalSunLongitude, birthDatetime, age, ayanamsa);
+  const chart = await ephemeris.calculateD1Chart(instant, lat, lng, ayanamsa);
+  const munthaRasi = calculateMuntha(natalAscendantRasi, age);
+
+  return { chart, munthaRasi, instant, age };
+}
+
+// Completed years since birth, as of `now` (0 = not yet had a birthday).
+export function currentAge(birthDatetime: Date, now: Date): number {
+  let age = now.getUTCFullYear() - birthDatetime.getUTCFullYear();
+  const birthdayThisYear = new Date(
+    Date.UTC(now.getUTCFullYear(), birthDatetime.getUTCMonth(), birthDatetime.getUTCDate()),
+  );
+  if (now < birthdayThisYear) {
+    age -= 1;
+  }
+  return Math.max(0, age);
 }
