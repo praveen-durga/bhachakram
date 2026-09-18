@@ -13,6 +13,7 @@ export type PlanetPositionRow = {
   navamsa: string;
   rasiCombination: string;
   characteristics: string;
+  characteristicsKeyPhrase: string;
   careerPath: string;
   hasKarmicDosha: boolean;
   nakshatraIndex: number;

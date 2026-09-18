@@ -15,7 +15,12 @@ import {
   RASI_LORD,
   RASI_NAMES,
 } from '../../shared/utils';
-import { KARMIC_NAKSHATRAS, KARMIC_PLANETS, NAKSHATRA_PADA_DATA } from '../../shared/data';
+import {
+  KARMIC_NAKSHATRAS,
+  KARMIC_PLANETS,
+  NAKSHATRA_CHARACTERISTICS_DATA,
+  NAKSHATRA_PADA_DATA,
+} from '../../shared/data';
 import {
   DHUMA_OFFSET_DEG,
   INDU_LAGNA_KALANADI,
@@ -40,6 +45,7 @@ export function buildRow(
   const pada = calculatePada(longitude);
   const { forward, backward, isVargottam } = getRasiDistances(rasiIndex, navamsaRasiIndex);
   const padaInfo = NAKSHATRA_PADA_DATA[nakshatraIndex][pada as 1 | 2 | 3 | 4];
+  const nakshatraCharacteristics = NAKSHATRA_CHARACTERISTICS_DATA[nakshatraIndex];
   const hasKarmicDosha = KARMIC_NAKSHATRAS[rasiIndex].includes(nakshatraIndex);
 
   let karmicPlanet = '';
@@ -65,7 +71,8 @@ export function buildRow(
     rasi: RASI_NAMES[rasiIndex],
     navamsa: RASI_NAMES[navamsaRasiIndex],
     rasiCombination: `${forward},${backward}${isVargottam ? ' (Vargottam)' : ''}`,
-    characteristics: padaInfo.characteristics,
+    characteristics: nakshatraCharacteristics.generalPoints,
+    characteristicsKeyPhrase: nakshatraCharacteristics.keyPhrase,
     careerPath: padaInfo.careerPath,
     hasKarmicDosha,
     nakshatraIndex,

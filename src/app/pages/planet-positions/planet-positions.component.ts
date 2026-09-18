@@ -49,6 +49,8 @@ export class PlanetPositionsComponent {
   protected bodyCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('bodyCell');
   protected longitudeCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('longitudeCell');
   protected nakshatraCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('nakshatraCell');
+  protected characteristicsCell =
+    viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('characteristicsCell');
   protected karmicDoshaCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicDoshaCell');
   protected karmicPlanetCell = viewChild.required<TemplateRef<TableCellContext<PlanetPositionRow>>>('karmicPlanetCell');
 
@@ -70,7 +72,7 @@ export class PlanetPositionsComponent {
     { key: 'rasi', label: 'Rasi (D1)' },
     { key: 'navamsa', label: 'Navamsa (D9)' },
     { key: 'rasiCombination', label: 'Rasi Combination' },
-    { key: 'characteristics', label: 'Characteristics' },
+    { key: 'characteristics', label: 'Characteristics', cellTemplate: this.characteristicsCell() },
     { key: 'careerPath', label: 'Career Path' },
     { key: 'hasKarmicDosha', label: 'Karmic Dosha', cellTemplate: this.karmicDoshaCell() },
     { key: 'karmicPlanet', label: 'Karmic Planet', cellTemplate: this.karmicPlanetCell() },

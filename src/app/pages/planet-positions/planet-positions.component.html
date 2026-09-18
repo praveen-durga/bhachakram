@@ -34,6 +34,13 @@
   </span>
 </ng-template>
 
+<ng-template #characteristicsCell let-row>
+  <span class="characteristics-cell">
+    {{ row.characteristics }}
+    <strong>{{ row.characteristicsKeyPhrase }}</strong>
+  </span>
+</ng-template>
+
 <ng-template #karmicDoshaCell let-row>
   @if (row.hasKarmicDosha) {
     <div class="cell-with-action">

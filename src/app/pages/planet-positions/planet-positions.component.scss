@@ -27,6 +27,14 @@
     @apply inline-flex items-center gap-2;
   }
 
+  .characteristics-cell {
+    @apply block max-w-sm;
+
+    strong {
+      @apply block mt-1;
+    }
+  }
+
   .pushkar-badge {
     @apply rounded-full px-2 py-0.5 text-xs font-semibold;
     background: color-mix(in oklch, var(--color-success) 15%, transparent);
