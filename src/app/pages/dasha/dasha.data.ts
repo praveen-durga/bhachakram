@@ -1,21 +1,4 @@
-import { Graha } from '../../shared/services';
 import { DashaVariationOption } from './dasha.model';
-
-// Full Vimshottari dasha length per lord (years), sums to 120. Same 9-lord
-// order as NAKSHATRA_LORD_CYCLE (ephemeris.util.ts).
-export const VIMSHOTTARI_DASHA_YEARS: Record<Graha, number> = {
-  Ketu: 7,
-  Venus: 20,
-  Sun: 6,
-  Moon: 10,
-  Mars: 7,
-  Rahu: 18,
-  Jupiter: 16,
-  Saturn: 19,
-  Mercury: 17,
-};
-
-export const VIMSHOTTARI_TOTAL_YEARS = 120;
 
 // The 4 selectable variations, per Sanjay Rath's description (srath.com) of
 // alternate Vimshottari starting points: the reference nakshatra is counted

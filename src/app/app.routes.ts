@@ -56,6 +56,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/dasha/dasha.component').then((m) => m.DashaComponent),
   },
   {
+    path: 'tajik',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () => import('./pages/tajik/tajik.component').then((m) => m.TajikComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),

@@ -1,6 +1,12 @@
 import { Graha } from '../../shared/services';
-import { calculateNakshatra, getNakshatraLord, NAKSHATRA_LORD_CYCLE, NAKSHATRA_SPAN } from '../../shared/utils';
-import { VIMSHOTTARI_DASHA_YEARS, VIMSHOTTARI_TOTAL_YEARS } from './dasha.data';
+import {
+  calculateNakshatra,
+  getNakshatraLord,
+  NAKSHATRA_LORD_CYCLE,
+  NAKSHATRA_SPAN,
+  VIMSHOTTARI_DASHA_YEARS,
+  VIMSHOTTARI_TOTAL_YEARS,
+} from '../../shared/utils';
 import { DashaBalance, DashaNode, DashaPeriod } from './dasha.model';
 
 // Mirrors sade-sati.util.ts's addFractionalMonths: the whole-year part steps
