@@ -13,3 +13,33 @@
     @apply flex items-center justify-end flex-1 min-w-0;
   }
 }
+
+.profile-list {
+  @apply flex flex-col gap-1 rounded-lg border-1 border-gray-400;
+
+  li {
+    @apply flex items-center justify-between gap-2 px-3 py-2 cursor-pointer border-b-1 border-gray-400;
+
+    &:last-child {
+      @apply border-b-0;
+    }
+
+    &:hover {
+      background: color-mix(in oklch, var(--color-base-content) 5%, transparent);
+    }
+
+    .profile-summary {
+      @apply text-sm;
+    }
+
+    .profile-delete {
+      @apply shrink-0 cursor-pointer;
+      color: var(--color-error);
+    }
+  }
+}
+
+.profile-empty {
+  font-size: var(--font-size-sm);
+  color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+}
