@@ -37,3 +37,14 @@ export type AnnualChart = {
   instant: Date;
   age: number;
 };
+
+// The Ascendant + 9 grahas as a single flat list, each with its own
+// nakshatra/pada - relocated here from pages/navatara since Kumara Swameeyam
+// is a 2nd consumer of the same "one row per chart body" shape.
+export type ChartBody = {
+  key: string;
+  label: string;
+  abbreviation: string;
+  nakshatraIndex: number;
+  pada: number;
+};

@@ -1,4 +1,14 @@
-import { AnnualChart, Ayanamsa, EphemerisService, Graha, GrahaPosition, HoraResult, SunTimes } from '../services';
+import {
+  AnnualChart,
+  Ayanamsa,
+  ChartBody,
+  D1Chart,
+  EphemerisService,
+  Graha,
+  GrahaPosition,
+  HoraResult,
+  SunTimes,
+} from '../services';
 
 export const NAKSHATRA_NAMES = [
   'Ashwini',
@@ -88,6 +98,19 @@ export const GRAHA_ORDER: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter'
 
 export const MATRIX_PLANETS = ['As', 'Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
 
+// Relocated here from rasi-chart.component.ts since Nava Tara needs it too.
+export const GRAHA_ABBREVIATIONS: Record<Graha, string> = {
+  Sun: 'Su',
+  Moon: 'Mo',
+  Mars: 'Ma',
+  Mercury: 'Me',
+  Jupiter: 'Ju',
+  Venus: 'Ve',
+  Saturn: 'Sa',
+  Rahu: 'Ra',
+  Ketu: 'Ke',
+};
+
 export function formatDegreeInRasi(longitude: number): string {
   const degreeInRasi = longitude % 30;
   const degrees = Math.floor(degreeInRasi);
@@ -97,6 +120,14 @@ export function formatDegreeInRasi(longitude: number): string {
 
 export function calculateNakshatra(longitude: number): number {
   return Math.floor(longitude / NAKSHATRA_SPAN);
+}
+
+// 1-indexed nakshatra distance from `referenceNakshatraIndex` to
+// `targetNakshatraIndex`, counting the reference's own nakshatra as 1 (own
+// nakshatra -> 1, next -> 2, ... wrapping after 27). Reused by Nava Tara and
+// Kumara Swameeyam - each of the 27 nakshatras maps to exactly one position.
+export function calculateNakshatraDistance(referenceNakshatraIndex: number, targetNakshatraIndex: number): number {
+  return ((targetNakshatraIndex - referenceNakshatraIndex + 27) % 27) + 1;
 }
 
 export function calculatePada(longitude: number): number {
@@ -243,6 +274,28 @@ export function findGraha(grahas: GrahaPosition[], graha: Graha): GrahaPosition 
     throw new Error(`Missing graha position for ${graha}`);
   }
   return found;
+}
+
+function chartBodyLongitude(d1Chart: D1Chart, bodyKey: string): number {
+  if (bodyKey === 'Ascendant') {
+    return d1Chart.ascendantLongitude ?? d1Chart.ascendantRasi * 30;
+  }
+  return findGraha(d1Chart.grahas, bodyKey as Graha).longitude;
+}
+
+// The Ascendant + 9 grahas as a single flat list - relocated here from
+// pages/navatara since Kumara Swameeyam is a 2nd consumer.
+export function buildChartBodies(d1Chart: D1Chart): ChartBody[] {
+  return ['Ascendant', ...GRAHA_ORDER].map((key) => {
+    const longitude = chartBodyLongitude(d1Chart, key);
+    return {
+      key,
+      label: key === 'Ascendant' ? 'Lagna' : key,
+      abbreviation: key === 'Ascendant' ? 'ASC' : GRAHA_ABBREVIATIONS[key as Graha],
+      nakshatraIndex: calculateNakshatra(longitude),
+      pada: calculatePada(longitude),
+    };
+  });
 }
 
 // Weekday index 0 = Sunday, matching JS Date#getDay().
