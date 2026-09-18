@@ -1,7 +1,18 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { D1Chart, Graha, GrahaPosition } from '../../../services';
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChartStyle } from '../../../models';
+import { ChartStyleService, D1Chart, Graha, GrahaPosition } from '../../../services';
 import { formatDegreeInRasi } from '../../../utils';
-import { ChartStyle, GrahaLabelPosition, RasiHouseRegion, TextAnchor } from './rasi-chart.model';
+import {
+  GRAHA_LABEL_POSITIONS_BY_STYLE,
+  RASI_LABEL_POSITIONS_BY_STYLE,
+  REGION_POLYGONS_BY_STYLE,
+} from './rasi-chart-coordinates';
+import { GrahaLabelPosition, RasiHouseRegion } from './rasi-chart.model';
+
+// Re-exported here (rather than from a barrel entry of its own) since
+// ashtakavarga-chart.component.ts is the one external consumer of the north
+// coordinates, importing them via shared/ui's existing re-export of this file.
+export * from './rasi-chart-coordinates';
 
 const GRAHA_ABBREVIATIONS: Record<Graha, string> = {
   Sun: 'Su',
@@ -15,74 +26,12 @@ const GRAHA_ABBREVIATIONS: Record<Graha, string> = {
   Ketu: 'Ke',
 };
 
-export const NORTH_REGION_POLYGONS = [
-  '200,0 300,100 200,200 100,100',
-  '400,0 200,0 300,100',
-  '400,0 400,200 300,100',
-  '400,200 300,100 200,200 300,300',
-  '400,200 400,400 300,300',
-  '400,400 200,400 300,300',
-  '200,400 300,300 200,200 100,300',
-  '0,400 200,400 100,300',
-  '0,200 0,400 100,300',
-  '0,200 100,100 200,200 100,300',
-  '0,0 0,200 100,100',
-  '0,0 200,0 100,100',
-];
-
-// [x, y] — where each region's rasi number is placed.
-export const NORTH_RASI_LABEL_POSITIONS: [number, number][] = [
-  [200, 18],
-  [370, 18],
-  [385, 35],
-  [385, 205],
-  [385, 375],
-  [305, 320],
-  [200, 380],
-  [30, 392],
-  [15, 365],
-  [15, 205],
-  [15, 40],
-  [30, 20],
-];
-
-// [x, y, stackDirection, textAnchor] — graha labels for a region start stacking from
-// (x, y) toward the region's roomier center-facing side (+1 = downward, -1 = upward),
-// independent of where that region's own rasi number sits.
-const NORTH_GRAHA_LABEL_POSITIONS: [number, number, number, TextAnchor][] = [
-  [200, 55, 1, 'middle'],
-  [320, 20, 1, 'end'],
-  [395, 75, 1, 'end'],
-  [330, 260, -1, 'end'],
-  [395, 330, -1, 'end'],
-  [325, 345, 1, 'end'],
-  [200, 345, -1, 'middle'],
-  [70, 390, -1, 'start'],
-  [10, 335, -1, 'start'],
-  [70, 165, -1, 'start'],
-  [5, 75, 1, 'start'],
-  [75, 20, 1, 'start'],
-];
-
-// south/east geometry is not designed yet (awaiting reference images) — they
-// temporarily alias north's layout so the chartStyle input has something to
-// render rather than being unusable.
-const REGION_POLYGONS_BY_STYLE: Record<ChartStyle, string[]> = {
-  north: NORTH_REGION_POLYGONS,
-  south: NORTH_REGION_POLYGONS,
-  east: NORTH_REGION_POLYGONS,
-};
-
-const RASI_LABEL_POSITIONS_BY_STYLE: Record<ChartStyle, [number, number][]> = {
-  north: NORTH_RASI_LABEL_POSITIONS,
-  south: NORTH_RASI_LABEL_POSITIONS,
-  east: NORTH_RASI_LABEL_POSITIONS,
-};
-
-const GRAHA_LABEL_POSITIONS_BY_STYLE: Record<ChartStyle, [number, number, number, TextAnchor][]> = {
-  north: NORTH_GRAHA_LABEL_POSITIONS,
-  south: NORTH_GRAHA_LABEL_POSITIONS,
-  east: NORTH_GRAHA_LABEL_POSITIONS,
+// North Indian rotates rasi positions around the Ascendant; South Indian's
+// rasi cells are fixed regardless of Ascendant, per the classical convention.
+const IS_FIXED_RASI_STYLE: Record<ChartStyle, boolean> = {
+  north: false,
+  south: true,
+  east: false,
 };
 
 type PendingLabel = { baseText: string; isCombust: boolean; degreeSuffix: string };
@@ -94,21 +43,29 @@ type PendingLabel = { baseText: string; isCombust: boolean; degreeSuffix: string
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RasiChartComponent {
+  private chartStyleService = inject(ChartStyleService);
+
   chartData = input.required<D1Chart>();
-  chartStyle = input<ChartStyle>('north');
   dagdhaRasis = input<number[]>([]);
   showDegrees = input<boolean>(true);
+
+  protected chartStyle = this.chartStyleService.style;
 
   protected regions = computed<RasiHouseRegion[]>(() => {
     const { ascendantRasi, ascendantLongitude, grahas } = this.chartData();
     const dagdhaRasis = this.dagdhaRasis();
     const showDegrees = this.showDegrees();
-    const regionPolygons = REGION_POLYGONS_BY_STYLE[this.chartStyle()];
-    const rasiLabelPositions = RASI_LABEL_POSITIONS_BY_STYLE[this.chartStyle()];
-    const grahaLabelPositions = GRAHA_LABEL_POSITIONS_BY_STYLE[this.chartStyle()];
+    const chartStyle = this.chartStyle();
+    const isFixedRasi = IS_FIXED_RASI_STYLE[chartStyle];
+    const regionPolygons = REGION_POLYGONS_BY_STYLE[chartStyle];
+    const rasiLabelPositions = RASI_LABEL_POSITIONS_BY_STYLE[chartStyle];
+    const grahaLabelPositions = GRAHA_LABEL_POSITIONS_BY_STYLE[chartStyle];
 
     return regionPolygons.map((_, position) => {
-      const rasi = (((ascendantRasi - position) % 12) + 12) % 12;
+      // North Indian rotates: array position 0 is always the Ascendant's
+      // house, and rasi walks backward from it. South Indian is fixed: array
+      // position IS the rasi directly (position 0 = Aries), never rotated.
+      const rasi = isFixedRasi ? position : (((ascendantRasi - position) % 12) + 12) % 12;
       const [rasiX, rasiY] = rasiLabelPositions[position];
       const [grahaX, grahaY, stackDirection, grahaTextAnchor] = grahaLabelPositions[position];
 
@@ -120,7 +77,11 @@ export class RasiChartComponent {
         labels.unshift({ baseText: '🔥', isCombust: false, degreeSuffix: '' });
       }
 
-      if (position === 0) {
+      // North: the Ascendant's house is always array position 0 (by
+      // construction of the rotation above). South: rasi cells are fixed, so
+      // the Ascendant marker goes wherever its own rasi's cell is.
+      const isAscendantHouse = isFixedRasi ? rasi === ascendantRasi : position === 0;
+      if (isAscendantHouse) {
         const degreeSuffix =
           showDegrees && ascendantLongitude !== undefined ? ` ${formatDegreeInRasi(ascendantLongitude)}` : '';
         labels.unshift({ baseText: 'Asc', isCombust: false, degreeSuffix });

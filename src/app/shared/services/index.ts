@@ -1,4 +1,5 @@
 export * from './birth-chart.service';
+export * from './chart-style.service';
 export * from './ephemeris.model';
 export * from './ephemeris.service';
 export * from './store.keys';

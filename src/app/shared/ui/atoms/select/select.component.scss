@@ -14,7 +14,7 @@
   }
 
   .select {
-    @apply block w-full rounded-sm border p-2.5;
+    @apply block w-full rounded-sm border p-2.5 pe-10;
     font-size: var(--font-size-sm);
     background: var(--color-base-100);
     border-color: color-mix(in oklab, var(--color-base-content) 20%, transparent);

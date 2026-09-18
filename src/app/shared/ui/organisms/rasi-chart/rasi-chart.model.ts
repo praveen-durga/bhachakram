@@ -1,7 +1,5 @@
 export type TextAnchor = 'start' | 'middle' | 'end';
 
-export type ChartStyle = 'north' | 'south' | 'east';
-
 export type GrahaLabelPosition = {
   baseText: string;
   isCombust: boolean;
