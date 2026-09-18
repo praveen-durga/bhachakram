@@ -1,0 +1,38 @@
+<h1>Nava Tara</h1>
+
+<app-select
+  class="anchor-select"
+  label="Anchor"
+  [options]="anchorOptions"
+  [ngModel]="anchor()"
+  (ngModelChange)="selectAnchor($event)"
+/>
+
+@if (anchorNakshatraName(); as anchorName) {
+  <h2 class="anchor-title">Anchor: {{ anchorLabel() }} · {{ anchorName }}</h2>
+
+  <div class="tara-grid">
+    @for (card of cards(); track card.position) {
+      <app-card [class.error]="card.inauspicious">
+        <div title class="tara-card-title">
+          <span>{{ card.position }}. {{ card.tara }} · {{ card.animal }}</span>
+          <span class="lord-badge">{{ card.lordGraha }}</span>
+        </div>
+
+        <p class="tara-description">{{ card.description }}</p>
+        <p class="tara-nakshatras">{{ card.nakshatras.join(' · ') }}</p>
+
+        @if (card.bodyBadges.length > 0) {
+          <div actions>
+            @for (body of card.bodyBadges; track body.key) {
+              <span class="body-badge">{{ body.abbreviation }}</span>
+            }
+          </div>
+        }
+      </app-card>
+    }
+  </div>
+
+  <h2 class="sequential-title">Sequential Tara of each Graha from the {{ anchorName }} star</h2>
+  <app-table [columns]="bodyRowColumns" [rows]="bodyRows()" />
+}

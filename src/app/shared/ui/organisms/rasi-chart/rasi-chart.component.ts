@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { ChartStyle } from '../../../models';
-import { ChartStyleService, D1Chart, Graha, GrahaPosition } from '../../../services';
-import { formatDegreeInRasi } from '../../../utils';
+import { ChartStyleService, D1Chart, GrahaPosition } from '../../../services';
+import { formatDegreeInRasi, GRAHA_ABBREVIATIONS } from '../../../utils';
 import {
   GRAHA_LABEL_POSITIONS_BY_STYLE,
   RASI_LABEL_POSITIONS_BY_STYLE,
@@ -13,18 +13,6 @@ import { GrahaLabelPosition, RasiHouseRegion } from './rasi-chart.model';
 // ashtakavarga-chart.component.ts is the one external consumer of the north
 // coordinates, importing them via shared/ui's existing re-export of this file.
 export * from './rasi-chart-coordinates';
-
-const GRAHA_ABBREVIATIONS: Record<Graha, string> = {
-  Sun: 'Su',
-  Moon: 'Mo',
-  Mars: 'Ma',
-  Mercury: 'Me',
-  Jupiter: 'Ju',
-  Venus: 'Ve',
-  Saturn: 'Sa',
-  Rahu: 'Ra',
-  Ketu: 'Ke',
-};
 
 // North Indian rotates rasi positions around the Ascendant; South Indian's
 // rasi cells are fixed regardless of Ascendant, per the classical convention.

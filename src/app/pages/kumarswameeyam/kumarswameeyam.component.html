@@ -1,0 +1,9 @@
+<h1>Kumara Swameeyam</h1>
+
+@if (janmaNakshatraName(); as janmaName) {
+  <p class="janma-info">
+    Janma Nakshatra (Moon): <strong>{{ janmaName }}</strong>
+  </p>
+
+  <app-table [columns]="columns" [rows]="rows()" />
+}

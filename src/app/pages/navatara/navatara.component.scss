@@ -1,0 +1,53 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .anchor-select {
+    @apply block mb-4;
+    max-width: 16rem;
+  }
+
+  .anchor-title {
+    @apply font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .tara-grid {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-4 mb-6;
+  }
+
+  .tara-card-title {
+    @apply flex items-center justify-between gap-2;
+  }
+
+  .tara-description {
+    @apply uppercase;
+    font-size: var(--font-size-xs);
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .tara-nakshatras {
+    font-size: var(--font-size-sm);
+  }
+
+  .lord-badge,
+  .body-badge {
+    @apply rounded-full px-2 py-0.5 text-xs font-semibold;
+    background: color-mix(in oklch, var(--color-primary) 15%, transparent);
+    color: var(--color-primary);
+  }
+
+  .sequential-title {
+    @apply font-semibold mb-3;
+  }
+
+  app-table {
+    @apply block;
+  }
+}

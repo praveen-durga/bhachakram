@@ -66,6 +66,17 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/transit/transit.component').then((m) => m.TransitComponent),
   },
   {
+    path: 'navatara',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () => import('./pages/navatara/navatara.component').then((m) => m.NavataraComponent),
+  },
+  {
+    path: 'kumarswameeyam',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () =>
+      import('./pages/kumarswameeyam/kumarswameeyam.component').then((m) => m.KumarswameeyamComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),
