@@ -1,14 +1,17 @@
 import { ChangeDetectionStrategy, Component, ElementRef, effect, input, output, viewChild } from '@angular/core';
+import { IconComponent } from '../../atoms';
 
 @Component({
   selector: 'app-modal',
   templateUrl: './modal.component.html',
   styleUrl: './modal.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [IconComponent],
 })
 export class ModalComponent {
   title = input<string>();
   open = input(false);
+  dialogClass = input<string>();
 
   closed = output<void>();
 

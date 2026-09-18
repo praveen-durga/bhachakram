@@ -13,12 +13,42 @@
     }
   </div>
 
-  <app-modal title="Birth Details" [open]="modalOpen()" (closed)="modalOpen.set(false)">
-    <app-birth-details-form (submitted)="onSubmitted($event)" />
+  <app-modal title="Birth Charts" [open]="modalOpen()" (closed)="modalOpen.set(false)" dialogClass="min-h-[400px]">
+    <app-tabs [(activeTab)]="activeTab">
+      <app-tab title="Profiles">
+        @if (birthChart.profiles().length > 0) {
+          <ul class="profile-list">
+            @for (profile of birthChart.profiles(); track profile.id) {
+              <li (click)="onSelectProfile(profile.id)">
+                <span class="profile-summary">
+                  {{ profile.details.name }} | DOB: {{ profile.details.dob | appDateFormat: DATE_SHORT_MONTH }} | POB:
+                  {{ profile.details.cityLabel }}
+                </span>
+                <button
+                  type="button"
+                  class="profile-delete"
+                  aria-label="Delete"
+                  (click)="onDeleteProfile(profile.id, $event)"
+                >
+                  <app-icon name="trash"></app-icon>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else {
+          <p class="profile-empty">No saved charts yet.</p>
+        }
+      </app-tab>
+      <app-tab title="Birth Chart">
+        <app-birth-details-form (submitted)="onSubmitted($event)" />
+      </app-tab>
+    </app-tabs>
 
-    <div footer class="flex gap-2 justify-items-end">
-      <app-button variant="primary-outline" (click)="modalOpen.set(false)">Cancel</app-button>
-      <app-button type="submit" form="birth-details-form">Generate Chart</app-button>
-    </div>
+    @if (activeTab() === 'Birth Chart') {
+      <div footer class="flex gap-2 justify-items-end">
+        <app-button variant="primary-outline" (click)="modalOpen.set(false)">Cancel</app-button>
+        <app-button type="submit" form="birth-details-form">Generate Chart</app-button>
+      </div>
+    }
   </app-modal>
 </header>

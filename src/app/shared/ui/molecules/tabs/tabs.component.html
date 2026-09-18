@@ -1,0 +1,17 @@
+<div class="tabs" role="tablist" (keydown)="onKeydown($event)">
+  @for (tab of tabs(); track tab.id) {
+    <button
+      #tabButton
+      type="button"
+      role="tab"
+      [id]="'tab-' + tab.id"
+      [attr.aria-selected]="activeTab() === tab.title()"
+      [attr.aria-controls]="'panel-' + tab.id"
+      [class.active]="activeTab() === tab.title()"
+      (click)="activeTab.set(tab.title())"
+    >
+      {{ tab.title() }}
+    </button>
+  }
+</div>
+<ng-content />

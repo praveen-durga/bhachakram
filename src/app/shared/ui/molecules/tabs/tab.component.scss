@@ -1,0 +1,9 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply contents;
+
+  & > div {
+    @apply mt-3;
+  }
+}

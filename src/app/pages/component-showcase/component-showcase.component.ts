@@ -8,8 +8,10 @@ import {
   ModalComponent,
   SelectComponent,
   SelectOption,
+  TabComponent,
   TableColumn,
   TableComponent,
+  TabsComponent,
 } from '../../shared/ui';
 
 type Planet = {
@@ -26,6 +28,8 @@ type Planet = {
     CardComponent,
     ModalComponent,
     TableComponent,
+    TabsComponent,
+    TabComponent,
     InputComponent,
     SelectComponent,
     ReactiveFormsModule,

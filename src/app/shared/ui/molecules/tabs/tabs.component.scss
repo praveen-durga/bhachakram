@@ -1,0 +1,27 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block;
+}
+
+.tabs {
+  @apply flex gap-4;
+
+  button {
+    @apply px-1 py-2 font-semibold border-b-2 border-transparent cursor-pointer;
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+
+    &:hover {
+      color: var(--color-base-content);
+    }
+
+    &:focus-visible {
+      @apply outline-none ring-1 ring-current rounded-sm;
+    }
+
+    &.active {
+      color: var(--color-primary);
+      border-color: var(--color-primary);
+    }
+  }
+}
