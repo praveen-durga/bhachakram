@@ -2,14 +2,29 @@
   <span class="brand">Bhachakram</span>
 
   <div class="actions">
+    <div class="item">
+      <app-select
+        class="chart-style-select"
+        [options]="chartStyleOptions"
+        [ngModel]="chartStyle.style()"
+        (ngModelChange)="onChartStyleChange($event)"
+      />
+    </div>
+
     @if (birthChart.birthDetails(); as details) {
-      <app-button variant="primary-inverted-outline" (click)="onEdit()">
-        {{ details.name }} | DOB: {{ details.dob | appDateFormat: DATE_SHORT_MONTH }} | TOB:
-        {{ details.tob | appTimeFormat: TIME_12H_WITH_SECONDS }} | POB: {{ details.cityLabel }}
-        <app-icon name="edit"></app-icon>
-      </app-button>
+      <div class="item">
+        <app-button variant="primary-inverted-outline" buttonClass="w-full" (click)="onEdit()">
+          {{ details.name }} | DOB: {{ details.dob | appDateFormat: DATE_SHORT_MONTH }} | TOB:
+          {{ details.tob | appTimeFormat: TIME_12H_WITH_SECONDS }} | POB: {{ details.cityLabel }}
+          <app-icon name="edit"></app-icon>
+        </app-button>
+      </div>
     } @else {
-      <app-button variant="primary-inverted-outline" (click)="onEdit()">Generate Chart</app-button>
+      <div class="item">
+        <app-button variant="primary-inverted-outline" buttonClass="w-full" (click)="onEdit()"
+          >Generate Chart</app-button
+        >
+      </div>
     }
   </div>
 

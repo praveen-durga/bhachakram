@@ -1,0 +1,54 @@
+// Breakpoints (matches prod's scale) — only sm/md/lg are needed here.
+$breakpoint-sm: 23.4375rem;
+$breakpoint-md: 48rem;
+$breakpoint-lg: 75rem;
+
+// Breakpoint Mixins — emit @container, not @media, since this app uses
+// container queries for component-local responsive layout.
+@mixin uptoSm {
+  @container (max-width: #{$breakpoint-sm - 0.0025rem}) {
+    @content;
+  }
+}
+
+@mixin uptoMd {
+  @container (max-width: #{$breakpoint-md - 0.0025rem}) {
+    @content;
+  }
+}
+
+@mixin uptoLg {
+  @container (max-width: #{$breakpoint-lg - 0.0025rem}) {
+    @content;
+  }
+}
+
+@mixin onlySm {
+  @container (min-width: #{$breakpoint-sm}) and (max-width: #{$breakpoint-md - 0.0025rem}) {
+    @content;
+  }
+}
+
+@mixin onlyMd {
+  @container (min-width: #{$breakpoint-md}) and (max-width: #{$breakpoint-lg - 0.0025rem}) {
+    @content;
+  }
+}
+
+@mixin fromSm {
+  @container (min-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+@mixin fromMd {
+  @container (min-width: #{$breakpoint-md}) {
+    @content;
+  }
+}
+
+@mixin fromLg {
+  @container (min-width: #{$breakpoint-lg}) {
+    @content;
+  }
+}

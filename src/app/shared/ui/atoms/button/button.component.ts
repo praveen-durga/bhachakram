@@ -23,8 +23,11 @@ export class ButtonComponent {
   type = input<'button' | 'submit' | 'reset'>('button');
   disabled = input(false);
   form = input<string>();
+  buttonClass = input<string>();
 
   protected classes = computed(() => {
-    return ['button', this.size(), variantClassMap[this.variant()], this.color()].join(' ');
+    return ['button', this.size(), variantClassMap[this.variant()], this.color(), this.buttonClass()]
+      .filter(Boolean)
+      .join(' ');
   });
 }
