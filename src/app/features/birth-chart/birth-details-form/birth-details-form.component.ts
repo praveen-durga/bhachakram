@@ -1,17 +1,10 @@
 import { ChangeDetectionStrategy, Component, computed, output } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import {
-  AbstractControl,
-  FormControl,
-  FormGroup,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { BirthDetails } from '../../../shared/models';
 import { Ayanamsa } from '../../../shared/services';
 import { InputComponent, SelectComponent, SelectOption } from '../../../shared/ui';
-import { CITY_LABELS, findCityByLabel } from '../../../shared/utils';
+import { CITY_LABELS, findCityByLabel, TIME_ZONES } from '../../../shared/utils';
 
 const AYANAMSA_OPTIONS: SelectOption[] = [
   { value: 'lahiri', label: 'Lahiri' },
@@ -21,9 +14,7 @@ const AYANAMSA_OPTIONS: SelectOption[] = [
   { value: 'fagan-bradley', label: 'Fagan–Bradley' },
 ];
 
-function cityValidator(control: AbstractControl<string>): ValidationErrors | null {
-  return findCityByLabel(control.value) ? null : { unknownCity: true };
-}
+const TIMEZONE_OPTIONS: SelectOption[] = TIME_ZONES.map((timezone) => ({ label: timezone, value: timezone }));
 
 @Component({
   selector: 'app-birth-details-form',
@@ -40,17 +31,24 @@ export class BirthDetailsFormComponent {
     name: new FormControl('', { nonNullable: true, validators: Validators.required }),
     dob: new FormControl('', { nonNullable: true, validators: Validators.required }),
     tob: new FormControl('', { nonNullable: true, validators: Validators.required }),
-    cityLabel: new FormControl('', { nonNullable: true, validators: [Validators.required, cityValidator] }),
+    cityLabel: new FormControl('', { nonNullable: true, validators: Validators.required }),
+    timezone: new FormControl('', { nonNullable: true, validators: Validators.required }),
+    lat: new FormControl('', { nonNullable: true, validators: Validators.required }),
+    lng: new FormControl('', { nonNullable: true, validators: Validators.required }),
     ayanamsa: new FormControl<Ayanamsa>('lahiri', { nonNullable: true }),
   });
 
   protected cityOptions = CITY_LABELS;
+  protected timezoneOptions = TIMEZONE_OPTIONS;
   protected ayanamsaOptions = AYANAMSA_OPTIONS;
 
   private nameEvents = toSignal(this.form.controls.name.events);
   private dobEvents = toSignal(this.form.controls.dob.events);
   private tobEvents = toSignal(this.form.controls.tob.events);
   private cityLabelEvents = toSignal(this.form.controls.cityLabel.events);
+  private timezoneEvents = toSignal(this.form.controls.timezone.events);
+  private latEvents = toSignal(this.form.controls.lat.events);
+  private lngEvents = toSignal(this.form.controls.lng.events);
 
   protected nameError = computed(() => {
     this.nameEvents();
@@ -73,17 +71,39 @@ export class BirthDetailsFormComponent {
   protected cityLabelError = computed(() => {
     this.cityLabelEvents();
     const control = this.form.controls.cityLabel;
-    if (!control.touched) {
-      return undefined;
-    }
-    if (control.hasError('required')) {
-      return 'Place of birth is required';
-    }
-    if (control.hasError('unknownCity')) {
-      return 'Select a place from the suggestions';
-    }
-    return undefined;
+    return control.touched && control.hasError('required') ? 'Place of birth is required' : undefined;
   });
+
+  protected timezoneError = computed(() => {
+    this.timezoneEvents();
+    const control = this.form.controls.timezone;
+    return control.touched && control.hasError('required') ? 'Timezone is required' : undefined;
+  });
+
+  protected latError = computed(() => {
+    this.latEvents();
+    const control = this.form.controls.lat;
+    return control.touched && control.hasError('required') ? 'Latitude is required' : undefined;
+  });
+
+  protected lngError = computed(() => {
+    this.lngEvents();
+    const control = this.form.controls.lng;
+    return control.touched && control.hasError('required') ? 'Longitude is required' : undefined;
+  });
+
+  protected onCityLabelSelect(event: Event): void {
+    const inputVal = (event.target as HTMLInputElement).value;
+    const city = findCityByLabel(inputVal);
+
+    if (city) {
+      this.form.patchValue({
+        timezone: city.timezone,
+        lat: String(city.lat),
+        lng: String(city.lng),
+      });
+    }
+  }
 
   protected onSubmit(): void {
     if (this.form.invalid) {
@@ -91,17 +111,16 @@ export class BirthDetailsFormComponent {
       return;
     }
 
-    const { name, dob, tob, cityLabel, ayanamsa } = this.form.getRawValue();
-    const city = findCityByLabel(cityLabel)!;
+    const { name, dob, tob, cityLabel, timezone, lat, lng, ayanamsa } = this.form.getRawValue();
 
     this.submitted.emit({
       name,
       dob,
       tob,
       cityLabel,
-      lat: city.lat,
-      lng: city.lng,
-      timezone: city.timezone,
+      lat: Number(lat),
+      lng: Number(lng),
+      timezone,
       ayanamsa,
     });
   }

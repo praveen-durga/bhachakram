@@ -6572,7 +6572,10 @@ export const CITIES: readonly [string, string, number, number, number][] = [
   ['Ahwa', 'IN', 20.7572, 73.6863, 142],
 ];
 
-// IANA timezone names, indexed by CITIES[i][4]
+// IANA timezone names, indexed by CITIES[i][4]. This is a curated subset (237 of the
+// ~418 zones in Intl.supportedValuesOf('timeZone')) - notably missing US regional/legacy
+// zones like America/Indianapolis, America/Indiana/*, America/North_Dakota/*, America/Adak.
+// Known gap, left as-is intentionally.
 export const TIME_ZONES: readonly string[] = [
   'Africa/Abidjan',
   'Africa/Accra',

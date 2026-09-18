@@ -17,11 +17,11 @@ let nextId = 0;
   ],
 })
 export class InputComponent implements ControlValueAccessor {
-  label = input<string>();
+  label = input<string>('');
   error = input<string>();
-  hint = input<string>();
+  hint = input<string>('');
   type = input<string>('text');
-  placeholder = input<string>();
+  placeholder = input<string>('');
   list = input<string>();
   step = input<string>();
 
