@@ -1,4 +1,5 @@
 import {
+  calculateD2KashinathaRasi,
   calculateD2Rasi,
   calculateD3JagannathRasi,
   calculateD3Rasi,
@@ -25,6 +26,7 @@ import { ModalityGrade, VargaOption } from './vargas.model';
 
 export const VARGA_OPTIONS: VargaOption[] = [
   { key: 'D2', label: 'D2 - Hora', calculateRasi: calculateD2Rasi },
+  { key: 'D2K', label: 'D2K - Kashinatha Hora', calculateRasi: calculateD2KashinathaRasi },
   { key: 'D3', label: 'D3 - Drekkana', calculateRasi: calculateD3Rasi },
   { key: 'D3J', label: 'D3J - Jagannatha Drekkana', calculateRasi: calculateD3JagannathRasi },
   { key: 'D3S', label: 'D3S - Somanatha Drekkana', calculateRasi: calculateD3SomanathRasi },
@@ -47,7 +49,7 @@ export const VARGA_OPTIONS: VargaOption[] = [
 
 // Not BPHS-verified (best-effort from secondary sources - see varga.util.ts
 // for the confidence notes per formula); shown with a caution badge in the UI.
-export const UNVERIFIED_VARGA_KEYS = ['D3J', 'D3S', 'D5', 'D6', 'D8', 'D11', 'D27'];
+export const UNVERIFIED_VARGA_KEYS = ['D2K', 'D3J', 'D3S', 'D5', 'D6', 'D8', 'D11', 'D27'];
 
 // Grade for a D1 sign's modality compared against a varga sign's modality,
 // as specified by the user: M+M=E, M+F=A, M+D=B, F+F=B, F+D=E, D+D=A

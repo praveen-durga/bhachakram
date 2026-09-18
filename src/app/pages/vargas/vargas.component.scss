@@ -26,12 +26,6 @@
         @apply text-center font-semibold mb-2;
         color: var(--color-base-content);
       }
-
-      .unverified-note {
-        @apply block font-normal;
-        font-size: var(--font-size-xs);
-        color: color-mix(in oklch, var(--color-warning) 80%, var(--color-base-content));
-      }
     }
   }
 

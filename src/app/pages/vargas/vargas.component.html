@@ -25,12 +25,7 @@
 
   @if (selectedVargaChart(); as chart) {
     <div class="chart-item">
-      <h2 class="chart-title">
-        {{ selectedOption().label }}
-        @if (unverifiedVargaKeys.includes(selectedOption().key)) {
-          <span class="unverified-note">(not from a primary classical source - best-effort formula)</span>
-        }
-      </h2>
+      <h2 class="chart-title">{{ selectedOption().label }}</h2>
       <app-rasi-chart [chartData]="chart" [showDegrees]="false" />
     </div>
   }

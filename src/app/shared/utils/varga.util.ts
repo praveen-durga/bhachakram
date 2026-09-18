@@ -52,6 +52,27 @@ export function calculateD2Rasi(longitude: number): number {
   return sunHora ? 4 : 3; // Leo or Cancer
 }
 
+// D2 Kashinatha Hora - not BPHS, an alternate Hora scheme named after Pt.
+// Kashinath Rath (per Jagannatha Hora software's own attribution - NOT a
+// place-name/Varanasi scheme despite the similar-sounding name, and not a
+// D3/Drekkana variant either, both worth flagging since the request that
+// prompted this assumed otherwise). Day signs (Leo/Virgo/Libra/Scorpio/
+// Aquarius/Pisces) vs night signs (the rest): 1st half of a sign stays in
+// that sign, 2nd half switches to the OTHER sign owned by the same ruler
+// (each of Mars/Venus/Mercury/Jupiter/Saturn owns one day + one night sign).
+// Sun and Moon each own only one sign (Leo/Cancer), so by the same
+// alternation pattern every other sign follows, they pair with each other -
+// this closes the pattern cleanly (verified: the resulting 12-sign table is
+// fully self-consistent, every sign's 2nd-half destination is symmetric
+// with that destination sign's own 1st-half), but the source only gives the
+// rule in prose, not this literal 12-row table, so it's flagged best-effort.
+const KASHINATHA_HORA_PAIR = [7, 6, 5, 4, 3, 2, 1, 0, 11, 10, 9, 8];
+
+export function calculateD2KashinathaRasi(longitude: number): number {
+  const { rasi, degreeInRasi } = toRasiAndDegree(longitude);
+  return degreeInRasi < 15 ? rasi : KASHINATHA_HORA_PAIR[rasi];
+}
+
 // D3 (Drekkana), BPHS v.7-8: each 10° third of a sign maps to that sign, the
 // 5th-from-it, or the 9th-from-it.
 export function calculateD3Rasi(longitude: number): number {
