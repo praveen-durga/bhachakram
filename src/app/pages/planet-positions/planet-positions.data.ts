@@ -31,3 +31,55 @@ export const INDU_LAGNA_KALANADI: Partial<Record<Graha, number>> = {
 export const KARAKA_GRAHAS: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn'];
 
 export const KARAKA_ABBREVIATIONS = ['AK', 'AmK', 'BK', 'MK', 'PK', 'GK', 'DK']; // rank 1 (highest degree) -> 7 (lowest)
+
+// DNA Karma - each nakshatra's owning graha, per the user's own table.
+// Indexed by nakshatra (0 = Ashwini ... 26 = Revati), matching
+// NAKSHATRA_NAMES order.
+export const NAKSHATRA_KARMA = [
+  'Sun', // Ashwini
+  'Moon', // Bharani
+  'Mars', // Krittika
+  'Mercury', // Rohini
+  'Jupiter', // Mrigashira
+  'Venus', // Ardra
+  'Saturn', // Punarvasu
+  'Rahu', // Pushya
+  'Sun', // Ashlesha
+  'Moon', // Magha
+  'Mars', // Purva Phalguni
+  'Mercury', // Uttara Phalguni
+  'Jupiter', // Hasta
+  'Venus', // Chitra
+  'Saturn', // Swati
+  'Rahu', // Vishakha
+  'Sun', // Anuradha
+  'Moon', // Jyeshtha
+  'Mars', // Moola
+  'Mercury', // Purva Ashadha
+  'Jupiter', // Uttara Ashadha
+  'Venus', // Sravana
+  'Saturn', // Dhanishta
+  'Rahu', // Shatabhisha
+  'Sun', // Purva Bhadrapada
+  'Moon', // Uttara Bhadrapada
+  'Mars', // Revati
+];
+
+// DNA Karma - each rashi's own karma, per the user's own table (with the
+// "Karma" suffix dropped and "No Karma" shown as "-", per the user's
+// explicit display preference). Indexed by rasi (0 = Aries ... 11 = Pisces),
+// matching RASI_NAMES order.
+export const RASHI_KARMA = [
+  'Jupiter', // Aries
+  'Jupiter', // Taurus
+  '-', // Gemini
+  '-', // Cancer
+  'Jupiter', // Leo
+  'Saturn and Moon', // Virgo
+  'Moon', // Libra
+  '-', // Scorpio
+  'Rahu', // Sagittarius
+  '-', // Capricorn
+  'Mars', // Aquarius
+  'Sun', // Pisces
+];

@@ -143,6 +143,48 @@
   </div>
 }
 
+@if (dnaKarmaColumns().length > 0) {
+  <p class="dna-karma-title">DNA Karma</p>
+  <div class="table-container">
+    <table class="dna-karma-table">
+      <thead>
+        <tr>
+          <th>Bhava</th>
+          @for (column of dnaKarmaColumns(); track column.house) {
+            <th>{{ column.house }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Degree</td>
+          @for (column of dnaKarmaColumns(); track column.house) {
+            <td>{{ column.degreeKarma }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Sign</td>
+          @for (column of dnaKarmaColumns(); track column.house) {
+            <td>{{ column.signKarma }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Lord</td>
+          @for (column of dnaKarmaColumns(); track column.house) {
+            <td>{{ column.lordKarma }}</td>
+          }
+        </tr>
+        <tr>
+          <td>Final Active Karma</td>
+          @for (column of dnaKarmaColumns(); track column.house) {
+            <td>{{ column.finalKarma }}</td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}
+
 <app-modal title="Karmic Dosha" [open]="!!selectedDosha()" (closed)="closeDosha()">
   @if (selectedDosha(); as dosha) {
     <p><strong>Rasi, Nakshatra:</strong> {{ dosha.rasi }}, {{ dosha.nakshatra }}</p>

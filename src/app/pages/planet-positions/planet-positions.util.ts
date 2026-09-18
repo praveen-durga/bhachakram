@@ -26,9 +26,11 @@ import {
   INDU_LAGNA_KALANADI,
   KARAKA_ABBREVIATIONS,
   KARAKA_GRAHAS,
+  NAKSHATRA_KARMA,
+  RASHI_KARMA,
   UPAKETU_OFFSET_DEG,
 } from './planet-positions.data';
-import { BhavaPositionColumn, CharaKarakaInfo, PlanetPositionRow } from './planet-positions.model';
+import { BhavaPositionColumn, CharaKarakaInfo, DnaKarmaColumn, PlanetPositionRow } from './planet-positions.model';
 
 function normalizeDegrees(degrees: number): number {
   return ((degrees % 360) + 360) % 360;
@@ -208,5 +210,36 @@ export function buildBhavaPositionColumns(
       d1DispositorCombination: combinationByGraha.get(d1Dispositor) ?? '',
       d9DispositorCombination: combinationByGraha.get(d9Dispositor) ?? '',
     };
+  });
+}
+
+// DNA Karma, houses 1-12 as whole signs from the Ascendant, per the user's
+// own tables. For each house:
+// - Degree: the Ascendant's own degree-within-sign, placed into that
+//   house's rasi - the nakshatra that longitude falls in gives the Karma.
+// - Sign: that house's rasi's own Karma (may be "No Karma" or a combined
+//   Karma, per RASHI_KARMA).
+// - Lord: that house's lord's own natal nakshatra gives the Karma.
+// - Final Active Karma: the above 3 combined, dropping any "-" (No Karma).
+export function buildDnaKarmaColumns(d1Chart: D1Chart): DnaKarmaColumn[] {
+  const ascendantLongitude = d1Chart.ascendantLongitude ?? d1Chart.ascendantRasi * 30;
+  const ascendantDegreeInRasi = ascendantLongitude % 30;
+
+  return Array.from({ length: 12 }, (_, index) => {
+    const house = index + 1;
+    const houseRasi = (d1Chart.ascendantRasi + index) % 12;
+
+    const degreeLongitude = houseRasi * 30 + ascendantDegreeInRasi;
+    const degreeKarma = NAKSHATRA_KARMA[calculateNakshatra(degreeLongitude)];
+
+    const signKarma = RASHI_KARMA[houseRasi];
+
+    const houseLord = RASI_LORD[houseRasi];
+    const lordLongitude = findGraha(d1Chart.grahas, houseLord).longitude;
+    const lordKarma = NAKSHATRA_KARMA[calculateNakshatra(lordLongitude)];
+
+    const finalKarma = [degreeKarma, signKarma, lordKarma].filter((karma) => karma !== '-').join(' / ');
+
+    return { house, degreeKarma, signKarma, lordKarma, finalKarma };
   });
 }

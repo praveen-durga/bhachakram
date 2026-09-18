@@ -44,3 +44,11 @@ export type BhavaPositionColumn = {
   d1DispositorCombination: string;
   d9DispositorCombination: string;
 };
+
+export type DnaKarmaColumn = {
+  house: number;
+  degreeKarma: string;
+  signKarma: string;
+  lordKarma: string;
+  finalKarma: string;
+};
