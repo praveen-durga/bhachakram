@@ -82,7 +82,7 @@ export const GRAHA_OWNED_RASIS: Record<Graha, number[]> = {
   Ketu: [7], // Scorpio (modern co-lord)
 };
 
-const NAKSHATRA_SPAN = 360 / 27;
+export const NAKSHATRA_SPAN = 360 / 27;
 
 export const GRAHA_ORDER: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];
 

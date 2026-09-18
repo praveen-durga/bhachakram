@@ -12,3 +12,4 @@
 - [ ] Ashtaka Varga route (SAV + BAV per planet, chart display) — [.claude/todo-plans/18-ashtakavarga-route.md](.claude/todo-plans/18-ashtakavarga-route.md)
 - [ ] Dagdha Rasi fire indicator on Main D1 chart — [.claude/todo-plans/19-dagdha-rasi-main-chart.md](.claude/todo-plans/19-dagdha-rasi-main-chart.md)
 - [x] Align Shadbala/Bhava Bala formulas with Jagannatha Hora (PyJHora)
+- [x] Dasha route (Vimshottari Maha/Antar/Pratyantar/Sookshma tree, Janma/Kshema/Utpanna/Adhana variations) — [.claude/todo-plans/20-dasha-route.md](.claude/todo-plans/20-dasha-route.md)

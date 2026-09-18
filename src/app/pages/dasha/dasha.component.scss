@@ -1,0 +1,31 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .variation-buttons {
+    @apply flex flex-wrap gap-2 mb-4;
+  }
+
+  app-card {
+    @apply block mb-6;
+  }
+
+  .dasha-table {
+    .expand-toggle {
+      @apply mr-2 w-4 inline-block text-center;
+      color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+    }
+
+    tr.current-period td {
+      @apply font-semibold;
+      background: color-mix(in oklch, var(--color-success) 15%, transparent);
+      color: var(--color-success-content);
+    }
+  }
+}
