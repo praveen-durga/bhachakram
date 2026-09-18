@@ -254,6 +254,53 @@ export function isSarpaDrekkana(longitude: number): boolean {
   return (SARPA_DREKKANA_INDICES[rasi] ?? []).includes(drekkanaIndex);
 }
 
+// Pasha ("noose") Drekkana - Scorpio's 2nd drekkana (10-20deg) only, per the
+// user's own confirmation, cross-checked against 2 independent sources
+// (BV Raman's "How to Judge a Horoscope" per an archive.org excerpt, and
+// astrosagar.com) that agree with each other.
+export function isPashaDrekkana(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const drekkanaIndex = Math.floor((longitude % 30) / 10);
+  return rasi === 7 && drekkanaIndex === 1; // Scorpio
+}
+
+// Ayudha ("weapon") Drekkana - per the user's own table. Keyed by rasi
+// (0 = Aries, 2 = Gemini, 8 = Sagittarius, 9 = Capricorn, 10 = Aquarius);
+// each value lists which of the 3 drekkanas (0-indexed) are Ayudha.
+const AYUDHA_DREKKANA_INDICES: Partial<Record<number, number[]>> = {
+  0: [2], // Aries
+  2: [2], // Gemini
+  8: [0, 2], // Sagittarius
+  9: [2], // Capricorn
+  10: [2], // Aquarius
+};
+
+export function isAyudhaDrekkana(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const drekkanaIndex = Math.floor((longitude % 30) / 10);
+  return (AYUDHA_DREKKANA_INDICES[rasi] ?? []).includes(drekkanaIndex);
+}
+
+// Pakshi ("bird") Drekkana - per the user's own table (Brihat Jataka /
+// Saravali). Keyed by rasi (2 = Gemini, 4 = Leo, 5 = Virgo, 6 = Libra,
+// 8 = Sagittarius, 9 = Capricorn, 10 = Aquarius); each value lists which of
+// the 3 drekkanas (0-indexed) are Pakshi.
+const PAKSHI_DREKKANA_INDICES: Partial<Record<number, number[]>> = {
+  2: [1], // Gemini
+  4: [0], // Leo
+  5: [0, 1, 2], // Virgo
+  6: [0, 1], // Libra
+  8: [0], // Sagittarius
+  9: [0], // Capricorn
+  10: [0], // Aquarius
+};
+
+export function isPakshiDrekkana(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const drekkanaIndex = Math.floor((longitude % 30) / 10);
+  return (PAKSHI_DREKKANA_INDICES[rasi] ?? []).includes(drekkanaIndex);
+}
+
 // 1-indexed pada across the full 108-pada zodiac cycle (27 nakshatras x 4
 // padas each, 3°20' apart), Ashwini pada 1 = 1, Revati pada 4 = 108.
 function calculateGlobalPada(longitude: number): number {

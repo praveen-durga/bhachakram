@@ -4,6 +4,9 @@ export type PlanetPositionRow = {
   isPushkarBhaga: boolean;
   isMrityuBhaga: boolean;
   isSarpaDrekkana: boolean;
+  isPashaDrekkana: boolean;
+  isAyudhaDrekkana: boolean;
+  isPakshiDrekkana: boolean;
   nakshatra: string;
   isGandanta: boolean;
   isTempGandanta: boolean;
