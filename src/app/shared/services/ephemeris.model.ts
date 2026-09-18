@@ -27,3 +27,13 @@ export type SunTimes = {
   sunset: Date;
   nextSunrise: Date;
 };
+
+// Varshapravesh (Tajik annual return) chart - relocated here from
+// pages/tajik/tajik.model.ts since the root app component's D1/D9/Bhava
+// Chalit display is now a 2nd consumer.
+export type AnnualChart = {
+  chart: D1Chart;
+  munthaRasi: number;
+  instant: Date;
+  age: number;
+};

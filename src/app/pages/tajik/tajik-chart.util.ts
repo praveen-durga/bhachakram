@@ -1,41 +1,4 @@
-import { Ayanamsa, EphemerisService } from '../../shared/services';
-import { AnnualChart, DecadeKey } from './tajik.model';
-
-// Muntha - sign-only progression of the natal Ascendant, one rasi per
-// elapsed year (age=0 at birth = the natal Lagna's own sign). Confirmed
-// directly against PyJHora's tajaka.py (muntha_house), this project's
-// existing reference standard for classical formulas.
-export function calculateMuntha(natalAscendantRasi: number, age: number): number {
-  return (((natalAscendantRasi + age) % 12) + 12) % 12;
-}
-
-export async function buildAnnualChart(
-  ephemeris: EphemerisService,
-  natalSunLongitude: number,
-  natalAscendantRasi: number,
-  birthDatetime: Date,
-  age: number,
-  lat: number,
-  lng: number,
-  ayanamsa: Ayanamsa,
-): Promise<AnnualChart> {
-  const instant = await ephemeris.findSolarReturn(natalSunLongitude, birthDatetime, age, ayanamsa);
-  const chart = await ephemeris.calculateD1Chart(instant, lat, lng, ayanamsa);
-  const munthaRasi = calculateMuntha(natalAscendantRasi, age);
-
-  return { chart, munthaRasi, instant, age };
-}
-
-export function currentAge(birthDatetime: Date, now: Date): number {
-  let age = now.getUTCFullYear() - birthDatetime.getUTCFullYear();
-  const birthdayThisYear = new Date(
-    Date.UTC(now.getUTCFullYear(), birthDatetime.getUTCMonth(), birthDatetime.getUTCDate()),
-  );
-  if (now < birthdayThisYear) {
-    age -= 1;
-  }
-  return Math.max(0, age);
-}
+import { DecadeKey } from './tajik.model';
 
 export const DECADE_KEYS: DecadeKey[] = [
   '1-10',

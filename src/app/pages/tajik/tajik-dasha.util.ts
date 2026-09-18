@@ -1,4 +1,4 @@
-import { Graha } from '../../shared/services';
+import { AnnualChart, Graha } from '../../shared/services';
 import {
   calculateNakshatra,
   findGraha,
@@ -6,7 +6,7 @@ import {
   NAKSHATRA_LORD_CYCLE,
   VIMSHOTTARI_DASHA_YEARS,
 } from '../../shared/utils';
-import { AnnualChart, TajikDashaNode } from './tajik.model';
+import { TajikDashaNode } from './tajik.model';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const SIDEREAL_YEAR_DAYS = 365.256363;

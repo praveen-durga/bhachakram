@@ -1,17 +1,19 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { BirthChartService, D1Chart, EphemerisService } from '../../shared/services';
+import { AnnualChart, BirthChartService, D1Chart, EphemerisService } from '../../shared/services';
 import { ButtonComponent, CardComponent, RasiChartComponent, SelectComponent, SelectOption } from '../../shared/ui';
 import {
+  buildAnnualChart,
   calculateD4Rasi,
   calculateD9Rasi,
   calculateD10Rasi,
+  currentAge,
   findGraha,
   getRasiDistances,
   wallTimeToUtc,
 } from '../../shared/utils';
-import { buildAnnualChart, currentAge, DECADE_KEYS, decadeAges } from './tajik-chart.util';
+import { DECADE_KEYS, decadeAges } from './tajik-chart.util';
 import {
   buildMuddaChildNodes,
   buildMuddaDashaNodes,
@@ -21,7 +23,7 @@ import {
 import { buildAllPlanetBala, buildPanchadhikariCandidates, selectYearLord } from './tajik-lords.util';
 import { calculateYogiAvayogi } from './tajik-yogi.util';
 import { buildVargaChart } from '../vargas/vargas.util';
-import { AnnualChart, PanchadhikariCandidate, PlanetBala, TajikDashaNode, TajikTab, YogiAvayogi } from './tajik.model';
+import { PanchadhikariCandidate, PlanetBala, TajikDashaNode, TajikTab, YogiAvayogi } from './tajik.model';
 
 type CurrentAtpData = {
   annualChart: AnnualChart;
