@@ -28,5 +28,9 @@
   .graha-label {
     @apply text-xs font-semibold;
     fill: var(--color-base-content);
+
+    .combust-marker {
+      font-size: 0.7em;
+    }
   }
 }

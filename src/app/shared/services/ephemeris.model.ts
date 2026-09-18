@@ -6,6 +6,8 @@ export type GrahaPosition = {
   graha: Graha;
   longitude: number;
   rasi: number;
+  isRetrograde: boolean;
+  isCombust: boolean;
 };
 
 export type D1Chart = {

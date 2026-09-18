@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
-import { D1Chart, Graha } from '../../../services';
+import { D1Chart, Graha, GrahaPosition } from '../../../services';
 import { formatDegreeInRasi } from '../../../utils';
 import { ChartStyle, GrahaLabelPosition, RasiHouseRegion, TextAnchor } from './rasi-chart.model';
 
@@ -85,6 +85,8 @@ const GRAHA_LABEL_POSITIONS_BY_STYLE: Record<ChartStyle, [number, number, number
   east: NORTH_GRAHA_LABEL_POSITIONS,
 };
 
+type PendingLabel = { baseText: string; isCombust: boolean; degreeSuffix: string };
+
 @Component({
   selector: 'app-rasi-chart',
   templateUrl: './rasi-chart.component.html',
@@ -95,10 +97,12 @@ export class RasiChartComponent {
   chartData = input.required<D1Chart>();
   chartStyle = input<ChartStyle>('north');
   dagdhaRasis = input<number[]>([]);
+  showDegrees = input<boolean>(true);
 
   protected regions = computed<RasiHouseRegion[]>(() => {
     const { ascendantRasi, ascendantLongitude, grahas } = this.chartData();
     const dagdhaRasis = this.dagdhaRasis();
+    const showDegrees = this.showDegrees();
     const regionPolygons = REGION_POLYGONS_BY_STYLE[this.chartStyle()];
     const rasiLabelPositions = RASI_LABEL_POSITIONS_BY_STYLE[this.chartStyle()];
     const grahaLabelPositions = GRAHA_LABEL_POSITIONS_BY_STYLE[this.chartStyle()];
@@ -108,21 +112,22 @@ export class RasiChartComponent {
       const [rasiX, rasiY] = rasiLabelPositions[position];
       const [grahaX, grahaY, stackDirection, grahaTextAnchor] = grahaLabelPositions[position];
 
-      const labelTexts = grahas
+      const labels: PendingLabel[] = grahas
         .filter((g) => g.rasi === rasi)
-        .map((g) => `${GRAHA_ABBREVIATIONS[g.graha]} ${formatDegreeInRasi(g.longitude)}`);
+        .map((g) => this.buildGrahaLabel(g, showDegrees));
 
       if (dagdhaRasis.includes(rasi)) {
-        labelTexts.unshift('🔥');
+        labels.unshift({ baseText: '🔥', isCombust: false, degreeSuffix: '' });
       }
 
       if (position === 0) {
-        const ascText = ascendantLongitude === undefined ? 'Asc' : `Asc ${formatDegreeInRasi(ascendantLongitude)}`;
-        labelTexts.unshift(ascText);
+        const degreeSuffix =
+          showDegrees && ascendantLongitude !== undefined ? ` ${formatDegreeInRasi(ascendantLongitude)}` : '';
+        labels.unshift({ baseText: 'Asc', isCombust: false, degreeSuffix });
       }
 
-      const grahaLabels: GrahaLabelPosition[] = labelTexts.map((text, i) => ({
-        text,
+      const grahaLabels: GrahaLabelPosition[] = labels.map((label, i) => ({
+        ...label,
         x: grahaX,
         y: grahaY + stackDirection * i * 15,
       }));
@@ -130,4 +135,12 @@ export class RasiChartComponent {
       return { rasi: rasi + 1, rasiLabelX: rasiX, rasiLabelY: rasiY, grahaTextAnchor, grahaLabels };
     });
   });
+
+  private buildGrahaLabel(graha: GrahaPosition, showDegrees: boolean): PendingLabel {
+    const abbreviation = GRAHA_ABBREVIATIONS[graha.graha];
+    const baseText = graha.isRetrograde ? `(${abbreviation})` : abbreviation;
+    const degreeSuffix = showDegrees ? ` ${formatDegreeInRasi(graha.longitude)}` : '';
+
+    return { baseText, isCombust: graha.isCombust, degreeSuffix };
+  }
 }

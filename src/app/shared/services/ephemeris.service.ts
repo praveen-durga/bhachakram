@@ -24,6 +24,17 @@ const RISE_TRANSIT_RISE = 1;
 const RISE_TRANSIT_SET = 2;
 const ECLIPTIC_OBLIQUITY_AND_NUTATION = -1;
 
+// Classical combustion (Asta) orbs in degrees from the Sun - Sun/Rahu/Ketu
+// are not subject to combustion, so they're intentionally absent here.
+const COMBUSTION_ORB_DEG: Partial<Record<Graha, number>> = {
+  Moon: 12,
+  Mars: 17,
+  Mercury: 14,
+  Jupiter: 11,
+  Venus: 10,
+  Saturn: 15,
+};
+
 const SIDEREAL_MODE_BY_AYANAMSA: Record<Ayanamsa, number> = {
   lahiri: 1,
   raman: 3,
@@ -32,8 +43,10 @@ const SIDEREAL_MODE_BY_AYANAMSA: Record<Ayanamsa, number> = {
   'fagan-bradley': 0,
 };
 
+type GrahaLongitudeSpeed = { longitude: number; longitudeSpeed: number };
+
 type RawPositions = {
-  grahaLongitudes: Record<Graha, number>;
+  grahaData: Record<Graha, GrahaLongitudeSpeed>;
   ascendantLongitude: number;
 };
 
@@ -54,26 +67,26 @@ export class EphemerisService {
   }
 
   async calculateD1Chart(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<D1Chart> {
-    const { grahaLongitudes, ascendantLongitude } = await this.#calculateRawPositions(
+    const { grahaData, ascendantLongitude } = await this.#calculateRawPositions(
       datetime,
       latitude,
       longitude,
       ayanamsa,
     );
 
-    const grahas = this.#toGrahaPositions(grahaLongitudes, this.#toRasi);
+    const grahas = this.#toGrahaPositions(grahaData, this.#toRasi);
     return { ascendantRasi: this.#toRasi(ascendantLongitude), ascendantLongitude, grahas };
   }
 
   async calculateD9Chart(datetime: Date, latitude: number, longitude: number, ayanamsa: Ayanamsa): Promise<D1Chart> {
-    const { grahaLongitudes, ascendantLongitude } = await this.#calculateRawPositions(
+    const { grahaData, ascendantLongitude } = await this.#calculateRawPositions(
       datetime,
       latitude,
       longitude,
       ayanamsa,
     );
 
-    const grahas = this.#toGrahaPositions(grahaLongitudes, calculateD9Rasi);
+    const grahas = this.#toGrahaPositions(grahaData, calculateD9Rasi);
     return { ascendantRasi: calculateD9Rasi(ascendantLongitude), grahas };
   }
 
@@ -87,11 +100,11 @@ export class EphemerisService {
     ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
     const julianDay = this.#toJulianDay(ephemeris, datetime);
 
-    const grahaLongitudes = this.#calculateGrahaLongitudes(ephemeris, julianDay);
+    const grahaData = this.#calculateGrahaData(ephemeris, julianDay);
     const houses = ephemeris.houses_ex(julianDay, EPHEMERIS_FLAG_SIDEREAL, latitude, longitude, 'S');
     const toBhavaIndex = (longitude: number) => this.#houseForLongitude(longitude, houses.cusps) - 1;
 
-    const grahas = this.#toGrahaPositions(grahaLongitudes, toBhavaIndex);
+    const grahas = this.#toGrahaPositions(grahaData, toBhavaIndex);
     return {
       ascendantRasi: toBhavaIndex(houses.ascmc[0]),
       ascendantLongitude: houses.ascmc[0],
@@ -297,12 +310,27 @@ export class EphemerisService {
     return 1;
   }
 
-  #toGrahaPositions(grahaLongitudes: Record<Graha, number>, toRasi: (longitude: number) => number): GrahaPosition[] {
-    return Object.entries(grahaLongitudes).map(([graha, longitude]) => ({
-      graha: graha as Graha,
-      longitude,
-      rasi: toRasi(longitude),
-    }));
+  #toGrahaPositions(
+    grahaData: Record<Graha, GrahaLongitudeSpeed>,
+    toRasi: (longitude: number) => number,
+  ): GrahaPosition[] {
+    const sunLongitude = grahaData.Sun.longitude;
+
+    return Object.entries(grahaData).map(([graha, { longitude, longitudeSpeed }]) => {
+      const combustionOrb = COMBUSTION_ORB_DEG[graha as Graha];
+      return {
+        graha: graha as Graha,
+        longitude,
+        rasi: toRasi(longitude),
+        isRetrograde: longitudeSpeed < 0,
+        isCombust: combustionOrb !== undefined && this.#angularDistance(longitude, sunLongitude) <= combustionOrb,
+      };
+    });
+  }
+
+  #angularDistance(a: number, b: number): number {
+    const diff = Math.abs(a - b) % 360;
+    return diff > 180 ? 360 - diff : diff;
   }
 
   async #calculateRawPositions(
@@ -315,20 +343,27 @@ export class EphemerisService {
     ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
     const julianDay = this.#toJulianDay(ephemeris, datetime);
 
-    const grahaLongitudes = this.#calculateGrahaLongitudes(ephemeris, julianDay);
+    const grahaData = this.#calculateGrahaData(ephemeris, julianDay);
     const houses = ephemeris.houses_ex(julianDay, EPHEMERIS_FLAG_SIDEREAL, latitude, longitude, 'W');
 
-    return { grahaLongitudes, ascendantLongitude: houses.ascmc[0] };
+    return { grahaData, ascendantLongitude: houses.ascmc[0] };
   }
 
-  #calculateGrahaLongitudes(ephemeris: SwissEphemeris, julianDay: number): Record<Graha, number> {
-    const grahaLongitudes = {} as Record<Graha, number>;
+  #calculateGrahaData(ephemeris: SwissEphemeris, julianDay: number): Record<Graha, GrahaLongitudeSpeed> {
+    const grahaData = {} as Record<Graha, GrahaLongitudeSpeed>;
     for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
-      const [grahaLongitude] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL);
-      grahaLongitudes[graha as Graha] = grahaLongitude;
+      const [longitude, , , longitudeSpeed] = ephemeris.calc_ut(
+        julianDay,
+        planetId,
+        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL | EPHEMERIS_FLAG_SPEED,
+      );
+      grahaData[graha as Graha] = { longitude, longitudeSpeed };
     }
-    grahaLongitudes.Ketu = ephemeris.degnorm(grahaLongitudes.Rahu + 180);
-    return grahaLongitudes;
+    grahaData.Ketu = {
+      longitude: ephemeris.degnorm(grahaData.Rahu.longitude + 180),
+      longitudeSpeed: grahaData.Rahu.longitudeSpeed,
+    };
+    return grahaData;
   }
 
   #toJulianDay(ephemeris: SwissEphemeris, datetime: Date): number {

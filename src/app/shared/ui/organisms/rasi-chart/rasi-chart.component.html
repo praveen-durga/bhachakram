@@ -8,10 +8,9 @@
   @for (region of regions(); track $index) {
     <text class="rasi-number" [attr.x]="region.rasiLabelX" [attr.y]="region.rasiLabelY">{{ region.rasi }}</text>
 
-    @for (label of region.grahaLabels; track label.text) {
-      <text class="graha-label" [attr.x]="label.x" [attr.y]="label.y" [attr.text-anchor]="region.grahaTextAnchor">
-        {{ label.text }}
-      </text>
+    @for (label of region.grahaLabels; track $index) {
+      <!-- prettier-ignore -->
+      <text class="graha-label" [attr.x]="label.x" [attr.y]="label.y" [attr.text-anchor]="region.grahaTextAnchor">{{ label.baseText }}@if (label.isCombust) {<tspan class="combust-marker" dy="-0.4em">*</tspan>}<tspan [attr.dy]="label.isCombust ? '0.4em' : null">{{ label.degreeSuffix }}</tspan></text>
     }
   }
 </svg>

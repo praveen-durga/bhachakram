@@ -40,7 +40,13 @@ export class BirthChartService {
     const storedDetails = this.storage.get<BirthDetails>(STORE_KEYS.BIRTH_DETAILS);
     const storedCharts = this.storage.get<StoredCharts>(STORE_KEYS.CHARTS);
 
-    if (storedDetails && storedCharts) {
+    // Charts cached before isRetrograde/isCombust existed on GrahaPosition are
+    // missing those fields - detect and recompute rather than silently
+    // showing stale data forever (storedCharts has no version/migration
+    // system, so this is the lightweight equivalent).
+    const hasCurrentShape = storedCharts?.d1Chart.grahas[0]?.isRetrograde !== undefined;
+
+    if (storedDetails && storedCharts && hasCurrentShape) {
       this.#birthDetails.set(storedDetails);
       this.#d1Chart.set(storedCharts.d1Chart);
       this.#d9Chart.set(storedCharts.d9Chart);

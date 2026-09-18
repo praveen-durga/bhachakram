@@ -3,7 +3,9 @@ export type TextAnchor = 'start' | 'middle' | 'end';
 export type ChartStyle = 'north' | 'south' | 'east';
 
 export type GrahaLabelPosition = {
-  text: string;
+  baseText: string;
+  isCombust: boolean;
+  degreeSuffix: string;
   x: number;
   y: number;
 };
