@@ -22,6 +22,7 @@
     @apply flex items-center gap-2;
   }
 
+  .body-cell,
   .longitude-cell,
   .nakshatra-cell {
     @apply inline-flex items-center gap-2;
@@ -44,7 +45,8 @@
   .visha-badge,
   .gandanta-badge,
   .temp-gandanta-badge,
-  .mrityu-badge {
+  .mrityu-badge,
+  .sarpa-badge {
     @apply rounded-full px-2 py-0.5 text-xs font-semibold;
     background: color-mix(in oklch, var(--color-error) 15%, transparent);
     color: var(--color-error-content);

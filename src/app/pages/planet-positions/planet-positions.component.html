@@ -1,7 +1,12 @@
 <h1>Planet Positions</h1>
 
 <ng-template #bodyCell let-row>
-  {{ bodyLabel(row.body) }}
+  <span class="body-cell">
+    {{ bodyLabel(row.body) }}
+    @if (row.isSarpaDrekkana) {
+      <span class="sarpa-badge">Sarpa Drekkana</span>
+    }
+  </span>
 </ng-template>
 
 <ng-template #longitudeCell let-row>

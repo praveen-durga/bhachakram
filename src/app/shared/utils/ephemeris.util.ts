@@ -236,6 +236,24 @@ export function isMrityuBhaga(body: string, longitude: number): boolean {
   return degreeInRasi >= target - 1 && degreeInRasi <= target + 0.5;
 }
 
+// Sarpa ("serpent") Drekkana - per the user's own table: Taurus's 2nd
+// drekkana (10-20deg), Cancer's 2nd and 3rd (10-30deg), Scorpio's 1st and
+// 2nd (0-20deg), and Pisces's 3rd (20-30deg). Keyed by rasi (1 = Taurus,
+// 3 = Cancer, 7 = Scorpio, 11 = Pisces); each value lists which of the 3
+// drekkanas (0-indexed) are Sarpa for that sign.
+const SARPA_DREKKANA_INDICES: Partial<Record<number, number[]>> = {
+  1: [1], // Taurus
+  3: [1, 2], // Cancer
+  7: [0, 1], // Scorpio
+  11: [2], // Pisces
+};
+
+export function isSarpaDrekkana(longitude: number): boolean {
+  const rasi = Math.floor(longitude / 30) % 12;
+  const drekkanaIndex = Math.floor((longitude % 30) / 10);
+  return (SARPA_DREKKANA_INDICES[rasi] ?? []).includes(drekkanaIndex);
+}
+
 // 1-indexed pada across the full 108-pada zodiac cycle (27 nakshatras x 4
 // padas each, 3°20' apart), Ashwini pada 1 = 1, Revati pada 4 = 108.
 function calculateGlobalPada(longitude: number): number {
