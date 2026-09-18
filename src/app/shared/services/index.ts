@@ -1,3 +1,4 @@
+export * from './atlas-search.service';
 export * from './birth-chart.service';
 export * from './chart-style.service';
 export * from './ephemeris.model';

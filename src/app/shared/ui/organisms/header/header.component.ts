@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BirthDetailsFormComponent } from '../../../../features/birth-chart';
 import { BirthDetails, ChartStyle } from '../../../models';
 import { DateFormatPipe, TimeFormatPipe } from '../../../pipes';
 import { BirthChartService, ChartStyleService } from '../../../services';
-import { DATE_SHORT_MONTH, TIME_12H_WITH_SECONDS } from '../../../utils';
+import { DATE_SHORT_MONTH, getAge, TIME_12H_WITH_SECONDS } from '../../../utils';
 import { ButtonComponent, IconComponent, SelectComponent, SelectOption } from '../../atoms';
 import { ModalComponent, TabComponent, TabsComponent } from '../../molecules';
 
@@ -41,6 +41,11 @@ export class HeaderComponent {
   protected readonly DATE_SHORT_MONTH = DATE_SHORT_MONTH;
   protected readonly TIME_12H_WITH_SECONDS = TIME_12H_WITH_SECONDS;
   protected readonly chartStyleOptions = CHART_STYLE_OPTIONS;
+
+  protected readonly age = computed(() => {
+    const details = this.birthChart.birthDetails();
+    return details ? getAge(details.dob) : undefined;
+  });
 
   protected onEdit(): void {
     this.modalOpen.set(true);

@@ -14,7 +14,7 @@
     @if (birthChart.birthDetails(); as details) {
       <div class="item">
         <app-button variant="primary-inverted-outline" buttonClass="w-full" (click)="onEdit()">
-          {{ details.name }} | DOB: {{ details.dob | appDateFormat: DATE_SHORT_MONTH }} | TOB:
+          {{ details.name }} | DOB: {{ details.dob | appDateFormat: DATE_SHORT_MONTH }} ({{ age() }} yrs) | TOB:
           {{ details.tob | appTimeFormat: TIME_12H_WITH_SECONDS }} | POB: {{ details.cityLabel }}
           <app-icon name="edit"></app-icon>
         </app-button>

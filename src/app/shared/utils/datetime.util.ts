@@ -1,3 +1,5 @@
+import { differenceInYears, parseISO } from 'date-fns';
+
 export const DATE_ISO = 'yyyy-MM-dd'; // ISO 8601 standard format with hyphen separators (e.g., 2026-07-29)
 export const DATE_SHORT_MONTH = 'd MMM yyyy'; // Single-digit day with abbreviated month name (e.g., 3 Jul 2026)
 export const DATE_FULL_MONTH = 'd MMMM yyyy'; // Single-digit day with full month name and year (e.g., 3 July 2026)
@@ -5,6 +7,10 @@ export const DATE_FULL_MONTH = 'd MMMM yyyy'; // Single-digit day with full mont
 export const TIME_24H = 'HH:mm'; // 24-hour clock, zero-padded (e.g., 17:30)
 export const TIME_12H = 'h:mm a'; // 12-hour clock with AM/PM (e.g., 5:30 PM)
 export const TIME_12H_WITH_SECONDS = 'h:mm:ss a'; // 12-hour clock with seconds and AM/PM (e.g., 5:30:15 PM)
+
+export function getAge(dob: string): number {
+  return differenceInYears(new Date(), parseISO(dob));
+}
 
 export function wallTimeToUtc(dateStr: string, timeStr: string, timeZone: string): Date {
   const [year, month, day] = dateStr.split('-').map(Number);
