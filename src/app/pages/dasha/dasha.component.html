@@ -1,0 +1,52 @@
+<h1>Dasha</h1>
+
+<nav class="variation-buttons">
+  @for (option of variations; track option.key) {
+    <app-button
+      size="sm"
+      [variant]="selectedVariation() === option.key ? 'primary' : 'primary-outline'"
+      (click)="selectVariation(option.key)"
+    >
+      {{ option.label }}
+    </app-button>
+  }
+</nav>
+
+@if (balance(); as balanceInfo) {
+  <app-card>
+    <span title>Dasha Balance at Birth</span>
+    <p>{{ balanceInfo.lord }} — {{ formatYears(balanceInfo.years) }} remaining</p>
+  </app-card>
+}
+
+<div class="table-container">
+  <table class="dasha-table">
+    <thead>
+      <tr>
+        <th>Lord</th>
+        <th>Level</th>
+        <th>Start</th>
+        <th>End</th>
+        <th>Duration</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of visibleRows(); track row.id) {
+        <tr [class.current-period]="isCurrentPeriod(row)">
+          <td [style.paddingLeft.rem]="row.level * 1.5">
+            @if (row.level < 3) {
+              <button type="button" class="expand-toggle" (click)="toggleNode(row)">
+                {{ isExpanded(row) ? '▾' : '▸' }}
+              </button>
+            }
+            {{ row.lord }}
+          </td>
+          <td>{{ levelLabels[row.level] }}</td>
+          <td>{{ row.start | date: 'd MMM y' : displayTimezone() }}</td>
+          <td>{{ row.end | date: 'd MMM y' : displayTimezone() }}</td>
+          <td>{{ formatYears(periodYears(row)) }}</td>
+        </tr>
+      }
+    </tbody>
+  </table>
+</div>

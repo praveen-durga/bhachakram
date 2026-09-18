@@ -51,6 +51,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/ashtakavarga/ashtakavarga.component').then((m) => m.AshtakavargaComponent),
   },
   {
+    path: 'dasha',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () => import('./pages/dasha/dasha.component').then((m) => m.DashaComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),
