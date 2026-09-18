@@ -2,6 +2,15 @@
 
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.24.
 
+## `.claude` folder
+
+This repo has a `.claude/` folder with project context that should be read at the start of every new session, or whenever the project is opened:
+
+- [`.claude/CLAUDE.md`](.claude/CLAUDE.md) — behavioral guidelines and coding conventions for this project.
+- [`.claude/MEMORY.md`](.claude/MEMORY.md) — project-specific feedback and conventions collected over time.
+- [`.claude/TASKS.md`](.claude/TASKS.md) — open/in-progress work, with plan references.
+- [`.claude/todo-plans/`](.claude/todo-plans) — implementation plans for tasks in progress.
+
 ## Development server
 
 To start a local development server, run:
