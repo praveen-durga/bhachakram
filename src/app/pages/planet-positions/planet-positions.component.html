@@ -10,6 +10,9 @@
     @if (row.isPushkarBhaga) {
       <span class="pushkar-badge">Pushkar Bhaga</span>
     }
+    @if (row.isMrityuBhaga) {
+      <span class="mrityu-badge">Mrityu Bhaga</span>
+    }
   </span>
 </ng-template>
 
@@ -54,9 +57,6 @@
 </ng-template>
 
 <app-table [columns]="columns()" [rows]="allRows()" />
-<p class="unverified-note">
-  * Indu Lagna is not from a primary classical source (best-effort formula) - all other rows above are.
-</p>
 
 <p class="navamsa-matrix-title">Navamsa Matrix</p>
 <div class="table-container">

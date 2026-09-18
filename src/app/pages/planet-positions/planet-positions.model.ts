@@ -2,6 +2,7 @@ export type PlanetPositionRow = {
   body: string;
   longitude: string;
   isPushkarBhaga: boolean;
+  isMrityuBhaga: boolean;
   nakshatra: string;
   isGandanta: boolean;
   isTempGandanta: boolean;

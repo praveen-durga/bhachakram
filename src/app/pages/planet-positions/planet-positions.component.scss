@@ -35,7 +35,8 @@
 
   .visha-badge,
   .gandanta-badge,
-  .temp-gandanta-badge {
+  .temp-gandanta-badge,
+  .mrityu-badge {
     @apply rounded-full px-2 py-0.5 text-xs font-semibold;
     background: color-mix(in oklch, var(--color-error) 15%, transparent);
     color: var(--color-error-content);

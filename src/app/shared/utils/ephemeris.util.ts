@@ -174,6 +174,37 @@ export function isPushkarBhaga(longitude: number): boolean {
   return degreeInRasi >= target - 1 && degreeInRasi <= target + 0.5;
 }
 
+// Mrityu Bhaga ("death degree") - unlike Pushkara Bhaga, this is per-GRAHA,
+// not per-element: each of the 7 classical grahas has its own degree in each
+// sign (index = rasi, 0-11), per Phaladeepika. Rahu/Ketu have no classical
+// entry (the table predates the nodes' inclusion in such degree-based
+// techniques) and are intentionally omitted. Cross-checked against an
+// independent 2nd source (astrosaxena.com) on 4 spot values spanning 3
+// planets (Sun/Moon in Capricorn, Saturn/Jupiter in Cancer) - all matched
+// exactly. Same +/-1deg/+0.5deg tolerance as Pushkara Bhaga above, for
+// consistency (no single classical orb convention exists - sources range
+// from 15' to a full degree).
+const MRITYU_BHAGA_DEGREE: Partial<Record<Graha, number[]>> = {
+  Sun: [20, 9, 12, 6, 8, 24, 16, 17, 22, 2, 3, 23],
+  Moon: [26, 12, 13, 25, 24, 11, 26, 14, 13, 25, 5, 12],
+  Mars: [19, 28, 25, 23, 29, 28, 14, 21, 2, 15, 11, 6],
+  Mercury: [15, 14, 13, 12, 8, 18, 20, 10, 21, 22, 7, 5],
+  Jupiter: [19, 29, 12, 27, 6, 4, 13, 10, 17, 11, 15, 28],
+  Venus: [28, 15, 11, 17, 10, 13, 4, 6, 27, 12, 29, 19],
+  Saturn: [10, 4, 7, 9, 12, 16, 3, 18, 28, 14, 13, 15],
+};
+
+export function isMrityuBhaga(body: string, longitude: number): boolean {
+  const degrees = MRITYU_BHAGA_DEGREE[body as Graha];
+  if (!degrees) {
+    return false;
+  }
+  const rasi = Math.floor(longitude / 30) % 12;
+  const degreeInRasi = longitude % 30;
+  const target = degrees[rasi];
+  return degreeInRasi >= target - 1 && degreeInRasi <= target + 0.5;
+}
+
 // 1-indexed pada across the full 108-pada zodiac cycle (27 nakshatras x 4
 // padas each, 3°20' apart), Ashwini pada 1 = 1, Revati pada 4 = 108.
 function calculateGlobalPada(longitude: number): number {
