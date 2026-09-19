@@ -1,0 +1,64 @@
+<div class="declination-chart">
+  <svg
+    #svgEl
+    class="chart-svg"
+    [attr.viewBox]="'0 0 ' + chartWidth + ' ' + chartHeight"
+    (pointermove)="onPointerMove($event, svgEl)"
+    (pointerleave)="onPointerLeave()"
+  >
+    @for (tick of yTicks(); track tick.value) {
+      <line
+        class="gridline"
+        [class.baseline]="tick.value === 0"
+        [attr.x1]="plotLeft"
+        [attr.x2]="plotLeft + plotWidth"
+        [attr.y1]="tick.y"
+        [attr.y2]="tick.y"
+      />
+      <text class="y-tick-label" [attr.x]="plotLeft - 6" [attr.y]="tick.y">{{ tick.value }}&deg;</text>
+    }
+
+    @for (tick of monthTicks(); track tick.label) {
+      <text class="x-tick-label" [attr.x]="tick.x" [attr.y]="plotTop + plotHeight + 18">{{ tick.label }}</text>
+    }
+
+    @for (series of plottedSeries(); track series.graha) {
+      <path class="series-line" [class.dashed]="series.dashed" [attr.d]="series.path" [attr.stroke]="series.color" />
+      <text class="end-label" [attr.x]="series.endLabel.x + 6" [attr.y]="series.endLabel.y">
+        {{ grahaAbbreviations[series.graha] }}
+      </text>
+    }
+
+    @if (hoverInfo(); as hover) {
+      <line
+        class="crosshair"
+        [attr.x1]="hover.x"
+        [attr.x2]="hover.x"
+        [attr.y1]="plotTop"
+        [attr.y2]="plotTop + plotHeight"
+      />
+    }
+  </svg>
+
+  @if (hoverInfo(); as hover) {
+    <div class="tooltip" [style.left.%]="(hover.x / chartWidth) * 100">
+      <p class="tooltip-date">{{ hover.date | date: 'd MMM y' }}</p>
+      @for (entry of hover.entries; track entry.graha) {
+        <p class="tooltip-row">
+          <span class="tooltip-swatch" [class.dashed]="entry.dashed" [style.background]="entry.color"></span>
+          {{ entry.graha }}: {{ entry.value | number: '1.2-2' }}&deg;
+        </p>
+      }
+    </div>
+  }
+
+  <div class="legend">
+    @for (series of data().series; track series.graha) {
+      <label class="legend-item" [class.hidden-item]="isHidden(series.graha)">
+        <input type="checkbox" [checked]="!isHidden(series.graha)" (change)="toggleGraha(series.graha)" />
+        <span class="legend-swatch" [class.dashed]="series.dashed" [style.background]="series.color"></span>
+        {{ series.graha }}
+      </label>
+    }
+  </div>
+</div>

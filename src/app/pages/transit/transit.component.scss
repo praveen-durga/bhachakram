@@ -20,4 +20,29 @@
       }
     }
   }
+
+  .declination-title {
+    @apply font-semibold mb-3 mt-6;
+    color: var(--color-base-content);
+  }
+
+  .declination-loading {
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .declination-table,
+  .declination-events-table {
+    th,
+    td {
+      @apply whitespace-nowrap;
+    }
+  }
+
+  .year-controls {
+    @apply flex items-center gap-3 mb-4;
+  }
+
+  .year-input {
+    width: 6rem;
+  }
 }
