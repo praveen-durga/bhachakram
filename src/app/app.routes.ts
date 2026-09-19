@@ -77,6 +77,12 @@ export const routes: Routes = [
       import('./pages/kumarswameeyam/kumarswameeyam.component').then((m) => m.KumarswameeyamComponent),
   },
   {
+    path: 'western-aspects',
+    canMatch: [hasBirthDetailsGuard],
+    loadComponent: () =>
+      import('./pages/western-aspects/western-aspects.component').then((m) => m.WesternAspectsComponent),
+  },
+  {
     path: 'showcase',
     loadComponent: () =>
       import('./pages/component-showcase/component-showcase.component').then((m) => m.ComponentShowcaseComponent),
