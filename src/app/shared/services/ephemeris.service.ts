@@ -67,7 +67,13 @@ export type GrahaEphemerisData = {
   eclipticLatitude: number;
 };
 
-export type TransitDeclinationData = { declination: number; eclipticLatitude: number };
+export type TransitBodySnapshot = {
+  longitude: number;
+  speed: number;
+  declination: number;
+  eclipticLatitude: number;
+  isCombust: boolean;
+};
 
 @Injectable({ providedIn: 'root' })
 export class EphemerisService {
@@ -190,62 +196,57 @@ export class EphemerisService {
     return { grahas, obliquity, ayanamsaDeg };
   }
 
-  // Sidereal longitude only (no speed/declination) for the 9 grahas plus
-  // Uranus/Neptune/Pluto, for Transit Aspects - aspect angles (differences
-  // between two longitudes) are ayanamsa-invariant, so sidereal vs tropical
-  // makes no difference to the result here.
-  async calculateTransitLongitudes(datetime: Date, ayanamsa: Ayanamsa): Promise<Record<Graha | OuterPlanet, number>> {
+  // Sidereal longitude + speed (negative = retrograde) + tropical declination/
+  // ecliptic latitude (ayanamsa-independent - the ayanamsa only rotates
+  // longitude) + combustion, for the 9 grahas plus Uranus/Neptune/Pluto -
+  // everything Transit Aspects' Result column needs per body, in one batch of
+  // calc_ut calls (merges the former calculateTransitLongitudes/
+  // calculateTransitDeclinations, whose only consumer was this same page).
+  async calculateTransitSnapshot(
+    datetime: Date,
+    ayanamsa: Ayanamsa,
+  ): Promise<Record<Graha | OuterPlanet, TransitBodySnapshot>> {
     const ephemeris = await this.#getEphemeris();
     ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
     const julianDay = this.#toJulianDay(ephemeris, datetime);
 
-    const longitudes = {} as Record<Graha | OuterPlanet, number>;
+    const snapshots = {} as Record<Graha | OuterPlanet, TransitBodySnapshot>;
     for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
-      longitudes[graha as Graha] = ephemeris.calc_ut(
+      const [longitude, eclipticLatitude, , speed] = ephemeris.calc_ut(
         julianDay,
         planetId,
-        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL,
-      )[0];
-    }
-    longitudes.Ketu = ephemeris.degnorm(longitudes.Rahu + 180);
-
-    for (const [planet, planetId] of Object.entries(OUTER_PLANET_IDS)) {
-      longitudes[planet as OuterPlanet] = ephemeris.calc_ut(
-        julianDay,
-        planetId,
-        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL,
-      )[0];
-    }
-
-    return longitudes;
-  }
-
-  // Tropical declination (ayanamsa-independent, same as calculateGrahaEphemerisData's
-  // declination) plus ecliptic latitude (also ayanamsa-independent - the
-  // ayanamsa only rotates longitude) for the 9 grahas plus Uranus/Neptune/Pluto,
-  // for Transit Aspects' N-to-S/S-to-N direction columns.
-  async calculateTransitDeclinations(datetime: Date): Promise<Record<Graha | OuterPlanet, TransitDeclinationData>> {
-    const ephemeris = await this.#getEphemeris();
-    const julianDay = this.#toJulianDay(ephemeris, datetime);
-
-    const declinations = {} as Record<Graha | OuterPlanet, TransitDeclinationData>;
-    for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
-      const [, eclipticLatitude] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS);
+        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL | EPHEMERIS_FLAG_SPEED,
+      );
       const [, declination] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_EQUATORIAL);
-      declinations[graha as Graha] = { declination, eclipticLatitude };
+      snapshots[graha as Graha] = { longitude, speed, declination, eclipticLatitude, isCombust: false };
     }
-    declinations.Ketu = {
-      declination: -declinations.Rahu.declination,
-      eclipticLatitude: -declinations.Rahu.eclipticLatitude,
+
+    const sunLongitude = snapshots.Sun.longitude;
+    for (const graha of Object.keys(GRAHA_PLANET_IDS) as Exclude<Graha, 'Ketu'>[]) {
+      const combustionOrb = COMBUSTION_ORB_DEG[graha];
+      snapshots[graha].isCombust =
+        combustionOrb !== undefined && this.#angularDistance(snapshots[graha].longitude, sunLongitude) <= combustionOrb;
+    }
+
+    snapshots.Ketu = {
+      longitude: ephemeris.degnorm(snapshots.Rahu.longitude + 180),
+      speed: snapshots.Rahu.speed,
+      declination: -snapshots.Rahu.declination,
+      eclipticLatitude: -snapshots.Rahu.eclipticLatitude,
+      isCombust: false,
     };
 
     for (const [planet, planetId] of Object.entries(OUTER_PLANET_IDS)) {
-      const [, eclipticLatitude] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS);
+      const [longitude, eclipticLatitude, , speed] = ephemeris.calc_ut(
+        julianDay,
+        planetId,
+        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL | EPHEMERIS_FLAG_SPEED,
+      );
       const [, declination] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_EQUATORIAL);
-      declinations[planet as OuterPlanet] = { declination, eclipticLatitude };
+      snapshots[planet as OuterPlanet] = { longitude, speed, declination, eclipticLatitude, isCombust: false };
     }
 
-    return declinations;
+    return snapshots;
   }
 
   // Finds the most recent instant before `datetime` at which the Sun's sidereal

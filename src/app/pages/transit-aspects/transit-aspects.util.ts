@@ -1,13 +1,17 @@
-import { TransitDeclinationData } from '../../shared/services';
+import { TransitBodySnapshot } from '../../shared/services';
 import { RASI_NAMES } from '../../shared/utils';
+import { AspectBodySnapshot, computeResult, computeResultTimeRange } from './transit-aspects-result.util';
 import { TRANSIT_ASPECT_ANGLES, TRANSIT_ASPECT_BODIES } from './transit-aspects.data';
 import { TransitAspectBody, TransitAspectEvent } from './transit-aspects.model';
 
-// Daily UTC-midnight dates from start to end (inclusive).
-export function buildDailySampleDates(start: Date, end: Date): Date[] {
+// Sample dates from start to end (inclusive) every `intervalHours`. The
+// minor aspect angles (down to 6°) need finer-than-daily sampling - see
+// findAngleCrossings' safety comment below.
+export function buildSampleDates(start: Date, end: Date, intervalHours: number): Date[] {
   const dates: Date[] = [];
-  for (let day = start.getTime(); day <= end.getTime(); day += 86400000) {
-    dates.push(new Date(day));
+  const intervalMs = intervalHours * 3600000;
+  for (let time = start.getTime(); time <= end.getTime(); time += intervalMs) {
+    dates.push(new Date(time));
   }
   return dates;
 }
@@ -17,8 +21,8 @@ export function buildDailySampleDates(start: Date, end: Date): Date[] {
 // would otherwise look like a ~360deg jump instead of the few degrees it
 // actually moved. Unwrapping turns each body's own longitude into a
 // continuous (non-modulo) trajectory, assuming no body moves more than
-// 180deg between consecutive samples (true for daily sampling of anything
-// in the solar system, direct or retrograde).
+// 180deg between consecutive samples (true for the 4-hour sampling grid used
+// here, for any body in the solar system, direct or retrograde).
 function unwrapLongitudes(rawValues: number[]): number[] {
   const unwrapped: number[] = [rawValues[0]];
   for (let i = 1; i < rawValues.length; i++) {
@@ -50,23 +54,67 @@ function formatDeclination(before: number, atEvent: number, latitudeAtEvent: num
   return `${direction} (Decl ${atEvent.toFixed(2)}°, Lat ${latitudeAtEvent.toFixed(2)}°)`;
 }
 
-type AngleCrossing = { date: Date; signA: string; signB: string; declinationA: string; declinationB: string };
+// Interpolates every field of a body's snapshot at `fraction` between the two
+// bracketing samples, for the Result rule engine - isCombust is looked up
+// from the nearer sample rather than interpolated (it changes far more slowly
+// than a single sampling interval, so this is an adequate approximation
+// without needing a second combustion-threshold table in the util layer).
+function interpolateBodySnapshot(
+  body: TransitAspectBody,
+  unwrapped: number[],
+  snapshots: TransitBodySnapshot[],
+  i: number,
+  fraction: number,
+): AspectBodySnapshot {
+  const before = snapshots[i - 1];
+  const after = snapshots[i];
+  const longitude = unwrapped[i - 1] + fraction * (unwrapped[i] - unwrapped[i - 1]);
+  const declination = before.declination + fraction * (after.declination - before.declination);
+  const eclipticLatitude = before.eclipticLatitude + fraction * (after.eclipticLatitude - before.eclipticLatitude);
+  const speed = before.speed + fraction * (after.speed - before.speed);
+
+  return {
+    body,
+    longitude,
+    eclipticLatitude,
+    declination,
+    isDeclinationIncreasing: declination > before.declination,
+    isRetrograde: speed < 0,
+    isCombust: fraction < 0.5 ? before.isCombust : after.isCombust,
+  };
+}
+
+type AngleCrossing = {
+  date: Date;
+  signA: string;
+  signB: string;
+  declinationA: string;
+  declinationB: string;
+  result: string;
+  resultStartTime: Date;
+  resultEndTime: Date;
+};
 
 // Every date, across the sampled range, that a pair's unwrapped longitude
 // difference crosses `angle` (or any of its 360deg-periodic repeats, since
 // the difference keeps accumulating past 360 as the faster body laps the
-// slower one) - linearly interpolated between the two bracketing daily
-// samples for a sub-day estimate. Each body's own sign, declination and
-// ecliptic latitude at that moment are derived the same way: interpolated
-// from the bracketing daily samples, with declination also compared against
-// the sample immediately before the event to determine the N/S trend.
+// slower one) - linearly interpolated between the two bracketing samples for
+// a sub-interval estimate. Safe to scan with simple endpoint comparison here
+// as long as no pair's relative motion can swing past the smallest target
+// angle (6deg) and back within one sampling interval - at the 4-hour grid
+// this page samples on, even the fastest pair (Moon vs anything, ~15deg/day
+// worst case) moves under 3deg between samples, comfortably under that floor
+// for ordinary (non-retrograde-station) motion.
 function findAngleCrossings(
   dates: Date[],
   diffs: number[],
   unwrappedA: number[],
   unwrappedB: number[],
-  declinationsA: TransitDeclinationData[],
-  declinationsB: TransitDeclinationData[],
+  unwrappedSun: number[],
+  snapshotsA: TransitBodySnapshot[],
+  snapshotsB: TransitBodySnapshot[],
+  bodyA: TransitAspectBody,
+  bodyB: TransitAspectBody,
   angle: number,
 ): AngleCrossing[] {
   const crossings: AngleCrossing[] = [];
@@ -84,25 +132,25 @@ function findAngleCrossings(
 
     const fraction = Math.abs(beforeOffset) / (Math.abs(beforeOffset) + Math.abs(afterOffset));
     const time = dates[i - 1].getTime() + fraction * (dates[i].getTime() - dates[i - 1].getTime());
-    const longitudeA = unwrappedA[i - 1] + fraction * (unwrappedA[i] - unwrappedA[i - 1]);
-    const longitudeB = unwrappedB[i - 1] + fraction * (unwrappedB[i] - unwrappedB[i - 1]);
-    const declinationAAtEvent =
-      declinationsA[i - 1].declination + fraction * (declinationsA[i].declination - declinationsA[i - 1].declination);
-    const declinationBAtEvent =
-      declinationsB[i - 1].declination + fraction * (declinationsB[i].declination - declinationsB[i - 1].declination);
-    const latitudeAAtEvent =
-      declinationsA[i - 1].eclipticLatitude +
-      fraction * (declinationsA[i].eclipticLatitude - declinationsA[i - 1].eclipticLatitude);
-    const latitudeBAtEvent =
-      declinationsB[i - 1].eclipticLatitude +
-      fraction * (declinationsB[i].eclipticLatitude - declinationsB[i - 1].eclipticLatitude);
+    const date = new Date(time);
+
+    const snapshotA = interpolateBodySnapshot(bodyA, unwrappedA, snapshotsA, i, fraction);
+    const snapshotB = interpolateBodySnapshot(bodyB, unwrappedB, snapshotsB, i, fraction);
+    const sunLongitude = unwrappedSun[i - 1] + fraction * (unwrappedSun[i] - unwrappedSun[i - 1]);
+    const declinationBeforeA = snapshotsA[i - 1].declination;
+    const declinationBeforeB = snapshotsB[i - 1].declination;
+
+    const resultTimeRange = computeResultTimeRange(angle, date, snapshotA, snapshotB);
 
     crossings.push({
-      date: new Date(time),
-      signA: longitudeToSign(longitudeA),
-      signB: longitudeToSign(longitudeB),
-      declinationA: formatDeclination(declinationsA[i - 1].declination, declinationAAtEvent, latitudeAAtEvent),
-      declinationB: formatDeclination(declinationsB[i - 1].declination, declinationBAtEvent, latitudeBAtEvent),
+      date,
+      signA: longitudeToSign(snapshotA.longitude),
+      signB: longitudeToSign(snapshotB.longitude),
+      declinationA: formatDeclination(declinationBeforeA, snapshotA.declination, snapshotA.eclipticLatitude),
+      declinationB: formatDeclination(declinationBeforeB, snapshotB.declination, snapshotB.eclipticLatitude),
+      result: computeResult(angle, snapshotA, snapshotB, sunLongitude),
+      resultStartTime: resultTimeRange.start,
+      resultEndTime: resultTimeRange.end,
     });
   }
 
@@ -111,15 +159,15 @@ function findAngleCrossings(
 
 export function findTransitAspectEvents(
   dates: Date[],
-  longitudeSamples: Record<TransitAspectBody, number>[],
-  declinationSamples: Record<TransitAspectBody, TransitDeclinationData>[],
+  samples: Record<TransitAspectBody, TransitBodySnapshot>[],
 ): TransitAspectEvent[] {
   const unwrappedByBody = new Map<TransitAspectBody, number[]>(
-    TRANSIT_ASPECT_BODIES.map((body) => [body, unwrapLongitudes(longitudeSamples.map((sample) => sample[body]))]),
+    TRANSIT_ASPECT_BODIES.map((body) => [body, unwrapLongitudes(samples.map((sample) => sample[body].longitude))]),
   );
-  const declinationsByBody = new Map<TransitAspectBody, TransitDeclinationData[]>(
-    TRANSIT_ASPECT_BODIES.map((body) => [body, declinationSamples.map((sample) => sample[body])]),
+  const snapshotsByBody = new Map<TransitAspectBody, TransitBodySnapshot[]>(
+    TRANSIT_ASPECT_BODIES.map((body) => [body, samples.map((sample) => sample[body])]),
   );
+  const unwrappedSun = unwrappedByBody.get('Sun')!;
 
   const events: TransitAspectEvent[] = [];
 
@@ -130,10 +178,7 @@ export function findTransitAspectEvents(
       const unwrappedA = unwrappedByBody.get(bodyA)!;
       const unwrappedB = unwrappedByBody.get(bodyB)!;
       // abs() of the (continuous) signed difference makes a "V" at exact
-      // conjunctions, not a jump - safe to scan with simple endpoint
-      // comparison here since the lowest target angle is 30deg and even the
-      // fastest pair (Moon vs anything) moves well under 30deg/day, so a
-      // dip-below-30-and-back can never be missed entirely between samples.
+      // conjunctions, not a jump.
       const diffs = unwrappedA.map((value, index) => Math.abs(value - unwrappedB[index]));
 
       for (const angle of TRANSIT_ASPECT_ANGLES) {
@@ -142,8 +187,11 @@ export function findTransitAspectEvents(
           diffs,
           unwrappedA,
           unwrappedB,
-          declinationsByBody.get(bodyA)!,
-          declinationsByBody.get(bodyB)!,
+          unwrappedSun,
+          snapshotsByBody.get(bodyA)!,
+          snapshotsByBody.get(bodyB)!,
+          bodyA,
+          bodyB,
           angle,
         )) {
           events.push({ bodyA, bodyB, angle, ...crossing });

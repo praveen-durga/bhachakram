@@ -5,7 +5,11 @@ import { BirthChartService, EphemerisService } from '../../shared/services';
 import { ButtonComponent, InputComponent } from '../../shared/ui';
 import { TRANSIT_ASPECT_BODIES, TRANSIT_ASPECT_DEFAULT_RANGE_DAYS } from './transit-aspects.data';
 import { TransitAspectBody, TransitAspectEvent } from './transit-aspects.model';
-import { buildDailySampleDates, findTransitAspectEvents } from './transit-aspects.util';
+import { buildSampleDates, findTransitAspectEvents } from './transit-aspects.util';
+
+// Fine enough to safely detect the smallest aspect angle in scope (6deg) - see
+// findAngleCrossings' safety comment in transit-aspects.util.ts.
+const SAMPLE_INTERVAL_HOURS = 4;
 
 function toDateInputValue(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -121,15 +125,14 @@ export class TransitAspectsComponent {
     }
 
     this.#isLoading.set(true);
-    const dates = buildDailySampleDates(start, end);
+    const dates = buildSampleDates(start, end, SAMPLE_INTERVAL_HOURS);
 
-    Promise.all([
-      Promise.all(dates.map((date) => this.ephemeris.calculateTransitLongitudes(date, details.ayanamsa))),
-      Promise.all(dates.map((date) => this.ephemeris.calculateTransitDeclinations(date))),
-    ]).then(([longitudeSamples, declinationSamples]) => {
-      this.#events.set(findTransitAspectEvents(dates, longitudeSamples, declinationSamples));
-      this.#resultRange.set({ start: this.#startDate(), end: this.#endDate() });
-      this.#isLoading.set(false);
-    });
+    Promise.all(dates.map((date) => this.ephemeris.calculateTransitSnapshot(date, details.ayanamsa))).then(
+      (samples) => {
+        this.#events.set(findTransitAspectEvents(dates, samples));
+        this.#resultRange.set({ start: this.#startDate(), end: this.#endDate() });
+        this.#isLoading.set(false);
+      },
+    );
   }
 }

@@ -92,6 +92,21 @@ export const GRAHA_OWNED_RASIS: Record<Graha, number[]> = {
   Ketu: [7], // Scorpio (modern co-lord)
 };
 
+// Exaltation longitude per planet (debilitation is the opposite point, +180°).
+// Relocated here from shadbala.data.ts since Transit Aspects' Result column
+// needs it too (shadbala.data.ts re-exports this for its own consumers).
+export const EXALTATION_LONGITUDE: Record<Graha, number> = {
+  Sun: 10, // 10° Aries
+  Moon: 33, // 3° Taurus
+  Mars: 298, // 28° Capricorn
+  Mercury: 165, // 15° Virgo
+  Jupiter: 95, // 5° Cancer
+  Venus: 357, // 27° Pisces
+  Saturn: 200, // 20° Libra
+  Rahu: 50, // 20° Taurus (not used by Shadbala; kept for Graha-keyed completeness)
+  Ketu: 230, // 20° Scorpio (not used by Shadbala; kept for Graha-keyed completeness)
+};
+
 export const NAKSHATRA_SPAN = 360 / 27;
 
 export const GRAHA_ORDER: Graha[] = ['Sun', 'Moon', 'Mars', 'Mercury', 'Jupiter', 'Venus', 'Saturn', 'Rahu', 'Ketu'];

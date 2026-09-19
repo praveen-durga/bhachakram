@@ -50,6 +50,9 @@
           <th>Planet B</th>
           <th>Planet B Sign</th>
           <th>Planet B Declination</th>
+          <th>Result</th>
+          <th>Result Start Time</th>
+          <th>Result End Time</th>
         </tr>
       </thead>
       <tbody>
@@ -63,10 +66,13 @@
             <td>{{ row.bodyB }}</td>
             <td>{{ row.signB }}</td>
             <td>{{ row.declinationB }}</td>
+            <td>{{ row.result }}</td>
+            <td>{{ row.resultStartTime | date: 'd MMM y, h:mm a' }}</td>
+            <td>{{ row.resultEndTime | date: 'd MMM y, h:mm a' }}</td>
           </tr>
         } @empty {
           <tr>
-            <td colspan="8">No aspects found in this range.</td>
+            <td colspan="11">No aspects found in this range.</td>
           </tr>
         }
       </tbody>

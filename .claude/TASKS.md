@@ -14,3 +14,4 @@
 - [x] Align Shadbala/Bhava Bala formulas with Jagannatha Hora (PyJHora)
 - [x] Dasha route (Vimshottari Maha/Antar/Pratyantar/Sookshma tree, Janma/Kshema/Utpanna/Adhana variations) — [.claude/todo-plans/20-dasha-route.md](.claude/todo-plans/20-dasha-route.md)
 - [x] Tajik route (Varshaphal annual chart, Muntha, Yogi/Avayogi, Mudda/Patyayini Dasha, Year Lord) — [.claude/todo-plans/21-tajik-route.md](.claude/todo-plans/21-tajik-route.md)
+- [ ] Transit Aspects Result/Result Time columns (market-astrology rule engine, 40-angle aspect table) — [.claude/todo-plans/22-transit-aspects-result-column.md](.claude/todo-plans/22-transit-aspects-result-column.md)

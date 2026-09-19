@@ -11,4 +11,7 @@ export type TransitAspectEvent = {
   declinationB: string;
   angle: number;
   date: Date;
+  result: string;
+  resultStartTime: Date;
+  resultEndTime: Date;
 };
