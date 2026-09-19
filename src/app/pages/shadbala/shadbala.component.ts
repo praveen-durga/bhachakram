@@ -1,5 +1,5 @@
 import { DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import {
   BirthChartService,
   D1Chart,
@@ -17,15 +17,32 @@ import {
   wallTimeToUtc,
 } from '../../shared/utils';
 import {
+  CHESTA_BALA_MINIMUM,
+  DIG_BALA_DIRECTION,
+  DIG_BALA_MINIMUM,
   DIG_BALA_WEAKEST_HOUSE,
   DISC_DIAMETER_ARCSEC,
   EXALTATION_LONGITUDE,
+  GRAHA_NATURE,
+  KAALA_BALA_MINIMUM,
   NAISARGIKA_BALA,
   SHADBALA_GRAHA_ORDER,
   SHADBALA_MINIMUM_REQUIREMENT,
+  STHANA_BALA_MINIMUM,
+  STHANA_BALA_STRENGTH_SIGNIFICANCE,
   YUDDHA_GRAHAS,
 } from './shadbala.data';
-import { BhavaBalaColumn, KaalaBala, ShadbalaRow, SthanaBala } from './shadbala.model';
+import {
+  BhavaBalaColumn,
+  ChestaBalaStrengthRow,
+  DigBalaStrengthRow,
+  FinalAssessmentRow,
+  KaalaBala,
+  KaalaBalaStrengthRow,
+  ShadbalaRow,
+  SthanaBala,
+  SthanaBalaStrengthRow,
+} from './shadbala.model';
 import {
   areGrahasAtWar,
   calculateAyanaBala,
@@ -88,6 +105,31 @@ export class ShadbalaComponent {
 
   protected rows = this.#rows.asReadonly();
   protected bhavaBala = this.#bhavaBala.asReadonly();
+
+  protected sthanaBalaStrength = computed<SthanaBalaStrengthRow[] | null>(() => {
+    const rows = this.rows();
+    return rows ? buildSthanaBalaStrengthRows(rows) : null;
+  });
+
+  protected kaalaBalaStrength = computed<KaalaBalaStrengthRow[] | null>(() => {
+    const rows = this.rows();
+    return rows ? buildKaalaBalaStrengthRows(rows) : null;
+  });
+
+  protected digBalaStrength = computed<DigBalaStrengthRow[] | null>(() => {
+    const rows = this.rows();
+    return rows ? buildDigBalaStrengthRows(rows) : null;
+  });
+
+  protected chestaBalaStrength = computed<ChestaBalaStrengthRow[] | null>(() => {
+    const rows = this.rows();
+    return rows ? buildChestaBalaStrengthRows(rows) : null;
+  });
+
+  protected finalAssessment = computed<FinalAssessmentRow[] | null>(() => {
+    const rows = this.rows();
+    return rows ? buildFinalAssessmentRows(rows) : null;
+  });
 
   constructor() {
     effect(() => {
@@ -368,4 +410,139 @@ function buildBhavaBalaColumns(d1Chart: D1Chart, cusps: number[], rows: Shadbala
       total,
     };
   });
+}
+
+// Sthana Bala - Positional Strength, per the user's own table: Sthana Bala
+// and Drig Bala (both already computed in the main Shadbala table) are
+// added together and measured against Sthana Bala's own per-planet minimum,
+// then ranked descending by that ratio. Significance text is keyed by rank
+// (1st/2nd/3rd strongest), not by which planet lands there.
+function buildSthanaBalaStrengthRows(rows: ShadbalaRow[]): SthanaBalaStrengthRow[] {
+  const withStrength = rows.map((row) => {
+    const sthanaBala = row.sthanaBala.total;
+    const computedSthanaBala = sthanaBala + row.drigBala;
+    const minimum = STHANA_BALA_MINIMUM[row.graha];
+
+    return {
+      graha: row.graha,
+      sthanaBala,
+      drigBala: row.drigBala,
+      computedSthanaBala,
+      minimum,
+      strength: computedSthanaBala / minimum,
+    };
+  });
+
+  return [...withStrength]
+    .sort((a, b) => b.strength - a.strength)
+    .map((row, index) => ({
+      ...row,
+      rank: index + 1,
+      isBelowMinimum: row.strength < 1,
+      significance: STHANA_BALA_STRENGTH_SIGNIFICANCE[index] ?? '',
+    }));
+}
+
+// Kaala Bala - Time Strength, same pattern as Sthana Bala above (Kaala Bala
+// + Drig Bala, measured against Kaala Bala's own per-planet minimum), with a
+// fixed benefic/malefic Nature label per planet instead of significance text.
+function buildKaalaBalaStrengthRows(rows: ShadbalaRow[]): KaalaBalaStrengthRow[] {
+  const withStrength = rows.map((row) => {
+    const kaalaBala = row.kaalaBala.total;
+    const computedKaalaBala = kaalaBala + row.drigBala;
+    const minimum = KAALA_BALA_MINIMUM[row.graha];
+
+    return {
+      graha: row.graha,
+      kaalaBala,
+      drigBala: row.drigBala,
+      computedKaalaBala,
+      minimum,
+      strength: computedKaalaBala / minimum,
+      nature: GRAHA_NATURE[row.graha],
+    };
+  });
+
+  return [...withStrength]
+    .sort((a, b) => b.strength - a.strength)
+    .map((row, index) => ({ ...row, rank: index + 1, isBelowMinimum: row.strength < 1 }));
+}
+
+// Dig Bala - Directional Strength, per the user's own table: unlike Sthana/
+// Kaala Bala, this does NOT add Drig Bala - Secured Dig Bala is the main
+// table's Dig Bala value as-is, ranked by Secured/Minimum.
+function buildDigBalaStrengthRows(rows: ShadbalaRow[]): DigBalaStrengthRow[] {
+  const withRatio = rows.map((row) => {
+    const minimum = DIG_BALA_MINIMUM[row.graha];
+
+    return {
+      graha: row.graha,
+      direction: DIG_BALA_DIRECTION[row.graha],
+      securedDigBala: row.digBala,
+      minimum,
+      ratio: row.digBala / minimum,
+    };
+  });
+
+  return [...withRatio]
+    .sort((a, b) => b.ratio - a.ratio)
+    .map((row, index) => ({ ...row, rank: index + 1, isBelowMinimum: row.ratio < 1 }));
+}
+
+// Chesta Bala - Motional Strength, per the user's own table: Secured Chesta
+// Bala is the main table's Chesta Bala value as-is (no Drig Bala added).
+// CHESTA_BALA_MINIMUM is on a different scale than raw Chesta Bala (max 60),
+// so the Ratio rescales by *60 to compensate - verified against the user's
+// own worked example (e.g. Saturn 57.5 * 60 / 67 = 51.49).
+function buildChestaBalaStrengthRows(rows: ShadbalaRow[]): ChestaBalaStrengthRow[] {
+  const withRatio = rows.map((row) => {
+    const minimum = CHESTA_BALA_MINIMUM[row.graha];
+
+    return {
+      graha: row.graha,
+      securedChestaBala: row.chestaBala,
+      minimum,
+      ratio: (row.chestaBala * 60) / minimum,
+    };
+  });
+
+  return [...withRatio]
+    .sort((a, b) => b.ratio - a.ratio)
+    .map((row, index) => ({ ...row, rank: index + 1, isBelowMinimum: row.ratio < 1 }));
+}
+
+// Final Assessment - each Bala type's raw per-planet values (not the
+// Drig-Bala-augmented "Computed"/"Secured" versions above) summed across all
+// 7 planets, measured against that Bala type's own summed minimum. Naisargika
+// Bala is a universal constant, so its own total doubles as its own minimum
+// (ratio always 1.000).
+function buildFinalAssessmentRows(rows: ShadbalaRow[]): FinalAssessmentRow[] {
+  const sum = (values: number[]) => values.reduce((total, value) => total + value, 0);
+  const minimumSum = (minimums: Record<Graha, number>) => sum(rows.map((row) => minimums[row.graha]));
+  const naisargikaBalaTotal = sum(rows.map((row) => row.naisargikaBala));
+
+  const balas = [
+    {
+      bala: 'Kala Bala',
+      totalBala: sum(rows.map((row) => row.kaalaBala.total)),
+      minimumBala: minimumSum(KAALA_BALA_MINIMUM),
+    },
+    {
+      bala: 'Sthana Bala',
+      totalBala: sum(rows.map((row) => row.sthanaBala.total)),
+      minimumBala: minimumSum(STHANA_BALA_MINIMUM),
+    },
+    { bala: 'Naisargika Bala', totalBala: naisargikaBalaTotal, minimumBala: naisargikaBalaTotal },
+    { bala: 'Dig Bala', totalBala: sum(rows.map((row) => row.digBala)), minimumBala: minimumSum(DIG_BALA_MINIMUM) },
+    {
+      bala: 'Chesta Bala',
+      totalBala: sum(rows.map((row) => row.chestaBala)),
+      minimumBala: minimumSum(CHESTA_BALA_MINIMUM),
+    },
+  ];
+
+  return balas
+    .map((row) => ({ ...row, ratio: row.totalBala / row.minimumBala }))
+    .sort((a, b) => b.ratio - a.ratio)
+    .map((row, index) => ({ ...row, rank: index + 1, isBelowMinimum: row.ratio < 1 }));
 }

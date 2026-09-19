@@ -42,4 +42,11 @@
       }
     }
   }
+
+  .strength-table {
+    .below-minimum {
+      @apply font-semibold;
+      color: var(--color-warning);
+    }
+  }
 }

@@ -48,3 +48,55 @@ export type BhavaBalaColumn = {
   drishtiBala: number;
   total: number;
 };
+
+export type SthanaBalaStrengthRow = {
+  rank: number;
+  graha: Graha;
+  sthanaBala: number;
+  drigBala: number;
+  computedSthanaBala: number;
+  minimum: number;
+  strength: number;
+  isBelowMinimum: boolean;
+  significance: string;
+};
+
+export type KaalaBalaStrengthRow = {
+  rank: number;
+  graha: Graha;
+  kaalaBala: number;
+  drigBala: number;
+  computedKaalaBala: number;
+  minimum: number;
+  strength: number;
+  isBelowMinimum: boolean;
+  nature: string;
+};
+
+export type DigBalaStrengthRow = {
+  rank: number;
+  graha: Graha;
+  direction: string;
+  securedDigBala: number;
+  minimum: number;
+  ratio: number;
+  isBelowMinimum: boolean;
+};
+
+export type ChestaBalaStrengthRow = {
+  rank: number;
+  graha: Graha;
+  securedChestaBala: number;
+  minimum: number;
+  ratio: number;
+  isBelowMinimum: boolean;
+};
+
+export type FinalAssessmentRow = {
+  rank: number;
+  bala: string;
+  totalBala: number;
+  minimumBala: number;
+  ratio: number;
+  isBelowMinimum: boolean;
+};

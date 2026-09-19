@@ -31,6 +31,105 @@ export const SHADBALA_MINIMUM_REQUIREMENT: Record<Graha, number> = {
   Ketu: 0,
 };
 
+// Sthana Bala's own per-planet minimum (virupas), from BPHS 27.37, used by
+// the standalone Sthana Bala - Positional Strength table (distinct from
+// SHADBALA_MINIMUM_REQUIREMENT above, which is the overall Shadbala minimum
+// in Rupas).
+export const STHANA_BALA_MINIMUM: Record<Graha, number> = {
+  Sun: 165,
+  Jupiter: 165,
+  Mercury: 165,
+  Moon: 133,
+  Venus: 133,
+  Mars: 96,
+  Saturn: 96,
+  Rahu: 0,
+  Ketu: 0,
+};
+
+// Sthana Bala - Positional Strength significance, per the user's own table -
+// keyed by RANK (1st/2nd/3rd strongest, whichever planet that turns out to
+// be for a given chart), not by planet identity. Ranks below 3rd have no
+// significance text.
+export const STHANA_BALA_STRENGTH_SIGNIFICANCE: string[] = [
+  'Ego; greater success, name and fame',
+  'Peace of mind and emotional happiness',
+  'Matrimonial life and companionship',
+];
+
+// Kaala Bala's own per-planet minimum (virupas), used by the standalone
+// Kaala Bala - Time Strength table.
+export const KAALA_BALA_MINIMUM: Record<Graha, number> = {
+  Sun: 50,
+  Jupiter: 50,
+  Mercury: 50,
+  Moon: 30,
+  Venus: 30,
+  Mars: 40,
+  Saturn: 40,
+  Rahu: 0,
+  Ketu: 0,
+};
+
+// Fixed benefic/malefic nature per planet, per the user's own table - Moon
+// is shown as "Benefic/Malefic" (dual) unconditionally, not resolved by
+// waxing/waning.
+export const GRAHA_NATURE: Record<Graha, string> = {
+  Sun: 'Malefic',
+  Moon: 'Benefic/Malefic',
+  Mars: 'Malefic',
+  Mercury: 'Benefic',
+  Jupiter: 'Benefic',
+  Venus: 'Benefic',
+  Saturn: 'Malefic',
+  Rahu: '',
+  Ketu: '',
+};
+
+// Dig Bala's own per-planet minimum (virupas), used by the standalone Dig
+// Bala - Directional Strength table.
+export const DIG_BALA_MINIMUM: Record<Graha, number> = {
+  Sun: 35,
+  Jupiter: 35,
+  Mercury: 35,
+  Moon: 50,
+  Venus: 50,
+  Mars: 30,
+  Saturn: 30,
+  Rahu: 0,
+  Ketu: 0,
+};
+
+// Fixed strongest direction per planet, per the user's own table.
+export const DIG_BALA_DIRECTION: Record<Graha, string> = {
+  Sun: 'East',
+  Moon: 'North West',
+  Mars: 'South',
+  Mercury: 'North',
+  Jupiter: 'North-East',
+  Venus: 'South-East',
+  Saturn: 'West',
+  Rahu: '',
+  Ketu: '',
+};
+
+// Chesta Bala's own per-planet minimum (virupas), used by the standalone
+// Chesta Bala - Motional Strength table. Note this is on a different scale
+// than raw Chesta Bala (max 60) - the table's Ratio column rescales
+// (Secured Chesta Bala * 60 / Minimum) to compensate, per the user's own
+// worked example.
+export const CHESTA_BALA_MINIMUM: Record<Graha, number> = {
+  Sun: 112,
+  Jupiter: 112,
+  Mercury: 112,
+  Moon: 100,
+  Venus: 100,
+  Mars: 67,
+  Saturn: 67,
+  Rahu: 0,
+  Ketu: 0,
+};
+
 // Naisargika Bala is a universal constant, rank/7 * 60 virupas, in this fixed
 // strength order (never varies by chart).
 export const NAISARGIKA_BALA: Record<Graha, number> = {

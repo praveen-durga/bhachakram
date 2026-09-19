@@ -239,3 +239,157 @@
     </table>
   </div>
 }
+
+@if (sthanaBalaStrength(); as sthanaBalaStrengthRows) {
+  <p class="bhava-bala-title">Sthana Bala &ndash; Positional Strength</p>
+  <div class="table-container">
+    <table class="strength-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Planet</th>
+          <th>Sthana Bala</th>
+          <th>Drig Bala</th>
+          <th>Computed Sthana Bala</th>
+          <th>Minimum</th>
+          <th>Strength</th>
+          <th>Significance</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of sthanaBalaStrengthRows; track row.graha) {
+          <tr>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.rank }}{{ row.isBelowMinimum ? 'x' : '' }}</td>
+            <td>{{ row.graha }}</td>
+            <td>{{ row.sthanaBala | number: '1.1-1' }}</td>
+            <td>{{ row.drigBala | number: '1.1-1' }}</td>
+            <td>{{ row.computedSthanaBala | number: '1.1-1' }}</td>
+            <td>{{ row.minimum }}</td>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.strength | number: '1.3-3' }}</td>
+            <td>{{ row.significance }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (kaalaBalaStrength(); as kaalaBalaStrengthRows) {
+  <p class="bhava-bala-title">Kaala Bala &ndash; Time Strength</p>
+  <div class="table-container">
+    <table class="strength-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Planet</th>
+          <th>Kala Bala</th>
+          <th>Drig Bala</th>
+          <th>Computed Kala Bala</th>
+          <th>Minimum</th>
+          <th>Strength</th>
+          <th>Nature</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of kaalaBalaStrengthRows; track row.graha) {
+          <tr>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.rank }}{{ row.isBelowMinimum ? 'x' : '' }}</td>
+            <td>{{ row.graha }}</td>
+            <td>{{ row.kaalaBala | number: '1.1-1' }}</td>
+            <td>{{ row.drigBala | number: '1.1-1' }}</td>
+            <td>{{ row.computedKaalaBala | number: '1.1-1' }}</td>
+            <td>{{ row.minimum }}</td>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.strength | number: '1.3-3' }}</td>
+            <td>{{ row.nature }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (digBalaStrength(); as digBalaStrengthRows) {
+  <p class="bhava-bala-title">Dig Bala &ndash; Directional Strength</p>
+  <div class="table-container">
+    <table class="strength-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Planet</th>
+          <th>Direction</th>
+          <th>Secured Dig Bala</th>
+          <th>Minimum</th>
+          <th>Ratio</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of digBalaStrengthRows; track row.graha) {
+          <tr>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.rank }}{{ row.isBelowMinimum ? 'x' : '' }}</td>
+            <td>{{ row.graha }}</td>
+            <td>{{ row.direction }}</td>
+            <td>{{ row.securedDigBala | number: '1.1-1' }}</td>
+            <td>{{ row.minimum }}</td>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.ratio | number: '1.3-3' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (chestaBalaStrength(); as chestaBalaStrengthRows) {
+  <p class="bhava-bala-title">Chesta Bala &ndash; Motional Strength</p>
+  <div class="table-container">
+    <table class="strength-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Planet</th>
+          <th>Secured Chesta Bala</th>
+          <th>Minimum</th>
+          <th>Ratio</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of chestaBalaStrengthRows; track row.graha) {
+          <tr>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.rank }}{{ row.isBelowMinimum ? 'x' : '' }}</td>
+            <td>{{ row.graha }}</td>
+            <td>{{ row.securedChestaBala | number: '1.1-1' }}</td>
+            <td>{{ row.minimum }}</td>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.ratio | number: '1.3-3' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
+
+@if (finalAssessment(); as finalAssessmentRows) {
+  <p class="bhava-bala-title">Final Assessment</p>
+  <div class="table-container">
+    <table class="strength-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Bala</th>
+          <th>Total Bala</th>
+          <th>Minimum Bala</th>
+          <th>Ratio</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of finalAssessmentRows; track row.bala) {
+          <tr>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.rank }}{{ row.isBelowMinimum ? 'x' : '' }}</td>
+            <td>{{ row.bala }}</td>
+            <td>{{ row.totalBala | number: '1.1-1' }}</td>
+            <td>{{ row.minimumBala | number: '1.0-0' }}</td>
+            <td [class.below-minimum]="row.isBelowMinimum">{{ row.ratio | number: '1.3-3' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}
