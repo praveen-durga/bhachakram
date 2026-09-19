@@ -3,7 +3,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } 
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { BirthChartService, D1Chart, EphemerisService } from '../../shared/services';
-import { ButtonComponent, InputComponent, RasiChartComponent } from '../../shared/ui';
+import { ButtonComponent, IconComponent, InputComponent, RasiChartComponent } from '../../shared/ui';
 import { calculateD10Rasi, calculateD9Rasi } from '../../shared/utils';
 import { DeclinationChartComponent } from './declination-chart.component';
 import { DeclinationChartData, DeclinationRow } from './declination.model';
@@ -20,6 +20,7 @@ import { buildTransitD1Chart, buildTransitVargaChart } from './transit.util';
   imports: [
     RasiChartComponent,
     DeclinationChartComponent,
+    IconComponent,
     ButtonComponent,
     InputComponent,
     FormsModule,

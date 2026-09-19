@@ -51,9 +51,13 @@
 
 <p class="declination-title">Declination Chart</p>
 <div class="year-controls">
-  <app-button size="sm" variant="primary-outline" (click)="previousYear()">&laquo; Last Year</app-button>
+  <app-button size="sm" variant="ghost" class="whitespace-nowrap" (click)="previousYear()"
+    ><app-icon name="arrow-left"></app-icon> Last Year</app-button
+  >
   <app-input class="year-input" type="number" [ngModel]="selectedYearValue()" (ngModelChange)="setYear($event)" />
-  <app-button size="sm" variant="primary-outline" (click)="nextYear()">Next Year &raquo;</app-button>
+  <app-button size="sm" variant="ghost" class="whitespace-nowrap" (click)="nextYear()"
+    >Next Year <app-icon name="arrow-right"></app-icon
+  ></app-button>
 </div>
 
 @if (declinationChart(); as chart) {
