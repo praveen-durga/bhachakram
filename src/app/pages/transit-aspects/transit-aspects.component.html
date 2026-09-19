@@ -1,0 +1,75 @@
+<h1>Transit Aspects</h1>
+
+<div class="range-controls">
+  <div class="date-field">
+    <app-input label="Start Date" type="date" [ngModel]="startDate()" (ngModelChange)="setStartDate($event)" />
+  </div>
+  <div class="date-field">
+    <app-input label="End Date" type="date" [ngModel]="endDate()" (ngModelChange)="setEndDate($event)" />
+  </div>
+  <app-button (click)="findAspects()" [disabled]="isLoading()">
+    {{ isLoading() ? 'Finding…' : 'Find Aspects' }}
+  </app-button>
+</div>
+
+<div class="planet-filters">
+  @for (body of allBodies; track body) {
+    <label class="planet-filter">
+      <input type="checkbox" [checked]="isBodyIncluded(body)" (change)="toggleBody(body)" />
+      {{ body }}
+    </label>
+  }
+</div>
+
+<div class="time-filters">
+  <label class="planet-filter">
+    <input type="checkbox" [checked]="timeWindowOnly()" (change)="toggleTimeWindow()" />
+    9 AM to 4 PM only
+  </label>
+</div>
+
+@if (resultRange(); as range) {
+  <p class="range-summary">
+    Showing aspects from <strong>{{ range.start | date: 'd MMM y' }}</strong> to
+    <strong>{{ range.end | date: 'd MMM y' }}</strong>
+  </p>
+}
+
+@if (isLoading()) {
+  <p class="loading">Calculating aspects&hellip;</p>
+} @else if (filteredEvents(); as rows) {
+  <div class="table-container">
+    <table class="transit-aspects-table">
+      <thead>
+        <tr>
+          <th>Date &amp; Time</th>
+          <th>Aspect</th>
+          <th>Planet A</th>
+          <th>Planet A Sign</th>
+          <th>Planet A Declination</th>
+          <th>Planet B</th>
+          <th>Planet B Sign</th>
+          <th>Planet B Declination</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows; track row.bodyA + row.bodyB + row.angle + row.date.getTime()) {
+          <tr>
+            <td>{{ row.date | date: 'd MMM y, h:mm a' }}</td>
+            <td>{{ row.angle }}&deg;</td>
+            <td>{{ row.bodyA }}</td>
+            <td>{{ row.signA }}</td>
+            <td>{{ row.declinationA }}</td>
+            <td>{{ row.bodyB }}</td>
+            <td>{{ row.signB }}</td>
+            <td>{{ row.declinationB }}</td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="8">No aspects found in this range.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

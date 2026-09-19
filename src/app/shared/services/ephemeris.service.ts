@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import type SwissEphemeris from 'swisseph-wasm';
 import { calculateD9Rasi } from '../utils';
-import { Ayanamsa, D1Chart, Graha, GrahaPosition } from './ephemeris.model';
+import { Ayanamsa, D1Chart, Graha, GrahaPosition, OuterPlanet } from './ephemeris.model';
 
 const SWISSEPH_CDN_URL = 'https://cdn.jsdelivr.net/npm/swisseph-wasm@0.1.0/src/swisseph.js';
 
@@ -14,6 +14,12 @@ const GRAHA_PLANET_IDS: Record<Exclude<Graha, 'Ketu'>, number> = {
   Jupiter: 5,
   Saturn: 6,
   Rahu: 11,
+};
+
+const OUTER_PLANET_IDS: Record<OuterPlanet, number> = {
+  Uranus: 7,
+  Neptune: 8,
+  Pluto: 9,
 };
 
 const EPHEMERIS_FLAG_SWISS = 2;
@@ -60,6 +66,8 @@ export type GrahaEphemerisData = {
   declination: number;
   eclipticLatitude: number;
 };
+
+export type TransitDeclinationData = { declination: number; eclipticLatitude: number };
 
 @Injectable({ providedIn: 'root' })
 export class EphemerisService {
@@ -180,6 +188,64 @@ export class EphemerisService {
     const [, obliquity] = ephemeris.calc_ut(julianDay, ECLIPTIC_OBLIQUITY_AND_NUTATION, 0);
     const ayanamsaDeg = ephemeris.get_ayanamsa(julianDay);
     return { grahas, obliquity, ayanamsaDeg };
+  }
+
+  // Sidereal longitude only (no speed/declination) for the 9 grahas plus
+  // Uranus/Neptune/Pluto, for Transit Aspects - aspect angles (differences
+  // between two longitudes) are ayanamsa-invariant, so sidereal vs tropical
+  // makes no difference to the result here.
+  async calculateTransitLongitudes(datetime: Date, ayanamsa: Ayanamsa): Promise<Record<Graha | OuterPlanet, number>> {
+    const ephemeris = await this.#getEphemeris();
+    ephemeris.set_sid_mode(SIDEREAL_MODE_BY_AYANAMSA[ayanamsa], 0, 0);
+    const julianDay = this.#toJulianDay(ephemeris, datetime);
+
+    const longitudes = {} as Record<Graha | OuterPlanet, number>;
+    for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
+      longitudes[graha as Graha] = ephemeris.calc_ut(
+        julianDay,
+        planetId,
+        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL,
+      )[0];
+    }
+    longitudes.Ketu = ephemeris.degnorm(longitudes.Rahu + 180);
+
+    for (const [planet, planetId] of Object.entries(OUTER_PLANET_IDS)) {
+      longitudes[planet as OuterPlanet] = ephemeris.calc_ut(
+        julianDay,
+        planetId,
+        EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_SIDEREAL,
+      )[0];
+    }
+
+    return longitudes;
+  }
+
+  // Tropical declination (ayanamsa-independent, same as calculateGrahaEphemerisData's
+  // declination) plus ecliptic latitude (also ayanamsa-independent - the
+  // ayanamsa only rotates longitude) for the 9 grahas plus Uranus/Neptune/Pluto,
+  // for Transit Aspects' N-to-S/S-to-N direction columns.
+  async calculateTransitDeclinations(datetime: Date): Promise<Record<Graha | OuterPlanet, TransitDeclinationData>> {
+    const ephemeris = await this.#getEphemeris();
+    const julianDay = this.#toJulianDay(ephemeris, datetime);
+
+    const declinations = {} as Record<Graha | OuterPlanet, TransitDeclinationData>;
+    for (const [graha, planetId] of Object.entries(GRAHA_PLANET_IDS)) {
+      const [, eclipticLatitude] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS);
+      const [, declination] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_EQUATORIAL);
+      declinations[graha as Graha] = { declination, eclipticLatitude };
+    }
+    declinations.Ketu = {
+      declination: -declinations.Rahu.declination,
+      eclipticLatitude: -declinations.Rahu.eclipticLatitude,
+    };
+
+    for (const [planet, planetId] of Object.entries(OUTER_PLANET_IDS)) {
+      const [, eclipticLatitude] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS);
+      const [, declination] = ephemeris.calc_ut(julianDay, planetId, EPHEMERIS_FLAG_SWISS | EPHEMERIS_FLAG_EQUATORIAL);
+      declinations[planet as OuterPlanet] = { declination, eclipticLatitude };
+    }
+
+    return declinations;
   }
 
   // Finds the most recent instant before `datetime` at which the Sun's sidereal

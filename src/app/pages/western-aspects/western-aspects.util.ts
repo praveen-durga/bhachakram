@@ -1,14 +1,7 @@
 import { D1Chart } from '../../shared/services';
-import { findGraha } from '../../shared/utils';
+import { calculateAngularDifference, findGraha } from '../../shared/utils';
 import { WESTERN_ASPECT_GRAHA_ORDER, WESTERN_ASPECT_HIGHLIGHT_RANGES } from './western-aspects.data';
 import { WesternAspectRow } from './western-aspects.model';
-
-// Row longitude minus column longitude, with the sign dropped if negative -
-// per the user's own formula (not folded/mirrored to the shorter arc, and
-// not wrapped by +360).
-export function calculateAngularDifference(longitudeA: number, longitudeB: number): number {
-  return Math.abs(longitudeA - longitudeB);
-}
 
 export function isWesternAspectHighlighted(value: number): boolean {
   return WESTERN_ASPECT_HIGHLIGHT_RANGES.some(([min, max]) => value >= min && value <= max);

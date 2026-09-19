@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { BirthChartService, D1Chart, EphemerisService } from '../../shared/services';
 import { ButtonComponent, InputComponent, RasiChartComponent } from '../../shared/ui';
 import { calculateD10Rasi, calculateD9Rasi } from '../../shared/utils';
@@ -16,7 +17,15 @@ import { buildTransitD1Chart, buildTransitVargaChart } from './transit.util';
 
 @Component({
   selector: 'app-transit',
-  imports: [RasiChartComponent, DeclinationChartComponent, ButtonComponent, InputComponent, FormsModule, DatePipe],
+  imports: [
+    RasiChartComponent,
+    DeclinationChartComponent,
+    ButtonComponent,
+    InputComponent,
+    FormsModule,
+    DatePipe,
+    RouterLink,
+  ],
   templateUrl: './transit.component.html',
   styleUrl: './transit.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

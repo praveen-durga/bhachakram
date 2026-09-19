@@ -1,0 +1,47 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .range-controls {
+    @apply flex flex-wrap items-end gap-3 mb-4;
+  }
+
+  .date-field {
+    @apply w-40;
+  }
+
+  .planet-filters {
+    @apply flex flex-wrap gap-x-4 gap-y-2 mb-4;
+  }
+
+  .planet-filter {
+    @apply flex items-center gap-1.5 text-sm;
+    color: var(--color-base-content);
+  }
+
+  .time-filters {
+    @apply mb-4;
+  }
+
+  .range-summary {
+    @apply mb-4;
+    color: color-mix(in oklch, var(--color-base-content) 80%, transparent);
+  }
+
+  .loading {
+    color: color-mix(in oklch, var(--color-base-content) 60%, transparent);
+  }
+
+  .transit-aspects-table {
+    th,
+    td {
+      @apply whitespace-nowrap;
+    }
+  }
+}

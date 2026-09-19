@@ -8,6 +8,11 @@
     color: var(--color-base-content);
   }
 
+  .transit-aspects-link {
+    @apply inline-block mb-4;
+    color: var(--color-primary);
+  }
+
   .charts {
     @apply flex flex-col md:flex-row gap-6 items-start justify-center;
 
