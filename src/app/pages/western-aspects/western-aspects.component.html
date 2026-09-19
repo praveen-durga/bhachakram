@@ -1,0 +1,28 @@
+<h1>Western Aspects</h1>
+
+@if (rows(); as aspectRows) {
+  <div class="table-container">
+    <table class="western-aspects-table">
+      <thead>
+        <tr>
+          <th>Aspect</th>
+          @for (column of columns; track column) {
+            <th>{{ column }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of aspectRows; track row.graha) {
+          <tr>
+            <td>{{ row.graha }}</td>
+            @for (cell of row.cells; track $index) {
+              <td [class.highlighted]="cell.isHighlighted">
+                {{ cell.isSelf ? 'X' : (cell.value | number: '1.2-2') }}
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

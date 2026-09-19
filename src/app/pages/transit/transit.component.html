@@ -1,5 +1,7 @@
 <h1>Transit (Gochar)</h1>
 
+<a routerLink="/transit-aspects" class="transit-aspects-link">View Transit Aspects &rarr;</a>
+
 <div class="charts">
   @if (transitD1(); as chart) {
     <div class="chart-item">
@@ -22,3 +24,66 @@
     </div>
   }
 </div>
+
+@if (declinationRows(); as rows) {
+  <p class="declination-title">Declination</p>
+  <div class="table-container">
+    <table class="declination-table">
+      <thead>
+        <tr>
+          <th>Body</th>
+          @for (row of rows; track row.graha) {
+            <th>{{ row.graha }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Declination</td>
+          @for (row of rows; track row.graha) {
+            <td>{{ formatDeclination(row.declination) }}</td>
+          }
+        </tr>
+      </tbody>
+    </table>
+  </div>
+}
+
+<p class="declination-title">Declination Chart</p>
+<div class="year-controls">
+  <app-button size="sm" variant="primary-outline" (click)="previousYear()">&laquo; Last Year</app-button>
+  <app-input class="year-input" type="number" [ngModel]="selectedYearValue()" (ngModelChange)="setYear($event)" />
+  <app-button size="sm" variant="primary-outline" (click)="nextYear()">Next Year &raquo;</app-button>
+</div>
+
+@if (declinationChart(); as chart) {
+  <app-declination-chart [data]="chart" />
+} @else {
+  <p class="declination-loading">Loading year chart&hellip;</p>
+}
+
+@if (declinationEvents(); as events) {
+  <p class="declination-title">Declination Direction-Change Events</p>
+  <div class="table-container">
+    <table class="declination-events-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Planet</th>
+          <th>Event</th>
+          <th>Direction</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (event of events; track event.graha + event.date.getTime()) {
+          <tr>
+            <td>{{ event.date | date: 'd MMM y' }}</td>
+            <td>{{ event.graha }}</td>
+            <td>{{ event.type }}</td>
+            <td>{{ event.direction }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

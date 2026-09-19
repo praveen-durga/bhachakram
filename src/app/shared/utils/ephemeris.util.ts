@@ -130,6 +130,14 @@ export function calculateNakshatraDistance(referenceNakshatraIndex: number, targ
   return ((targetNakshatraIndex - referenceNakshatraIndex + 27) % 27) + 1;
 }
 
+// One longitude minus another, with the sign dropped if negative - per the
+// user's own formula (not folded/mirrored to the shorter arc, and not
+// wrapped by +360). Relocated here from pages/western-aspects since Transit
+// Aspects is a 2nd consumer.
+export function calculateAngularDifference(longitudeA: number, longitudeB: number): number {
+  return Math.abs(longitudeA - longitudeB);
+}
+
 export function calculatePada(longitude: number): number {
   const degreeInNakshatra = longitude % NAKSHATRA_SPAN;
   return Math.floor(degreeInNakshatra / (NAKSHATRA_SPAN / 4)) + 1;

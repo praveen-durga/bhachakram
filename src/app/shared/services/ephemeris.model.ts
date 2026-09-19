@@ -1,5 +1,11 @@
 export type Graha = 'Sun' | 'Moon' | 'Mars' | 'Mercury' | 'Jupiter' | 'Venus' | 'Saturn' | 'Rahu' | 'Ketu';
 
+// Modern Western-astrology-only bodies, not part of the classical Vedic
+// Navagraha - kept separate from Graha rather than folded into it, since
+// every Vedic-specific calculation in this app (Shadbala, Vargas, Dashas,
+// ...) assumes the 9-graha set. Only Transit Aspects needs these.
+export type OuterPlanet = 'Uranus' | 'Neptune' | 'Pluto';
+
 export type Ayanamsa = 'lahiri' | 'raman' | 'kp' | 'yukteshwar' | 'fagan-bradley';
 
 export type GrahaPosition = {

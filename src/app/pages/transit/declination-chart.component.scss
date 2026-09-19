@@ -1,0 +1,103 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block;
+}
+
+.declination-chart {
+  @apply relative;
+}
+
+.chart-svg {
+  @apply block w-full h-auto touch-none;
+}
+
+.gridline {
+  stroke: var(--color-base-300);
+  stroke-width: 1;
+
+  &.baseline {
+    stroke: color-mix(in oklch, var(--color-base-content) 35%, transparent);
+  }
+}
+
+.y-tick-label,
+.x-tick-label {
+  font-size: 10px;
+  fill: color-mix(in oklch, var(--color-base-content) 55%, transparent);
+}
+
+.y-tick-label {
+  text-anchor: end;
+  dominant-baseline: middle;
+}
+
+.x-tick-label {
+  text-anchor: middle;
+}
+
+.series-line {
+  fill: none;
+  stroke-width: 2;
+
+  &.dashed {
+    stroke-dasharray: 5 4;
+  }
+}
+
+.end-label {
+  font-size: 10px;
+  font-weight: var(--font-weight-semibold);
+  dominant-baseline: middle;
+  fill: var(--color-base-content);
+}
+
+.crosshair {
+  stroke: color-mix(in oklch, var(--color-base-content) 40%, transparent);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  pointer-events: none;
+}
+
+.tooltip {
+  @apply absolute top-2 -translate-x-1/2 rounded-lg p-2 pointer-events-none;
+  min-width: 8rem;
+  background: var(--color-base-100);
+  box-shadow: var(--box-shadow);
+  font-size: var(--font-size-xs);
+}
+
+.tooltip-date {
+  @apply font-semibold mb-1;
+  color: var(--color-base-content);
+}
+
+.tooltip-row {
+  @apply flex items-center gap-1.5;
+  color: var(--color-base-content);
+}
+
+.tooltip-swatch,
+.legend-swatch {
+  @apply inline-block rounded-full;
+  width: 0.65rem;
+  height: 0.65rem;
+
+  &.dashed {
+    @apply rounded-none;
+  }
+}
+
+.legend {
+  @apply flex flex-wrap gap-3 mt-3;
+}
+
+.legend-item {
+  @apply inline-flex items-center gap-1.5 cursor-pointer;
+  font-size: var(--font-size-sm);
+  color: var(--color-base-content);
+
+  &.hidden-item {
+    opacity: 0.4;
+  }
+}

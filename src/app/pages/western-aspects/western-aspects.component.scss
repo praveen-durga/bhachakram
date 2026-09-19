@@ -1,0 +1,21 @@
+@reference 'tailwindcss';
+
+:host {
+  @apply block py-6;
+
+  h1 {
+    @apply text-xl font-semibold mb-4;
+    color: var(--color-base-content);
+  }
+
+  .western-aspects-table {
+    th,
+    td {
+      @apply whitespace-nowrap;
+    }
+
+    .highlighted {
+      background: color-mix(in oklch, var(--color-base-content) 12%, transparent);
+    }
+  }
+}
