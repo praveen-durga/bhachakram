@@ -33,8 +33,7 @@ import {
   FIXED_SIGNS,
   GRAHA_DRISHTI_HOUSES,
   MOVABLE_SIGNS,
-  NATURAL_BENEFIC_SEED_GRAHAS,
-  NATURAL_MALEFIC_SEED_GRAHAS,
+  BENEFIC_SEED_GRAHAS,
   TEMPORARY_FRIEND_HOUSES,
   TRIBHAGA_DAY_LORDS,
   TRIBHAGA_NIGHT_LORDS,
@@ -103,41 +102,14 @@ function dignityPointsFor(
   return DIGNITY_POINTS[relation];
 }
 
-// Dynamic benefic/malefic classification shared by Paksha Bala and Drig Bala
-// (distinct from Bhava Drishti Bala's own static list). Jupiter/Venus seed as
-// benefic, Sun/Mars/Saturn as malefic; Moon joins whichever list its waxing/
-// waning state matches; Mercury is resolved last via the Mars-co-location
-// rule: benefic if alone in Mars's sign or with more benefics than malefics
-// there, malefic if outnumbered by malefics, and on an exact tie the planet
-// closest to Mercury's own longitude (within Mercury's sign) decides.
-export function calculateBeneficMalefic(grahaPositions: GrahaPosition[], isMoonWaxing: boolean): Set<Graha> {
-  const benefics = new Set<Graha>(NATURAL_BENEFIC_SEED_GRAHAS);
-  const malefics = new Set<Graha>(NATURAL_MALEFIC_SEED_GRAHAS);
-  (isMoonWaxing ? benefics : malefics).add('Moon');
-
-  const mars = grahaPositions.find((position) => position.graha === 'Mars')!;
-  const mercury = grahaPositions.find((position) => position.graha === 'Mercury')!;
-  const coLocatedWithMars = grahaPositions.filter(
-    (position) => position.graha !== 'Mercury' && position.rasi === mars.rasi,
-  );
-  const marsBeneficsCount = coLocatedWithMars.filter((position) => benefics.has(position.graha)).length;
-  const marsMaleficsCount = coLocatedWithMars.filter((position) => malefics.has(position.graha)).length;
-
-  if ((marsBeneficsCount === 0 && marsMaleficsCount === 0) || marsBeneficsCount > marsMaleficsCount) {
-    benefics.add('Mercury');
-  } else if (marsMaleficsCount > marsBeneficsCount) {
-    malefics.add('Mercury');
-  } else {
-    const closest = grahaPositions
-      .filter((position) => position.graha !== 'Mercury' && position.rasi === mercury.rasi)
-      .reduce<GrahaPosition | null>((closest, position) => {
-        const distance = Math.abs(position.longitude - mercury.longitude);
-        const closestDistance = closest ? Math.abs(closest.longitude - mercury.longitude) : Infinity;
-        return distance < closestDistance ? position : closest;
-      }, null);
-    (closest && benefics.has(closest.graha) ? benefics : malefics).add('Mercury');
+// Paksha Bala and Drig Bala's shared static benefic/malefic classification
+// (see BENEFIC_SEED_GRAHAS) — Mercury is always benefic; Moon follows
+// waxing/waning.
+export function calculateBenefics(isMoonWaxing: boolean): Set<Graha> {
+  const benefics = new Set<Graha>(BENEFIC_SEED_GRAHAS);
+  if (isMoonWaxing) {
+    benefics.add('Moon');
   }
-
   return benefics;
 }
 
@@ -433,8 +405,9 @@ export function calculateIsMoonWaxing(moonSunElongation: number): boolean {
   return moonSunElongation < 180;
 }
 
-// Bhava Drishti Bala's own static benefic/malefic list — distinct from Drig
-// Bala's dynamic calculateBeneficMalefic; Moon is unconditionally benefic here.
+// Bhava Drishti Bala's own static benefic/malefic list — distinct from
+// Paksha/Drig Bala's shared calculateBenefics; Moon is unconditionally
+// benefic here.
 export function isBhavaDrishtiBenefic(graha: Graha): boolean {
   return BHAVA_DRISHTI_BENEFIC_GRAHAS.includes(graha);
 }

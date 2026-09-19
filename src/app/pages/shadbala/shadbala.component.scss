@@ -12,6 +12,15 @@
     @apply font-semibold mb-3 mt-6;
   }
 
+  // .table-container's overflow-x-auto makes it a scroll container on both
+  // axes per the CSS spec, so .table-sticky's "position: sticky" resolves
+  // against ITS scrollport, not the page's - with no bounded height it never
+  // visibly scrolls, so nothing sticks. Give it a real scrollport instead.
+  .sticky-table-container {
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+
   .shadbala-table {
     th,
     td {

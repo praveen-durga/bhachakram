@@ -17,23 +17,19 @@ import {
   wallTimeToUtc,
 } from '../../shared/utils';
 import {
-  CHESTA_BALA_MINIMUM,
-  DIG_BALA_MINIMUM,
   DIG_BALA_WEAKEST_HOUSE,
   DISC_DIAMETER_ARCSEC,
   EXALTATION_LONGITUDE,
-  KAALA_BALA_MINIMUM,
   NAISARGIKA_BALA,
   SHADBALA_GRAHA_ORDER,
   SHADBALA_MINIMUM_REQUIREMENT,
-  STHANA_BALA_MINIMUM,
   YUDDHA_GRAHAS,
 } from './shadbala.data';
 import { BhavaBalaColumn, KaalaBala, ShadbalaRow, SthanaBala } from './shadbala.model';
 import {
   areGrahasAtWar,
   calculateAyanaBala,
-  calculateBeneficMalefic,
+  calculateBenefics,
   calculateBhavaDigBala,
   calculateBhavaDrishtiBala,
   calculateChestaBalaSeeghraKendra,
@@ -168,7 +164,7 @@ function buildBaseGrahaBala(
 
   const sun = findGraha(d1Chart.grahas, 'Sun');
   const moon = findGraha(d1Chart.grahas, 'Moon');
-  const benefics = calculateBeneficMalefic(d1Chart.grahas, isMoonWaxing);
+  const benefics = calculateBenefics(isMoonWaxing);
 
   const kaalaBala: KaalaBala = {
     nataUnnataBala: calculateNataUnnataBala(graha, closenessToNoon),
@@ -191,6 +187,8 @@ function buildBaseGrahaBala(
     kaalaBala.tribhagaBala +
     kaalaBala.horaBala;
 
+  // Sun/Moon placeholder - buildShadbalaRows overrides this with their own
+  // Chesta Bala formula (needs sayanaSunLongitude, not available here).
   const chestaBala =
     graha === 'Sun' || graha === 'Moon'
       ? 0
@@ -281,13 +279,18 @@ function buildShadbalaRows(
   applyYuddhaBala(baseByGraha, ephemerisData);
 
   const rows = SHADBALA_GRAHA_ORDER.map((graha) => {
-    const { sthanaBala, digBala, kaalaBala, chestaBala, drigBala } = baseByGraha.get(graha)!;
-    const chestaBalaForPhala =
+    const { sthanaBala, digBala, kaalaBala, chestaBala: baseChestaBala, drigBala } = baseByGraha.get(graha)!;
+    // Sun/Moon have no Seeghra-Kendra-based Chesta Bala (they never go
+    // retrograde), but classical texts still prescribe a value for them -
+    // verified against a real JHora chart (Moon matches exactly, Sun within
+    // ~0.1) - so the base 0 placeholder is overridden here rather than in
+    // buildBaseGrahaBala, reusing the same formula as Ishta/Kashta Phala.
+    const chestaBala =
       graha === 'Sun'
         ? calculateSunChestaBalaForPhala(sayanaSunLongitude)
         : graha === 'Moon'
           ? calculateMoonChestaBalaForPhala(sun.longitude, moon.longitude)
-          : chestaBala;
+          : baseChestaBala;
 
     kaalaBala.total =
       kaalaBala.nataUnnataBala +
@@ -316,19 +319,15 @@ function buildShadbalaRows(
       totalShadbala,
       shadbalaInRupas,
       minimumRequirement,
-      percentOfRequired: (totalShadbala / minimumRequirement) * 100,
-      sthanaBalaPercentReq: (sthanaBala.total / STHANA_BALA_MINIMUM[graha]) * 100,
-      digBalaPercentReq: (digBala / DIG_BALA_MINIMUM[graha]) * 100,
-      kaalaBalaPercentReq: (kaalaBala.total / KAALA_BALA_MINIMUM[graha]) * 100,
-      chestaBalaPercentReq: (chestaBala / CHESTA_BALA_MINIMUM[graha]) * 100,
+      percentOfRequired: (shadbalaInRupas / minimumRequirement) * 100,
       relativeRank: 0,
-      ishtaPhala: calculateIshtaPhala(sthanaBala.ucchaBala, chestaBalaForPhala),
-      kashtaPhala: calculateKashtaPhala(sthanaBala.ucchaBala, chestaBalaForPhala),
+      ishtaPhala: calculateIshtaPhala(sthanaBala.ucchaBala, chestaBala),
+      kashtaPhala: calculateKashtaPhala(sthanaBala.ucchaBala, chestaBala),
     };
   });
 
   const rankByGraha = new Map(
-    [...rows].sort((a, b) => b.totalShadbala - a.totalShadbala).map((row, index) => [row.graha, index + 1]),
+    [...rows].sort((a, b) => b.percentOfRequired - a.percentOfRequired).map((row, index) => [row.graha, index + 1]),
   );
 
   return rows.map((row) => ({ ...row, relativeRank: rankByGraha.get(row.graha)! }));

@@ -17,65 +17,16 @@ export const EXALTATION_LONGITUDE: Record<Graha, number> = {
   Ketu: 230, // 20° Scorpio (not used by Shadbala; kept for Graha-keyed completeness)
 };
 
-// Per-bala-type minimum requirements (virupas), from BPHS 27.37-38, grouped by
-// planet. No classical minimum exists for Drig Bala (it is a +/- modifier, not
-// a pass/fail category) — its "% req." row is intentionally left unimplemented.
-export const STHANA_BALA_MINIMUM: Record<Graha, number> = {
-  Sun: 165,
-  Jupiter: 165,
-  Mercury: 165,
-  Moon: 133,
-  Venus: 133,
-  Mars: 96,
-  Saturn: 96,
-  Rahu: 0,
-  Ketu: 0,
-};
-
-export const DIG_BALA_MINIMUM: Record<Graha, number> = {
-  Sun: 35,
-  Jupiter: 35,
-  Mercury: 35,
-  Moon: 50,
-  Venus: 50,
-  Mars: 30,
-  Saturn: 30,
-  Rahu: 0,
-  Ketu: 0,
-};
-
-export const KAALA_BALA_MINIMUM: Record<Graha, number> = {
-  Sun: 50,
-  Jupiter: 50,
-  Mercury: 50,
-  Moon: 30,
-  Venus: 30,
-  Mars: 40,
-  Saturn: 40,
-  Rahu: 0,
-  Ketu: 0,
-};
-
-export const CHESTA_BALA_MINIMUM: Record<Graha, number> = {
-  Sun: 112,
-  Jupiter: 112,
-  Mercury: 112,
-  Moon: 100,
-  Venus: 100,
-  Mars: 67,
-  Saturn: 67,
-  Rahu: 0,
-  Ketu: 0,
-};
-
+// Minimum Shadbala requirement in Rupas (not virupas), per the user's own
+// table — "% of required" = Shadbala in Rupas * 100 / this value.
 export const SHADBALA_MINIMUM_REQUIREMENT: Record<Graha, number> = {
-  Sun: 390,
-  Moon: 360,
-  Mars: 300,
-  Mercury: 420,
-  Jupiter: 390,
-  Venus: 330,
-  Saturn: 300,
+  Sun: 5.0,
+  Moon: 6.0,
+  Mars: 5.0,
+  Mercury: 7.0,
+  Jupiter: 6.5,
+  Venus: 5.5,
+  Saturn: 5.0,
   Rahu: 0,
   Ketu: 0,
 };
@@ -122,16 +73,21 @@ export const DREKKANA_FEMALE_GRAHAS: Graha[] = ['Moon', 'Venus'];
 export const NATA_UNNATA_DIURNAL_GRAHAS: Graha[] = ['Sun', 'Jupiter', 'Venus'];
 export const NATA_UNNATA_NOCTURNAL_GRAHAS: Graha[] = ['Moon', 'Mars', 'Saturn'];
 
-// Dynamic benefic/malefic classification (used by Paksha Bala and Drig Bala):
-// Jupiter/Venus are always-benefic seeds, Sun/Mars/Saturn are always-malefic
-// seeds; Moon (waxing/waning) and Mercury (Mars-co-location rule) are then
-// resolved on top of these — see calculateBeneficMalefic in shadbala.util.ts.
-export const NATURAL_BENEFIC_SEED_GRAHAS: Graha[] = ['Jupiter', 'Venus'];
-export const NATURAL_MALEFIC_SEED_GRAHAS: Graha[] = ['Sun', 'Mars', 'Saturn'];
-
 // Bhava Drishti Bala's OWN static benefic/malefic classification (distinct
-// from Drig Bala's dynamic one above) — Moon is unconditionally benefic here.
+// from Paksha/Drig Bala's shared one below) — Moon is unconditionally
+// benefic here.
 export const BHAVA_DRISHTI_BENEFIC_GRAHAS: Graha[] = ['Moon', 'Mercury', 'Jupiter', 'Venus'];
+
+// Paksha Bala and Drig Bala's shared static benefic seed list (everything
+// else - Sun/Mars/Saturn, and Moon when waning - is malefic) — verified
+// against a real JHora chart (20-03-1981, Chittoor): a dynamic Mars-sign-
+// occupancy rule for Mercury (tried first) put it as malefic for that
+// chart, but both JHora's Paksha Bala (Mercury = 58.21, the benefic-branch
+// value) and Drig Bala (Sun/Moon/Mars/Venus exact, Jupiter/Saturn within
+// ~0.5) only matched once Mercury was treated as a plain benefic instead.
+// Moon still follows waxing/waning — see calculateBenefics in
+// shadbala.util.ts.
+export const BENEFIC_SEED_GRAHAS: Graha[] = ['Jupiter', 'Venus', 'Mercury'];
 
 // Graha Drishti: house offsets (from the aspecting graha's own house) every
 // graha aspects. All grahas aspect the 7th; Mars/Jupiter/Saturn additionally

@@ -34,10 +34,6 @@ export type ShadbalaRow = {
   shadbalaInRupas: number;
   minimumRequirement: number;
   percentOfRequired: number;
-  sthanaBalaPercentReq: number;
-  digBalaPercentReq: number;
-  kaalaBalaPercentReq: number;
-  chestaBalaPercentReq: number;
   relativeRank: number;
   ishtaPhala: number;
   kashtaPhala: number;
